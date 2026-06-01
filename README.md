@@ -6,4 +6,4 @@ This application is being created to be
 - fast
 - use filters for quick search
 - database backend
-- Clean UI
+- Clean UI  
