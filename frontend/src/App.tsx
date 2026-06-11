@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import './App.css'
 
 function App() {
-  const [status, setStatus] = useState('loading...')
+  const [status, setStatus] = useState('Loading...')
 
   useEffect(() => {
     // Use Docker service name in Docker environment, localhost for local dev
@@ -18,11 +18,12 @@ function App() {
       .catch(err => {
         setStatus(`Error: ${err.message}`)
       })
+
   }, [])
 
   return (
     <div style={{ padding: '2rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎵 SoundBin</h1>
+      <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Welcome to 🎵 SoundBin.</h1>
       <pre style={{ backgroundColor: '#f3f4f6', padding: '1rem', borderRadius: '0.375rem' }}>
         {status}
       </pre>
