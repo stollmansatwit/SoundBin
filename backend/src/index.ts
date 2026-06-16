@@ -1,25 +1,68 @@
 import express from 'express';
 import cors from 'cors';
+import type { Request, Response } from 'express';
 import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 const app = express();
 const prisma = new PrismaClient();
 
-const port = process.env.PORT || 3000;
+const port: number = process.env.PORT || 3000;
+
+type ColumnRow = {
+  table_name: string;
+  column_name: string;
+  ordinal_position: number;
+};
 
 // Middleware
 app.use(express.json());
 app.use(cors({ origin: 'http://localhost:5173' }));
 
 // Health check endpoint with DB connection test
-app.get('/api/health', async (req, res) => {
+app.get('/api/health', async (_req: Request, res: Response) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     res.json({ ok: true, db: 'connected' });
   } catch (error) {
     console.error('Database connection error:', error);
     res.status(500).json({ ok: false, db: 'disconnected' });
+  }
+});
+
+app.get('/api/schema/columns', async (_req: Request, res: Response) => {
+  try {
+    const rows: ColumnRow[] = await prisma.$queryRaw<ColumnRow[]>(Prisma.sql`
+      SELECT
+        table_name,
+        column_name,
+        ordinal_position
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+      ORDER BY table_name, ordinal_position
+    `);
+
+    const tables = rows.reduce<Record<string, string[]>>(
+      (accumulator: Record<string, string[]>, row: ColumnRow) => {
+        if (!accumulator[row.table_name]) {
+          accumulator[row.table_name] = [];
+        }
+
+        accumulator[row.table_name].push(row.column_name);
+        return accumulator;
+      },
+      {},
+    );
+
+    res.json({
+      tables: Object.entries(tables).map(([tableName, columns]) => ({
+        tableName,
+        columns,
+      })),
+    });
+  } catch (error) {
+    console.error('Schema query error:', error);
+    res.status(500).json({ ok: false, error: 'Unable to load schema columns' });
   }
 });
 
