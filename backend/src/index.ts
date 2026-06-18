@@ -29,7 +29,7 @@ app.get('/api/health', async (_req: Request, res: Response) => {
     res.status(500).json({ ok: false, db: 'disconnected' });
   }
 });
-
+// Endpoint to get schema columns
 app.get('/api/schema/columns', async (_req: Request, res: Response) => {
   try {
     const rows: ColumnRow[] = await prisma.$queryRaw<ColumnRow[]>(Prisma.sql`
@@ -60,12 +60,27 @@ app.get('/api/schema/columns', async (_req: Request, res: Response) => {
         columns,
       })),
     });
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Schema query error:', error);
     res.status(500).json({ ok: false, error: 'Unable to load schema columns' });
   }
 });
 
+// Get album cover art URLs
+app.get('/api/album-links', async (_req: Request, res: Response) => {
+  try {
+    const albums = await prisma.album.$queryRaw<{ cover_art_url: string }[]>(Prisma.sql`
+      SELECT cover_art_url FROM album
+    `);
+    
+    res.json({ albums });
+  } catch (error) {
+    console.error('Album query error:', error);
+    res.status(500).json({ ok: false, error: 'Unable to load album links' });
+  }
+});
+// TODO: User Authentication Endpoints
 
 
 

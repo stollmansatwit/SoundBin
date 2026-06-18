@@ -1,11 +1,19 @@
 import { SchemaColumns } from './components/SchemaColumns'
+import { ScrollableAlbums } from './components/ScrollableAlbums'
+import NavBar from './components/NavBar'
+
+
 
 function App() {
   return (
-    <div style={{ padding: '2rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Welcome to 🎵 SoundBin.</h1>
-      <SchemaColumns />
+
+    <div className = 'h-full font-bold bg-gradient-to-t from-orange-500 to-gray-500' >
+      <h1 className = 'flex fixed top-0 left-0 right-0 justify-center p-4 bg-gray-800 text-white'>Welcome to 🎵 SoundBin.</h1>
+      {/* <SchemaColumns /> */}
+      <ScrollableAlbums />
+      <NavBar />
     </div>
+
   )
 }
 

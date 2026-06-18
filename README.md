@@ -295,3 +295,9 @@ This project is developed as part of a university senior project.
 ## 🙏 Acknowledgments
 
 Inspired by projects like Navidrome, Funkwhale, and Subsonic.
+
+## Important References
+https://medium.com/@yelee2369/node-js-streaming-audio-files-10dd5e8670d0
+
+https://www.youtube.com/watch?v=x4bom6Udk_4
+
