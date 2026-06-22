@@ -67,7 +67,7 @@ app.get('/api/schema/columns', async (_req: Request, res: Response) => {
   }
 });
 
-// Get album cover art URLs
+// Get album cover art URLs TODO: Replace with code that grabs cover_art_url from public.album table. Do this after upload works
 app.get('/api/album-links', async (_req: Request, res: Response) => {
   try {
     const albums = await prisma.album.$queryRaw<{ cover_art_url: string }[]>(Prisma.sql`

@@ -1,5 +1,5 @@
 import React from 'react';
-const NavBar = () => {
+export function NavBar() {
   return (
 
 <nav className="flex fixed left-0 right-0 bottom-0 height[64px] bg-gray-800 align-center z-10 border-box justify-center gap-14 p-4 text-white">
@@ -12,5 +12,3 @@ const NavBar = () => {
 </nav>
 );
 };
-
-export default NavBar;
