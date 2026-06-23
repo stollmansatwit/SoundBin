@@ -15,7 +15,7 @@ export function SchemaColumns() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const apiBaseUrl:string = 'http://localhost:3000';
+    const apiBaseUrl:string = 'http://127.0.0.1:3000';
 
     fetch(`${apiBaseUrl}/api/schema/columns`)
       .then((response) => {

@@ -17,7 +17,7 @@ type ColumnRow = {
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: 'http://127.0.0.1:5173' }));
 
 // Health check endpoint with DB connection test
 app.get('/api/health', async (_req: Request, res: Response) => {
@@ -67,19 +67,19 @@ app.get('/api/schema/columns', async (_req: Request, res: Response) => {
   }
 });
 
-// Get album cover art URLs TODO: Replace with code that grabs cover_art_url from public.album table. Do this after upload works
-app.get('/api/album-links', async (_req: Request, res: Response) => {
-  try {
-    const albums = await prisma.album.$queryRaw<{ cover_art_url: string }[]>(Prisma.sql`
-      SELECT cover_art_url FROM album
-    `);
+// // Get album cover art URLs TODO: Replace with code that grabs cover_art_url from public.album table. Do this after upload works
+// app.get('/api/album-links', async (_req: Request, res: Response) => {
+//   try {
+//     const albums = await prisma.album.$queryRaw<{ cover_art_url: string }[]>(Prisma.sql`
+//       SELECT cover_art_url FROM album
+//     `);
     
-    res.json({ albums });
-  } catch (error) {
-    console.error('Album query error:', error);
-    res.status(500).json({ ok: false, error: 'Unable to load album links' });
-  }
-});
+//     res.json({ albums });
+//   } catch (error) {
+//     console.error('Album query error:', error);
+//     res.status(500).json({ ok: false, error: 'Unable to load album links' });
+//   }
+// });
 // TODO: User Authentication Endpoints
 
 
