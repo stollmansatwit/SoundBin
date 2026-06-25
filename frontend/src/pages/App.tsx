@@ -3,6 +3,7 @@ import { ScrollableAlbums } from '../components/scrollable/ScrollableAlbums'
 import {NavBar} from '../components/NavBar'
 import {RecentListenTable} from '../components/scrollable/RecentListenTable'
 import { ScrollablePlaylists } from '../components/scrollable/ScrollablePlaylists'
+import { UploadButton } from '../components/UploadFileButton'
 
 export default function App() {
   const [isNavOpen, setIsNavOpen] = useState(false)
@@ -23,7 +24,7 @@ export default function App() {
       <ScrollablePlaylists />
       <ScrollableAlbums />
       <RecentListenTable />
-
+      <UploadButton/>
     </div>
 
   )

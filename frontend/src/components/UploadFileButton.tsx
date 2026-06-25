@@ -25,7 +25,7 @@ export function UploadButton() {
     const fileInput = e.currentTarget.elements.namedItem('songFile') as HTMLInputElement;
 
     if (fileInput.files && fileInput.files[0]) {
-      formData.append('file', fileInput.files[0]);
+      formData.append('songFile', fileInput.files[0]);
       // able to add other fields here
     }
 
@@ -49,23 +49,32 @@ export function UploadButton() {
   return (
     <div className="relative flex items-center m40">
       <form 
-        onSubmit={handleOnSubmit} 
-        className="w-[250px] inline-block p-4 border rounded shadow-sm"
+        className='w-[250px] inline-block p-4 border rounded bg-white shadow-sm'
+        onSubmit={handleOnSubmit} // This will now correctly trigger your logic
       >
         <div className="flex flex-col gap-3">
-          <label htmlFor="songFile" className="text-sm font-bold">Select a song</label>
+          <label htmlFor="songFile" className="text-sm font-bold text-gray-700">
+            Select a song
+          </label>
           <input 
             id="songFile"
             type="file" 
-            name="songFile" 
-            className="block w-full text-sm"
+            name="songFile"
+            className="block w-full text-sm text-gray-500
+            file:mr-4 file:py-2 file:px-4
+            file:rounded-md file:border-0
+            file:text-sm file:font-semibold
+            file:bg-blue-50 file:text-blue-700
+            hover:file:bg-blue-100" 
           />
+          
+          <p className="text-[10px] text-gray-400">Supported formats: .mp3, .flac, .wav</p>
           <button 
             type="submit" 
             disabled={uploading}
-            className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400"
+            className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400 text-sm font-bold"
           >
-            {uploading ? 'Uploading...' : 'Upload song'}
+            {uploading ? 'Uploading...' : 'Submit'}
           </button>
         </div>
       </form>
