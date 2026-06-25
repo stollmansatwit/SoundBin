@@ -17,7 +17,7 @@ export default function App() {
 
   return (
 
-    <div className={`min-h-screen bg-gradient-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-64' : 'pl-16'}`}>
+    <div className={`min-h-screen bg-linear-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
       <h1 className='flex justify-center bg-transparent shadow-lg p-4 text-orange-500'>SoundBin</h1>
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
       <ScrollablePlaylists />

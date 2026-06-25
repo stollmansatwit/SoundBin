@@ -6,6 +6,8 @@ import App from './pages/App.tsx';
 import {NavBar} from './components/NavBar.tsx';
 import { SchemaColumns } from './components/SchemaColumns.tsx';
 import Library from './pages/Library.tsx';
+import Stats from './pages/Stats.tsx';
+import User from './pages/User.tsx';
 
 const router = createBrowserRouter([
   {path: '/', element: <App />},
@@ -15,10 +17,10 @@ const router = createBrowserRouter([
     throw new Error('Function not implemented.');
   } } />},
   {path: '/columns', element: <SchemaColumns />},
-  {path: '/user', element: <div>User Page</div>},
+  {path: '/user', element: <User/>},
   {path: '/library', element: <Library/>},
   {path: '/home', element: <App />},
-  {path: '/stats', element: <div>Stats Page</div>},
+  {path: '/stats', element: <Stats/>},
 ]);
 
 createRoot(document.getElementById('root')!).render(

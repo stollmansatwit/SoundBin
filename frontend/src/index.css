@@ -6,6 +6,10 @@ html, body {
   background: rgb(141, 141, 141);
 }
 
+@theme {
+  --animate-ping-once: ping 1s cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+
 /* :root {
   --text: #6b6375;
   --text-h: #08060d;

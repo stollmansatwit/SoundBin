@@ -10,7 +10,7 @@ export function NavBar({ isOpen, openNav, closeNav }: NavBarProps) {
   return (
     <nav
       className={`fixed left-0 top-0 z-10 h-screen bg-transparent px-4 py-6 text-white shadow-lg transition-all duration-300 ${
-        isOpen ? 'w-64' : 'w-16'
+        isOpen ? 'w-32' : 'w-16'
       }`}
     >
       <div className="flex h-full flex-col gap-4 text-left text-lg font-semibold">
