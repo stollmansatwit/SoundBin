@@ -1,6 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
 import { data } from '../test-imgs.ts';
-import React from 'react';
 // type AlbumArt = {
 //     url: string,
 // };
@@ -25,7 +23,7 @@ export function ScrollablePlaylists() {
 
   return (
     <div className="relative flex items-center">
-      <li className='w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth'>
+      <li className='w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth scrollbar scrollbar-thin scrollbar-thumb-sky-700 scrollbar-track-sky-100'>
         <div id='slider'></div>
         Playlists:
         {data.map((item: { id: number | undefined; }) => (

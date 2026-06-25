@@ -1,6 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
 import { data } from '../test-imgs.ts';
-import React from 'react';
 // type AlbumArt = {
 //     url: string,
 // };
