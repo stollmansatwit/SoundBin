@@ -1,2 +1,31 @@
-backend/package.json
+# Node Packages
+
+## Project Level
 node_modules/
+package.json
+
+
+## Backend
+backend/node_modules/
+backend/package.json
+
+
+## Frontend
+frontend/node_modules/
+frontend/package.json
+
+
+
+
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.env
