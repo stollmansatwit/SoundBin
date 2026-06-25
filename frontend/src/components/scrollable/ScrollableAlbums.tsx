@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { data } from './test-imgs.ts';
+import { data } from '../test-imgs.ts';
 import React from 'react';
 // type AlbumArt = {
 //     url: string,
@@ -24,8 +24,8 @@ export function ScrollableAlbums() {
 
 
   return (
-    <div className="relative flex items-center">
-      <li className='w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth'>
+    <div className='relative flex items-center scrollbar-thumb-blue-500'>
+      <li className='w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth  '>
         <div id='slider'></div>
         {data.map((item: { img: string | undefined; }) => (
           <img className='mt-14 w-[220px] inline-block p-2 cursor-pointer hover:scale-105 ease-in-out duration-300 rounded-[75px]' src={item.img} alt='album cover' />
