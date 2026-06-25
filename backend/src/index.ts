@@ -3,11 +3,14 @@ import cors from 'cors';
 import type { Request, Response } from 'express';
 import 'dotenv/config';
 import { Prisma, PrismaClient } from '@prisma/client';
+// import functions
+import uploadRoutes from './routes/upload_routes';
 
 const app = express();
 const prisma = new PrismaClient();
+export {app}
 
-const port: number = process.env.PORT || 3000;
+const port = Number(process.env.PORT);
 
 type ColumnRow = {
   table_name: string;
@@ -18,6 +21,7 @@ type ColumnRow = {
 // Middleware
 app.use(express.json());
 app.use(cors({ origin: 'http://127.0.0.1:5173' }));
+
 
 // Health check endpoint with DB connection test
 app.get('/api/health', async (_req: Request, res: Response) => {
@@ -66,6 +70,9 @@ app.get('/api/schema/columns', async (_req: Request, res: Response) => {
     res.status(500).json({ ok: false, error: 'Unable to load schema columns' });
   }
 });
+
+// API response for uploading single file
+app.use('/api', uploadRoutes);
 
 // // Get album cover art URLs TODO: Replace with code that grabs cover_art_url from public.album table. Do this after upload works
 // app.get('/api/album-links', async (_req: Request, res: Response) => {
