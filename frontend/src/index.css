@@ -8,6 +8,7 @@ html, body {
 
 @theme {
   --animate-ping-once: ping 1s cubic-bezier(0.4, 0, 0.6, 1) both;
+  --animate-spin-slow: spin 3s linear infinite;
 }
 
 /* :root {

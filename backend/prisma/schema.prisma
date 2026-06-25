@@ -11,12 +11,12 @@ datasource db {
 
 // User model for authentication
 model User {
-  user_id       String   @id @default(uuid())
-  username      String   @unique
+  user_id       String    @id
+  username      String    @unique
   password      String
-  display_name  String 
-  register_date DateTime
-  is_active     Boolean
+  display_name  String
+  register_date DateTime  @default(now())
+  is_active     Boolean   @default(true)
   is_admin      Boolean
   last_login    DateTime?
 
@@ -24,40 +24,57 @@ model User {
 }
 
 model UserFavorites {
-  favorite_id        String   @id @default(uuid())
-  user_id            String
-  track_id           String
-  date_added         DateTime @default(now())
+  favorite_id String   @id
+  user_id     String
+  track_id    String
+  date_added  DateTime @default(now())
 
   @@map("user_favorites")
 }
 
 // Logging & Analytics model
 model Activity {
-  activity_id         String @id @default(uuid())
-  user_id             Int
-  track_id            Int?
-  played_at           DateTime @default(now())
-  duration_played     Int?
+  activity_id     String   @id
+  user_id         Int
+  track_id        Int?
+  played_at       DateTime @default(now())
+  duration_played Int?
 
   @@map("user_activity")
 }
 
 // artist
 model Artist {
-  artist_id        String   @id @default(uuid())
-  name             String
-  bio              String
-  image_url        String?
+  artist_id String  @id
+  name      String
+  bio       String
+  image_url String?
+
   @@map("artists")
 }
 
-model Album{
-  album_id        String    @id @default(uuid())
-  title           String
-  artist_id       Int
-  release_date    DateTime?
-  cover_art_url   String?
-  
+model Album {
+  album_id      String    @id
+  title         String
+  artist_id     Int
+  release_date  DateTime?
+  cover_art_url String?
+
   @@map("albums")
 }
+
+model Tracks{
+  track_id      String   @id
+  title         String
+  artist_id     Int
+  album_id      Int?
+  duration      Int
+  file_path     String
+  genre         String?
+  release_date  DateTime?
+  lyrics        String?
+
+  @@map("tracks")
+}
+
+// 

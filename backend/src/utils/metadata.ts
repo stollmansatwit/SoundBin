@@ -26,7 +26,7 @@ export async function extractMetadata(filePath: string) {
     total track number
     disc number
     year/data
-    gener
+    genre
 
     composer
     conductor

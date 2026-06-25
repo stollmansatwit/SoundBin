@@ -23,7 +23,7 @@ export function ScrollablePlaylists() {
 
   return (
     <div className="relative flex items-center">
-      <li className='w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth scrollbar-thumb-sky-700 scrollbar-track-blue-300'>
+      <li className='w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth scrollbar-thumb-black'>
         <div id='slider'></div>
         Playlists:
         {data.map((item: { id: number | undefined; }) => (

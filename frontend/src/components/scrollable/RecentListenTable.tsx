@@ -2,7 +2,7 @@ import { data } from '../test-imgs.js';
 
 export function RecentListenTable() {
   return (
-    <div className='relative flex items-center'>
+    <div className='relative flex items-center scrollbar-thumb-black'>
       <ul className = 'w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth'>
         Recently Listened To:
         {data.map((item: { id: number | undefined; }) => (
