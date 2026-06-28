@@ -1,5 +1,5 @@
 /**
- * @file desc
+ * @file Handles the Routes for file uploads
  * @module UploadRoutes
  * @author  Ian Mac
  * @version 0.1
@@ -19,7 +19,7 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: (req:any, file:any, cb:any) => {
       // This path should match your .env UPLOAD_DIR
-      cb(null, process.env.DOCKER_SONG_FILE_LOCATION || './uploads');  // Remove './uploads' after development
+      cb(null, process.env.DOCKER_SONG_FILE_LOCATION);
     },
     filename: (req:any, file:any, cb:any) => {
       cb(null, Date.now() + '-' + file.originalname);

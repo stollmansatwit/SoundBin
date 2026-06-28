@@ -1,5 +1,5 @@
 /**
- * @file desc
+ * @file Pulls relavent metadata from the song file, used by watcher.ts
  * @module MetadataReader
  * @author Ian MacDougall
  * @version 0.1
@@ -26,7 +26,7 @@ export async function extractMetadata(filePath: string) {
     total track number
     disc number
     year/data
-    genre
+    gener
 
     composer
     conductor
@@ -60,6 +60,8 @@ export async function extractMetadata(filePath: string) {
       album: common?.album || "Unknown Album",
       duration: typeof common.duration == 'number' ? Math.floor(common.duration) : 0, // in seconds
       genre: common?.genre || "Unknown Genre",
+      track: common?.track || "Unknown Track",
+      date: common?.date || "Unknown Release Date",
     };
 
     console.log("Extracted Data:", info);
@@ -69,6 +71,8 @@ export async function extractMetadata(filePath: string) {
       album: info.album,
       duration: info.duration,
       genre: info.genre,
+      track: info.track,
+      date: info.date
       // We return this so the watcher can use it to create a Prisma record
     };
   } catch (error) {

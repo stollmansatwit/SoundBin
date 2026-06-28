@@ -9,6 +9,7 @@ import uploadRoutes from './routes/upload_routes';
 const app = express();
 const prisma = new PrismaClient();
 export {app}
+export {prisma}
 
 const port = Number(process.env.PORT);
 
