@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {NavBar} from '../components/NavBar'
+import { Header } from '../components/Header'
 
 export default function Stats() {
   const [isNavOpen, setIsNavOpen] = useState(false)
@@ -14,7 +15,7 @@ export default function Stats() {
 
   return (
     <div className={`min-h-screen bg-linear-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
-      <h1 className='flex justify-center bg-gray-800 p-4 text-white'>Welcome to 🎵 SoundBin.</h1>
+      <Header />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
       <div className="p-4">
         <h2 className="text-2xl font-bold text-white">Stats</h2>

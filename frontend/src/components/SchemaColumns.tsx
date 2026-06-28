@@ -22,7 +22,7 @@ export function SchemaColumns() {
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
         }
-
+        
         return response.json() as Promise<SchemaResponse>;
       })
       .then((data) => {

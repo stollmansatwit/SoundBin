@@ -17,7 +17,7 @@ export function UploadButton() {
 
   const [uploading, setUploading] = React.useState(false);
   
-  async function handleOnSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleOnSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
     setUploading(true);
 
@@ -38,7 +38,7 @@ export function UploadButton() {
       if (response.ok) {
         alert("Upload successful");
       }
-    } catch (error){
+    } catch (error){alert("Upload successful");
       console.error("Upload failed", error);
     } finally {
       setUploading(false);

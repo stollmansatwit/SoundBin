@@ -22,14 +22,16 @@ export function ScrollableAlbums() {
 
 
   return (
-    <div className='relative flex items-center scrollbar-thumb-black scrollbar-auto scrollbar ease-in duration-75'>
-      <li className='w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth p-1 text-center '>
-        Albums
+    <>
+       <p className = 'text-center text-lg font-bold sticky'>Albums</p>
+    <div className='relative flex items-center scrollbar-thumb-black scrollbar-auto scrollbar ease-in duration-75 shadow-lg'>
+      <li className='w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth p-1'>
         <div id='slider'></div>
         {data.map((item: { img: string | undefined; }) => (
           <img className=' w-[220px] inline-block p-2 cursor-pointer transition-transform ease-linear duration-[300ms] hover:duration-[2000ms] hover:rotate-[360deg] hover:scale-105 rounded-full' src={item.img} alt='album cover' />
         ))}
       </li>
     </div>
+    </>
   );
 }
