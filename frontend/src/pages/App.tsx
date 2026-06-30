@@ -5,6 +5,7 @@ import {RecentListenTable} from '../components/scrollable/RecentListenTable'
 import { ScrollablePlaylists } from '../components/scrollable/ScrollablePlaylists'
 import { UploadButton } from '../components/UploadFileButton'
 import { Header } from '../components/Header'
+import { SearchBar } from '../components/SearchBar'
 
 export default function App() {
   const [isNavOpen, setIsNavOpen] = useState(false)
@@ -21,6 +22,7 @@ export default function App() {
 
     <div className={`min-h-screen bg-linear-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
       <Header />
+      <SearchBar />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
       <ScrollablePlaylists />
       <ScrollableAlbums />

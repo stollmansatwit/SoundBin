@@ -47,13 +47,13 @@ export function UploadButton() {
   }
 
   return (
-    <div className="relative flex items-center m40">
+    <div className="relative flex items-center m40 justify-center">
       <form 
-        className='w-[250px] inline-block p-4 border rounded bg-white shadow-sm'
+        className='w-1/2 inline-block p-4 border rounded bg-gray-900 shadow-sm rounded-[30px]'
         onSubmit={handleOnSubmit} // This will now correctly trigger your logic
       >
         <div className="flex flex-col gap-3">
-          <label htmlFor="songFile" className="text-sm font-bold text-gray-700">
+          <label htmlFor="songFile" className="text-lg font-bold text-white">
             Select a song
           </label>
           <input 
@@ -72,7 +72,7 @@ export function UploadButton() {
           <button 
             type="submit" 
             disabled={uploading}
-            className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400 text-sm font-bold"
+            className="bg-orange-600 text-white px-4 py-2 rounded disabled:bg-gray-400 text-sm font-bold"
           >
             {uploading ? 'Uploading...' : 'Submit'}
           </button>

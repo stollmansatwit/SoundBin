@@ -304,3 +304,5 @@ https://www.youtube.com/watch?v=x4bom6Udk_4
 https://prismic.io/blog/tailwind-animations
 
 https://stackoverflow.com/questions/79429572/whenever-i-run-my-react-vite-it-says-pluginviteesbuild-the-service-is-no-lon/79430130#79430130
+
+https://www.reddit.com/r/reactjs/comments/1ddbqei/open_source_react_chart_libraries/
