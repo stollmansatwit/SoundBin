@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   background: rgb(141, 141, 141);
@@ -9,6 +10,31 @@ html, body {
 @theme {
   --animate-ping-once: ping 1s cubic-bezier(0.4, 0, 0.6, 1) both;
   --animate-spin-slow: spin 3s linear infinite;
+
+  @keyframes modalOpen {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(-20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+    @keyframes appear {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+
+  --animate-modal-open: modalOpen 500ms ease-out forwards;
+  --animate-transparency: appear 500ms ease-out forwards;
 }
 
 /* :root {
@@ -99,4 +125,3 @@ html, body {
   gap: 12px;
   align-items: center;
 } */
-

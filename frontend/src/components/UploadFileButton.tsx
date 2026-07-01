@@ -56,11 +56,11 @@ export function UploadButton({ onClose }: UploadButtonProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-transparency"
       onClick={onClose}
     >
       <form
-        className="w-full max-w-lg rounded-3xl border border-gray-700 bg-gray-900 p-8 shadow-2xl"
+        className="w-full max-w-lg rounded-3xl border border-gray-700 bg-gray-900 p-8 shadow-2xl animate-modal-open"
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleOnSubmit}
       >

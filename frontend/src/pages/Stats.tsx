@@ -35,10 +35,11 @@ export default function Stats() {
         <h2 className="text-2xl font-bold text-white">Stats</h2>
         <p className="text-gray-300">This is the stats page.</p>
       </div>
-      <div className="w-1/2 ">
+      <div className="w-1/4">
           <Doughnut data={{
           labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
           datasets: [{
+            label: 'Songs',
             data: [12, 19, 3, 5, 2, 3],
             backgroundColor: [
               'rgba(255, 99, 132, 0.5)',
