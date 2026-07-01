@@ -62,6 +62,9 @@ export async function extractMetadata(filePath: string) {
       genre: common?.genre || "Unknown Genre",
       track: common?.track || "Unknown Track",
       date: common?.date || "Unknown Release Date",
+      // data
+      codec: common?.audio || "Unknown Codec",
+      bitrate: common?.bitrate || 0,
     };
 
     console.log("Extracted Data:", info);
@@ -72,8 +75,10 @@ export async function extractMetadata(filePath: string) {
       duration: info.duration,
       genre: info.genre,
       track: info.track,
-      date: info.date
-      // We return this so the watcher can use it to create a Prisma record
+      date: info.date,
+      codec: info.codec,
+      bitrate: info.bitrate
+      // returned to the watcher can use it to create a Prisma record
     };
   } catch (error) {
     console.error(`Error parsing metadata for ${filePath}:`, error);

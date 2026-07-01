@@ -1,15 +1,15 @@
 import express from 'express';
 import cors from 'cors';
 import type { Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import 'dotenv/config';
-import { Prisma, PrismaClient } from '@prisma/client';
 // import functions
 import uploadRoutes from './routes/upload_routes';
+import { prisma } from "./lib/database";
+import './services/watcher'
 
 const app = express();
-const prisma = new PrismaClient();
 export {app}
-export {prisma}
 
 const port = Number(process.env.PORT);
 
