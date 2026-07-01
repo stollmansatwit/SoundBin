@@ -9,6 +9,7 @@ import { SearchBar } from '../components/SearchBar'
 import { Upload } from '../components/Upload'
 
 
+
 export default function App() {
   const [isNavOpen, setIsNavOpen] = useState(false)
 
