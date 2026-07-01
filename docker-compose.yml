@@ -28,6 +28,8 @@ services:
     environment:
       DATABASE_URL: "postgresql://soundbin:soundbin_dev@db:5432/soundbin?schema=public"
       PORT: 3000
+    command: sh -c "npx prisma migrate deploy && npm run dev" 
+    # runs migration as part of the containers startup command
     depends_on:
       db:
         condition: service_healthy
@@ -35,7 +37,6 @@ services:
       - ./backend:/app
       - /app/node_modules
       - ./backend/uploads:/app/uploads
-    command: npm run dev
 
   frontend:
     build:
