@@ -38,7 +38,7 @@ CREATE TABLE "tracks" (
     "track_id" SERIAL NOT NULL,
     "title" VARCHAR(200) NOT NULL,
     "album_id" INTEGER,
-    "release_year" SMALLINT,
+    "release_date" DATE,
     "duration" INTEGER NOT NULL,
     "cover_art_url" VARCHAR(500),
 
@@ -139,6 +139,8 @@ CREATE TABLE "track_files" (
     "track_id" INTEGER NOT NULL,
     "storage_path_url" VARCHAR(500) NOT NULL,
     "bitrate" SMALLINT NOT NULL,
+    "sample_rate" INTEGER NOT NULL,
+    "channels" SMALLINT NOT NULL,
     "codec" VARCHAR(20) NOT NULL,
     "file_mtime" TIMESTAMPTZ(6) NOT NULL,
 

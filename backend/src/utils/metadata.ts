@@ -54,17 +54,20 @@ export async function extractMetadata(filePath: string) {
     */
 
     const common = metadata.common as any
+    const format = metadata.format as any
     const info = {
       title: common?.title || "Unknown Title",
       artist: common?.artist || "Unknown Artist",
       album: common?.album || "Unknown Album",
-      duration: typeof common.duration == 'number' ? Math.floor(common.duration) : 0, // in seconds
-      genre: common?.genre || "Unknown Genre",
+      genre: common?.genre ?? null,
       track: common?.track || "Unknown Track",
-      date: common?.date || "Unknown Release Date",
+      date: common?.date ?? null, 
       // data
-      codec: common?.audio || "Unknown Codec",
-      bitrate: common?.bitrate || 0,
+      duration: typeof format.duration == 'number' ? Math.floor(format.duration) : 0, // in seconds
+      codec: format?.codec || "Unknown Codec",
+      bitrate: format?.bitrate ? Math.round(format.bitrate / 1000) : 0, // for KBps
+      sample_rate: typeof format?.sampleRate === 'number' ? format.sampleRate : 0,
+      channels: typeof format?.numberOfChannels === 'number' ? format.numberOfChannels : 0
     };
 
     console.log("Extracted Data:", info);
@@ -77,7 +80,9 @@ export async function extractMetadata(filePath: string) {
       track: info.track,
       date: info.date,
       codec: info.codec,
-      bitrate: info.bitrate
+      bitrate: info.bitrate,
+      sample_rate: info.sample_rate,
+      channels: info.channels
       // returned to the watcher can use it to create a Prisma record
     };
   } catch (error) {

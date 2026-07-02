@@ -69,7 +69,7 @@ model Track{
   track_id Int @id @default(autoincrement())
   title String @db.VarChar(200)
   album_id Int?
-  release_year Int? @db.SmallInt
+  release_date  DateTime? @db.Date
   duration  Int
   cover_art_url String? @db.VarChar(500)
 
@@ -209,9 +209,9 @@ model TrackFile {
   file_id Int @id @default(autoincrement())
   track_id Int
   storage_path_url String @unique @db.VarChar(500)
-  bitrate Int @db.SmallInt
-  //sample_rate Int
-  //channels Int @db.SmallInt
+  bitrate Int @db.SmallInt //KBps
+  sample_rate Int
+  channels Int @db.SmallInt
   codec String @db.VarChar(20)
   file_mtime DateTime @db.Timestamptz(6)
   //file_hash String  @db.VarChar(64)

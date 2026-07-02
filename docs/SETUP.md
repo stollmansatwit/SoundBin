@@ -15,3 +15,24 @@ npx prisma migrate reset
 npx prisma migrate dev --name init
 ```
 
+## To view database
+```
+cd backend
+npx prisma studio
+```
+
+
+# Docker Compose
+## Run
+```
+docker copmose up -d
+```
+## Build
+```
+docker compose up --build -d
+```
+## Stop
+```
+docker compose down -v
+```
+
