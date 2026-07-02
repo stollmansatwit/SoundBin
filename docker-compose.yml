@@ -10,7 +10,9 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+
+      - postgresql:/var/lib/postgresql/data
+      # - ./data/db-data:/var/lib/postgresql/data - for while not in developments aka actually being used
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U soundbin"]
       interval: 10s
@@ -55,6 +57,6 @@ services:
       VITE_API_URL: "http://localhost:3000"
     command: npm run dev -- --host
 
-volumes:
-  postgres-data:
  
+volumes: # remove for real use
+  postgresql:
