@@ -18,8 +18,6 @@ export default function Library() {
   return (
     <div className={`min-h-screen bg-linear-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
       <Header />
-      <Header />
-      <SearchBar />
       <SearchBar />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
       <div className="w-1/3 flex align-center justify-center p-4 float-start">
