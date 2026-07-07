@@ -9,7 +9,7 @@ import { prisma } from "./lib/database";
 import './services/watcher'
 
 const app = express();
-export {app}
+export { app }
 
 const port = Number(process.env.PORT);
 
@@ -65,7 +65,7 @@ app.get('/api/schema/columns', async (_req: Request, res: Response) => {
         columns,
       })),
     });
-  } 
+  }
   catch (error) {
     console.error('Schema query error:', error);
     res.status(500).json({ ok: false, error: 'Unable to load schema columns' });
@@ -81,7 +81,7 @@ app.use('/api', uploadRoutes);
 //     const albums = await prisma.album.$queryRaw<{ cover_art_url: string }[]>(Prisma.sql`
 //       SELECT cover_art_url FROM album
 //     `);
-    
+
 //     res.json({ albums });
 //   } catch (error) {
 //     console.error('Album query error:', error);
@@ -90,6 +90,35 @@ app.use('/api', uploadRoutes);
 // });
 // TODO: User Authentication Endpoints
 
+
+// Search Database for songs, artists, albums, and playlists
+app.get('/api/search', async (req: Request, res: Response) => {
+  const { query } = req.query;
+
+  if (!query || typeof query !== 'string') {
+    return res.status(400).json({ ok: false, error: 'Query parameter is required and must be a string' });
+  }
+
+  try {
+    const searchResults = await prisma.$queryRaw(Prisma.sql`
+      SELECT * FROM (
+        SELECT 'song' AS type, id, title AS name FROM song WHERE title LIKE ${`%${query}%`}
+        UNION ALL
+        SELECT 'artist' AS type, id, name FROM artist WHERE name LIKE ${`%${query}%`}
+        UNION ALL
+        SELECT 'album' AS type, id, title AS name FROM album WHERE title LIKE ${`%${query}%`}
+        UNION ALL
+        SELECT 'playlist' AS type, id, name FROM playlist WHERE name LIKE ${`%${query}%`}
+      ) AS combined_results
+    `);
+
+    res.json({ ok: true, results: searchResults });
+  }
+  catch (error) {
+    console.error('Search query error:', error);
+    res.status(500).json({ ok: false, error: 'Unable to perform search' });
+  }
+});
 
 
 // Server startup

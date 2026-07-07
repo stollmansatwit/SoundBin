@@ -1,6 +1,17 @@
+/*
+What kind of stats do we want?
+- Number of songs listened to per day/week/month/year (bar chart)
+- Number of unique genres listened to per day/week/month/year (doughnut chart)
+- # of songs in library (no chart)
+- # of playlists created (no chart)
+- # of albums (no chart)
+- Listening time trends over time (line chart) (can filter by genre, artist, album, playlist)
+*/
+
+
 import { useState } from 'react';
-import {NavBar} from '../components/NavBar';
-import {Header} from '../components/Header';
+import { NavBar } from '../components/NavBar';
+import { Header } from '../components/Header';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -9,12 +20,14 @@ import {
   LinearScale,
   Tooltip,
   Legend,
+  LineElement,
+  PointElement,
 } from "chart.js";
 
-import { Doughnut } from "react-chartjs-2";
-import {Bar} from "react-chartjs-2";
+import { Doughnut, Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 
-ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, LineElement, PointElement);
 
 export default function Stats() {
   const [isNavOpen, setIsNavOpen] = useState(false)
@@ -27,16 +40,28 @@ export default function Stats() {
     setIsNavOpen(false)
   }
 
+  const numSongs = 0 // SELECT count(songs) FROM public.song;
+  const numAlbums = 0 // SELECT count(albums) FROM public.album;
+  const numPlaylists = 0 // SELECT count(playlists) FROM public.playlist;
+
   return (
+
     <div className={`min-h-screen bg-linear-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
       <Header />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
+      <div className='border border-[rgba(255,255,255,0.5)] rounded-2xl shadow-2xl m-5'>
+        <p className="text-gray-300 mt-3 ml-10">You have {numSongs} songs in your library</p>
+        <p className="text-gray-300 mt-3 ml-10">You have {numAlbums} albums in your library</p>
+        <p className="text-gray-300 mt-3 ml-10">You have {numPlaylists} playlists in your library</p>
+      </div>
       <div className="p-4">
         <h2 className="text-2xl font-bold text-white">Stats</h2>
         <p className="text-gray-300">This is the stats page.</p>
       </div>
+
+
       <div className="w-1/4">
-          <Doughnut data={{
+        <Doughnut data={{
           labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
           datasets: [{
             label: 'Songs',
@@ -60,10 +85,12 @@ export default function Stats() {
             borderWidth: 1
           }]
         }} />
-        </div>
-        <div className = 'w-1/2 bg-white inline-block'>
+      </div>
+
+
+      <div className='w-1/2 bg-white inline-block'>
         <Bar data={{
-          labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' , 'Sunday'],
+          labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
           datasets: [{
             label: 'Listen Time',
             data: [12, 19, 3, 5, 2, 3],
@@ -85,8 +112,21 @@ export default function Stats() {
             ],
             borderWidth: 1
           }]
-        }} /> 
-        </div>
+        }} />
+      </div>
+            <div className="w-1/4 bg-white">
+        <Line data={{
+          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+          datasets: [{
+            label: 'Listening Time',
+            data: [65, 59, 80, 81, 90, 95, 80],
+            fill: false,
+            borderColor: 'rgb(53, 162, 235)',
+            backgroundColor: 'rgba(53, 162, 235, 0.5)',
+            tension: 0.1
+          }]
+        }}/>
+      </div>
     </div>
   )
 }
