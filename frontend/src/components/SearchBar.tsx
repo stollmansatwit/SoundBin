@@ -4,8 +4,8 @@ export function SearchBar() {
   const [name, setName] = useState("");
   const handleSearch = (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
-    useEffect(() => {
-      const apiBaseUrl:string = 'http://localhost:3000'; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
+    // useEffect(() => {
+    //   const apiBaseUrl:string = 'http://localhost:3000'; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
     // use effect to call backend with query
     // backend should return a list of songs, albums, and playlists that match the query
     // Search Result component should display the results in a list with links to the song, album, or playlist page
