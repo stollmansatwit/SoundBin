@@ -1,10 +1,14 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import type { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
 import 'dotenv/config';
 // import functions
+// import routes
 import uploadRoutes from './routes/upload_routes';
+import ablumRoutes from './routes/album_routes'
+
 import { prisma } from "./lib/database";
 import './services/watcher'
 
@@ -22,6 +26,8 @@ type ColumnRow = {
 // Middleware
 app.use(express.json());
 app.use(cors({ origin: 'http://127.0.0.1:5173' }));
+
+app.use('/assets', express.static(path.join(process.cwd(), 'uploads', 'assets')));
 
 
 // Health check endpoint with DB connection test
@@ -72,8 +78,15 @@ app.get('/api/schema/columns', async (_req: Request, res: Response) => {
   }
 });
 
+/**
+ * API routes
+ */
+
 // API response for uploading single file
 app.use('/api', uploadRoutes);
+// Grabs the album photos
+app.use('/api', ablumRoutes);
+
 
 // // Get album cover art URLs TODO: Replace with code that grabs cover_art_url from public.album table. Do this after upload works
 // app.get('/api/album-links', async (_req: Request, res: Response) => {

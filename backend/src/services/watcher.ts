@@ -114,7 +114,7 @@ watcher.on('add', (filePath: string) => {
                   title: metadata.album,
                   artist_id: artistID,
                   release_date: metadata.date ? new Date('${metadata.date}-01-01') : null,
-                  // Update for COVER_ART_URL later
+                  cover_art_url: metadata.cover_url,
                 }
               });
               albumID = newAlbum.album_id;
@@ -136,6 +136,7 @@ watcher.on('add', (filePath: string) => {
             title: metadata.title,
             release_date: metadata.date ? new Date('${metadata.date}-01-01') : null,
             duration: metadata.duration,
+            cover_art_url: metadata.cover_url,
             // update for COVER ART URL
             album: albumID ? {connect:{album_id: albumID}} : undefined,
             genres: genreID ? {create: {genre_id: genreID}} : undefined
@@ -169,10 +170,10 @@ watcher.on('add', (filePath: string) => {
             //file_hash String  @db.VarChar(64)
           }
         });
-        console.log("Successfully indexed: ${track.Title}");
+        console.log(`Successfully indexed: ${track.title}`);
       } catch (err) {
         console.error("Error saving to database:", err);
       }
-    });
+    }).catch((err) => console.error(`INGEST FAILED for ${filePath}:`, err));
   }
 });
