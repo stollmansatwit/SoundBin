@@ -7,6 +7,31 @@
 
 import * as mm from 'music-metadata';
 import { promises as fs } from 'fs';
+import { createReadStream } from 'fs';
+import path from 'path';
+import { createHash } from 'crypto';
+
+  const BaseDir = process.env.DOCKER_SONG_FILE_LOCATION;
+  const targetDir = `${BaseDir}/assets`;
+
+
+async function saveCoverArt(picture: any): Promise<string | null> {
+  if(!picture?.data) return null;
+  const ext = picture.format?.split('/')[1]?.replace('jpeg','jpg') ?? 'jpg';
+  const hash = createHash('sha256').update(picture.data).digest('hex').slice(0, 16);
+  const fileName = `${hash}.${ext}`;
+  const outPath = path.join(targetDir, fileName);
+
+  // checking if already saved
+  try {
+    await fs.access(outPath);
+  } catch {
+    await fs.mkdir(targetDir, { recursive: true });
+    await fs.writeFile(outPath, picture.data);
+  }
+  return outPath;
+}
+
 
 /**
  * Parses a music file and returns an object containing 
@@ -55,6 +80,13 @@ export async function extractMetadata(filePath: string) {
 
     const common = metadata.common as any
     const format = metadata.format as any
+
+    const pic = common.picture?.[0];
+    const file_path = await saveCoverArt(pic);
+
+    console.log('picture raw:', common.picture);
+    console.log('picture count:', common.picture?.length ?? 0);
+
     const info = {
       title: common?.title || "Unknown Title",
       artist: common?.artist || "Unknown Artist",
@@ -62,6 +94,7 @@ export async function extractMetadata(filePath: string) {
       genre: common?.genre ?? null,
       track: common?.track || "Unknown Track",
       date: common?.date ?? null, 
+      cover_url: file_path ?? null,
       // data
       duration: typeof format.duration == 'number' ? Math.floor(format.duration) : 0, // in seconds
       codec: format?.codec || "Unknown Codec",
@@ -78,6 +111,7 @@ export async function extractMetadata(filePath: string) {
       duration: info.duration,
       genre: info.genre,
       track: info.track,
+      cover_url: info.cover_url,
       date: info.date,
       codec: info.codec,
       bitrate: info.bitrate,

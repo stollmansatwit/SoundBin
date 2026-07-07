@@ -8,7 +8,9 @@ import chokidar from 'chokidar';
 import { extractMetadata } from '../utils/metadata'; 
 import {prisma} from "../lib/database"
 
-const uploadPath = String(process.env.DOCKER_SONG_FILE_LOCATION);
+const BaseDir = process.env.DOCKER_SONG_FILE_LOCATION;
+const targetDir = `${BaseDir}/songs`;
+const uploadPath = String(targetDir);
 
 // Initialize watcher
 const watcher = chokidar.watch(uploadPath, {

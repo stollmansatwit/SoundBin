@@ -19,7 +19,9 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: (req:any, file:any, cb:any) => {
       // This path should match your .env UPLOAD_DIR
-      cb(null, process.env.DOCKER_SONG_FILE_LOCATION);
+      const BaseDir = process.env.DOCKER_SONG_FILE_LOCATION;
+      const targetDir = `${BaseDir}/songs`;
+      cb(null, targetDir);
     },
     filename: (req:any, file:any, cb:any) => {
       cb(null, Date.now() + '-' + file.originalname);
