@@ -1,7 +1,8 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 
 export type Album = {
   album_id: string;
+  artist_id: string;
   title: string;
   cover_art_url?: string;
 };
@@ -12,9 +13,25 @@ interface Props {
 }
 
 export default function AlbumPopUp({ album, onClose }: Props) {
-  // Update to album get tracks api
-  const songs = ["Track 1", "Track 2", "Track 3"]; 
+  const [songs, setSongs] = useState<{title: string}[]>([]);
+  const [loadingTracks, setLoadingTracks] = useState(true);
 
+  const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
+
+  useEffect(() => {
+    if (!album?.album_id) return;
+    setLoadingTracks(true);
+    fetch(`${apiBaseUrl}/api/album-track-list?id=${album.album_id}`)
+      .then((res) => res.json())
+      .then((data: {title: string}[] = []) => {
+        setSongs(data);
+        setLoadingTracks(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch tracks:", err);
+        setLoadingTracks(false)
+      });
+  }, [album?.album_id]);
 
   // still needs updates but good starter
   return (
@@ -29,7 +46,7 @@ export default function AlbumPopUp({ album, onClose }: Props) {
         
         <div className="flex flex-col items-center">
           <img 
-            src={album.cover_art_url ? `http://localhost:3000/assets/${album.cover_art_url.split('/').pop()}` : "/defaultAlbum.png"} 
+            src={album.cover_art_url ? `${apiBaseUrl}/assets/${album.cover_art_url.split('/').pop()}` : "/defaultAlbum.png"} 
             alt={album.title}
             className="w-48 h-48 rounded-full mb-4 border-4 border-white"
           />
@@ -38,11 +55,17 @@ export default function AlbumPopUp({ album, onClose }: Props) {
           <div className="w-full">
             <h3 className="text-gray-400 mb-2">Tracklist:</h3>
             <ul className="space-y-2">
-              {songs.map((song, index) => (
-                <li key={index} className="text-white border-b border-gray-800 pb-1">
-                  {song}
-                </li>
-              ))}
+              {loadingTracks ? (
+                <li className="test-white opacity-50">Loading tracks...</li>
+              ) : songs.length > 0 ? (
+                songs.map((song, index) => (
+                  <li key={index} className="text-white border-b border-gray-800 pb-1 last:border-none">
+                    {song.title}
+                  </li>
+                ))
+              ) : (
+                <li className="text-gray-500">No tracks found.</li>
+              )}
             </ul>
           </div>
         </div>

@@ -4,6 +4,7 @@ import AlbumPopUp from "../popUpPage/AlbumPopUp";
 
 type Album = {
   album_id: string;
+  artist_id: string;
   title: string;
   cover_art_url?: string;
 };

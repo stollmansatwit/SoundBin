@@ -104,7 +104,7 @@ export async function extractMetadata(filePath: string) {
       channels: typeof format?.numberOfChannels === 'number' ? format.numberOfChannels : 0
     };
 
-    console.log("Extracted Data:", info);
+    // console.log("Extracted Data:", info);
     return {
       title: info.title,
       artist: info.artist,
