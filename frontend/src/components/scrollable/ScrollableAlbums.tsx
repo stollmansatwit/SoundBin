@@ -1,5 +1,6 @@
-import { data } from "../test-imgs.ts";
 import React, { useEffect, useState } from "react";
+
+import AlbumPopUp from "../popUpPage/AlbumPopUp";
 
 type Album = {
   album_id: string;
@@ -12,9 +13,9 @@ const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets
 export function ScrollableAlbums() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
 
   useEffect(() => {
-    console.log("1");
     const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
     fetch(`${apiBaseUrl}/api/album-path`)
@@ -36,19 +37,15 @@ export function ScrollableAlbums() {
   }, []);
 
   const getCoverImage = (path?: string) => {
-    console.log("2");
     const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
     if (!path || path == "" || path == null) {
       return DEFAULT_IMAGE;
     }
 
     const file = path.split('/').pop();
-    console.log(`file path: ${path}`);
-    console.log(`file: ${file}`);
     return `${apiBaseUrl}/assets/${file}`;
   };
 
-  console.log("3");
   const displayAlbum = Array.isArray(albums) ? albums : [];
 
   return (
@@ -73,6 +70,7 @@ export function ScrollableAlbums() {
           {displayAlbum.map((album) => (
             <img
               key={album.album_id}
+              onClick={() => setSelectedAlbum(album)}
               className=" w-40 inline-block p-2 cursor-pointer transition-transform ease-linear duration-[300ms] hover:duration-[2000ms] hover:rotate-[360deg] hover:scale-105 rounded-full"
               src={getCoverImage(album.cover_art_url)}
               alt={album.title}
@@ -80,6 +78,12 @@ export function ScrollableAlbums() {
           ))}
         </li>
       </div>
+        {selectedAlbum && (
+          <AlbumPopUp
+            album={selectedAlbum}
+            onClose={() => setSelectedAlbum(null)}
+          />
+        )}
     </>
   );
 }
