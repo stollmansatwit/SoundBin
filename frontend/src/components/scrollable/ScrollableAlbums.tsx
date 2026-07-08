@@ -7,7 +7,7 @@ type Album = {
   cover_art_url?: string;
 };
 
-const DEFAULT_IMAGE = "https://docs.sonos.com/docs/add-album-art"; // change to an actual path in assets once better image found
+const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets once better image found
 
 export function ScrollableAlbums() {
   const [albums, setAlbums] = useState<Album[]>([]);

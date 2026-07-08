@@ -38,9 +38,10 @@ async function saveCoverArt(picture: any): Promise<string | null> {
  * information we can save to our database via Prisma.
  */
 export async function extractMetadata(filePath: string) {
+  const absolutePath = path.resolve(filePath)
   try {
     // mm.parseFile reads the file and extracts ID3/metadata tags
-    const metadata = await mm.parseFile(filePath);
+    const metadata = await mm.parseFile(absolutePath);
     /*Metadata that should be found
     # Descriptive
     title
@@ -84,15 +85,15 @@ export async function extractMetadata(filePath: string) {
     const pic = common.picture?.[0];
     const file_path = await saveCoverArt(pic);
 
-    console.log('picture raw:', common.picture);
-    console.log('picture count:', common.picture?.length ?? 0);
+    // console.log('picture raw:', common.picture);
+    // console.log('picture count:', common.picture?.length ?? 0);
 
     const info = {
       title: common?.title || "Unknown Title",
       artist: common?.artist || "Unknown Artist",
       album: common?.album || "Unknown Album",
       genre: common?.genre ?? null,
-      track: common?.track || "Unknown Track",
+      track: common?.track?.no ?? null,
       date: common?.date ?? null, 
       cover_url: file_path ?? null,
       // data

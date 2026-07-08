@@ -12,6 +12,12 @@ import { app } from '../index';
 // Store in memory first to handle during pipeline? or diskStorage?
 const storage = multer.memoryStorage(); 
 
+// Cleans string name for storage by removing bad characters 
+function cleanName(fileName: string){
+  const cleanName = fileName.replace(/[\r\n]/g, '');
+  return cleanName
+}
+
 /*
 Saves file to path specified
 */
@@ -24,7 +30,8 @@ const upload = multer({
       cb(null, targetDir);
     },
     filename: (req:any, file:any, cb:any) => {
-      cb(null, Date.now() + '-' + file.originalname);
+      const cleanFile = cleanName(file.originalname);
+      cb(null, Date.now() + '-' + cleanFile);
     }
   }),
   limits: {

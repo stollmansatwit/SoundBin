@@ -15,8 +15,19 @@ const uploadPath = String(targetDir);
 // Initialize watcher
 const watcher = chokidar.watch(uploadPath, {
   persistent: true,
-  ignoreInitial: true
+  ignoreInitial: true,
+  awaitWriteFinish: {
+    stabilityThreshold: 2000, // wait 2 seconds to finish
+    pollInterval: 100,  // check every .1 seconds
+  },
 }) as any;
+
+
+// Helper functions
+function UnknownArtistAndAlbum(){
+
+}
+
 
 console.log(`Watching for new files in: ${uploadPath}`);
 
@@ -71,8 +82,8 @@ watcher.on('add', (filePath: string) => {
         // 2. Resolve Album & Artist
         let albumID = null;
         let artistID = null;
+        //2.1. if metadata for artist exists, check if artist already exists
         if (metadata.artist && metadata.artist !== "Unknown Artist") {
-          // if metadata for artist exists, check if artist already exists
           const existingArtist = await prisma.artist.findFirst({
             where:{
               name: {
@@ -81,9 +92,8 @@ watcher.on('add', (filePath: string) => {
               }
             }
           });
-
-          if (existingArtist){ // Artist exists, check for album under artist where = title
-            artistID = existingArtist.artist_id;
+          // 2.2. If Artist exists, check for album under artist where = title
+          if (existingArtist){ artistID = existingArtist.artist_id;
           } else { // Arist does not exist
             const newArtist = await prisma.artist.create({
               data:{
@@ -93,9 +103,8 @@ watcher.on('add', (filePath: string) => {
             });
             artistID = newArtist.artist_id;
           }
-
+          // 2.3. if metdata for artist & album exists, check if album already exists
           if (metadata.album && metadata.album !== "Unknown Album"){
-            // if metdata for artist & album exists, check if album already exists
             const existingAlbum = await prisma.album.findFirst({
               where:{
                 title:{
@@ -105,28 +114,70 @@ watcher.on('add', (filePath: string) => {
                 artist_id: artistID
               }
             });
-
-            if (existingAlbum) { // Album exists, get Album ID
-              albumID = existingAlbum.album_id;
-            } else { // Album doesn't exisit 
+            // 2.4. If Album exists, get Album ID
+            if (existingAlbum) { albumID = existingAlbum.album_id;
+            } else { // Album doesn't exisit
               const newAlbum = await prisma.album.create({
                 data:{
                   title: metadata.album,
                   artist_id: artistID,
-                  release_date: metadata.date ? new Date('${metadata.date}-01-01') : null,
+                  release_date: metadata.date ? new Date(`${metadata.date}-01-01`) : null,
                   cover_art_url: metadata.cover_url,
                 }
               });
               albumID = newAlbum.album_id;
             }
-          } else { // Album metadata doesn't exist, should add elif for Unknown Album
+            // 2.4. If album unknown add to known artist singles playlist
+          } else if (metadata.album == "Unknown Album") {
             // upload to unknown
-            console.log("UNKOWN ALBUM UPLOAD FROM FILE");
+
+          } else { console.log("ERROR FINDING METADATA OF ALBUM FROM FILE"); } // Album metadata not given, log error
+        } else if (metadata.artist == "Unknown Artist") {
+          // 2.5. If artisit unknown and album unknown, add to unknown 'album' / 'playlist'
+          const existingUnknownArtist = await prisma.artist.findFirst({
+            where:{
+              name: {
+                equals: 'Unknown',
+                mode: 'insensitive'
+              }
+            }
+          });
+          // 2.6. If Unknown Artist exists, check for album under artist where = title
+          if (existingUnknownArtist){ artistID = existingUnknownArtist.artist_id;
+          } else { // Arist does not exist
+            const newUnknownArtist = await prisma.artist.create({
+              data:{
+                name: metadata.artist,
+                // Update for BIO & IMAGE_URL
+              }
+            });
+            artistID = newUnknownArtist.artist_id;
           }
-        } else { // Artist metadata doesn't exist, should add elif for Unknown Artists
-          // upload to uknown
-          console.log("UNKOWN ARTIST UPLOAD FROM FILE");
-        }
+          // 2.7. If album Unknown, album not in errors
+          if (metadata.album == "Unknown Album") {
+            const existingUnkownAlbum = await prisma.album.findFirst({
+              where:{
+                title:{
+                  equals: `Unknown`,
+                  mode: `insensitive`
+                },
+              }
+            });
+            // 2.8. If album exists add to singles "album"
+            if (existingUnkownAlbum) {albumID = existingUnkownAlbum.album_id;
+            } else {
+              const newUnknownAlbum = await prisma.album.create({
+                data:{
+                  title: 'Unknown',
+                  artist_id: artistID,
+                  release_date: metadata.date ? new Date(`${metadata.date}-01-01`) : null,
+                  cover_art_url: null,
+                }
+              });
+              albumID = newUnknownAlbum.album_id;
+            }
+          } else { console.log("ERROR FINDING METADATA OF ALBUM FROM FILE"); } // Album metadata not given, log error
+        } else{ console.log("ERROR FINDING METADATA OF ARTIST FROM FILE"); } // Artist metadata not given, log error
 
       
         // 3. Create track
@@ -134,10 +185,9 @@ watcher.on('add', (filePath: string) => {
         const track = await prisma.track.create({
           data: {
             title: metadata.title,
-            release_date: metadata.date ? new Date('${metadata.date}-01-01') : null,
+            release_date: metadata.date ? new Date(`${metadata.date}-01-01`) : null,
             duration: metadata.duration,
             cover_art_url: metadata.cover_url,
-            // update for COVER ART URL
             album: albumID ? {connect:{album_id: albumID}} : undefined,
             genres: genreID ? {create: {genre_id: genreID}} : undefined
           }
@@ -177,3 +227,5 @@ watcher.on('add', (filePath: string) => {
     }).catch((err) => console.error(`INGEST FAILED for ${filePath}:`, err));
   }
 });
+
+
