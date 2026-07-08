@@ -194,7 +194,7 @@ watcher.on('add', (filePath: string) => {
         });
 
         // 4. Create Album Track Sequence
-        const trackNum = metadata.track ? metadata.track.no : null;
+        const trackNum = metadata.track ? metadata.track : null;
         if(albumID && trackNum) {
           await prisma.albumTrackSequence.create({ 
             data: {

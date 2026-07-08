@@ -1,11 +1,17 @@
 import React, {useEffect, useState} from "react";
 
-export type Album = {
+type Album = {
   album_id: string;
   artist_id: string;
   title: string;
   cover_art_url?: string;
 };
+
+type Track = {
+  title: string;
+  duration: number;
+  albumSequence?: {sequence_number: number}[];
+}
 
 interface Props {
   album: Album;
@@ -13,7 +19,7 @@ interface Props {
 }
 
 export default function AlbumPopUp({ album, onClose }: Props) {
-  const [songs, setSongs] = useState<{title: string}[]>([]);
+  const [songs, setSongs] = useState<Track[]>([]);
   const [loadingTracks, setLoadingTracks] = useState(true);
 
   const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
@@ -23,7 +29,7 @@ export default function AlbumPopUp({ album, onClose }: Props) {
     setLoadingTracks(true);
     fetch(`${apiBaseUrl}/api/album-track-list?id=${album.album_id}`)
       .then((res) => res.json())
-      .then((data: {title: string}[] = []) => {
+      .then((data: Track[] = []) => {
         setSongs(data);
         setLoadingTracks(false);
       })
@@ -33,6 +39,26 @@ export default function AlbumPopUp({ album, onClose }: Props) {
       });
   }, [album?.album_id]);
 
+
+  // Helper Functions
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = (seconds % 60).toString().padStart(2, '0');
+    return `${mins}:${secs}`;
+  };
+
+  const getCoverImage = (path?: string) => {
+    if (!path || path == "" || path == null) {
+      return "/defaultAlbum.png";
+    }
+    const file = path.split('/').pop();
+    return `${apiBaseUrl}/assets/${file}`;
+  };
+
+  const getSequenceNumber = () => {
+
+  }
+  
   // still needs updates but good starter
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
@@ -46,7 +72,7 @@ export default function AlbumPopUp({ album, onClose }: Props) {
         
         <div className="flex flex-col items-center">
           <img 
-            src={album.cover_art_url ? `${apiBaseUrl}/assets/${album.cover_art_url.split('/').pop()}` : "/defaultAlbum.png"} 
+            src={getCoverImage(album.cover_art_url)} 
             alt={album.title}
             className="w-48 h-48 rounded-full mb-4 border-4 border-white"
           />
@@ -56,11 +82,29 @@ export default function AlbumPopUp({ album, onClose }: Props) {
             <h3 className="text-gray-400 mb-2">Tracklist:</h3>
             <ul className="space-y-2">
               {loadingTracks ? (
-                <li className="test-white opacity-50">Loading tracks...</li>
+                <li className="text-white opacity-50">Loading tracks...</li>
               ) : songs.length > 0 ? (
                 songs.map((song, index) => (
-                  <li key={index} className="text-white border-b border-gray-800 pb-1 last:border-none">
-                    {song.title}
+                  <li key={index} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-none">
+
+                    {/* Left side: Track Number and Title */}
+                    <div className="flex items-center gap-4">
+                      <span className="text-gray-500 text-sm w-4">{song.albumSequence?.[0]?.sequence_number ? song.albumSequence?.[0]?.sequence_number : index + 1}</span>
+                      <span className="text-white font-medium">{song.title}</span>
+                    </div>
+
+                    {/* Right side: Duration and Play Button */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-gray-400 text-sm ml-auto">
+                        {formatDuration(song.duration)}
+                      </span>
+                      <button className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors">
+                         {/* Placeholder for Play Button Icon */}
+                        <svg viewBox="0 0 24 24" fill="white" className="w-4 h-4">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </button>
+                    </div>
                   </li>
                 ))
               ) : (

@@ -35,7 +35,6 @@ router.get('/album-path', async (_req: Request, res: Response) => {
 router.get('/album-track-list', async (req: Request, res: Response) => {
   try {
     const {id} = req.query;
-    console.log(`track list id ${id}`);
     if (!id) { return res.status(400).json({error: "Album ID is required"}); }
 
     const tracks= await prisma.track.findMany({
@@ -45,7 +44,6 @@ router.get('/album-track-list', async (req: Request, res: Response) => {
         files: true,
       },
     });
-    console.log(`track list track ${tracks}`);
 
     // Sort by sequence_number first. 
     // If a track has no sequence (null), it will fall back to mtime.
@@ -68,7 +66,6 @@ router.get('/album-track-list', async (req: Request, res: Response) => {
              new Date(b.files?.[0]?.file_mtime).getTime();
     });
 
-    console.log(`sorked track list ${sortedTracks}`);
     res.json(sortedTracks);
   } catch (error) {
     console.error("Error fetching tracks from album:", error);
