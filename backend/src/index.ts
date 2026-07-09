@@ -41,7 +41,7 @@ app.get('/api/health', async (_req: Request, res: Response) => {
   }
 });
 // Endpoint to get schema columns
-app.get('/api/schema/columns', async (_req: Request, res: Response) => {
+app.get('/schema/columns', async (_req: Request, res: Response) => {
   try {
     const rows: ColumnRow[] = await prisma.$queryRaw<ColumnRow[]>(Prisma.sql`
       SELECT
@@ -105,33 +105,52 @@ app.use('/api', ablumRoutes);
 
 
 // Search Database for songs, artists, albums, and playlists
+/**
+ * @param get `/api/search`
+ * @description searches the database for songs, artists, albums, and playlists based on a query parameter
+ * @queryParam `q` - The search query string
+ * @returns JSON object containing search results for songs, artists, albums, and playlists
+ */
 app.get('/api/search', async (req: Request, res: Response) => {
-  const { query } = req.query;
+  const query = req.query.q as string;
 
-  if (!query || typeof query !== 'string') {
-    return res.status(400).json({ ok: false, error: 'Query parameter is required and must be a string' });
+  if (!query || query.trim().length < 2) {
+    return res.json([]);
   }
-
+  
   try {
-    const searchResults = await prisma.$queryRaw(Prisma.sql`
-      SELECT * FROM (
-        SELECT 'song' AS type, id, title AS name FROM song WHERE title LIKE ${`%${query}%`}
-        UNION ALL
-        SELECT 'artist' AS type, id, name FROM artist WHERE name LIKE ${`%${query}%`}
-        UNION ALL
-        SELECT 'album' AS type, id, title AS name FROM album WHERE title LIKE ${`%${query}%`}
-        UNION ALL
-        SELECT 'playlist' AS type, id, name FROM playlist WHERE name LIKE ${`%${query}%`}
-      ) AS combined_results
-    `);
+    const songs = await prisma.track.findMany({
+      where: { title: { contains: query, mode: 'insensitive' } },
+      select: { track_id: true, title: true, album_id: true },
+    });
 
-    res.json({ ok: true, results: searchResults });
-  }
-  catch (error) {
-    console.error('Search query error:', error);
-    res.status(500).json({ ok: false, error: 'Unable to perform search' });
+    const artists = await prisma.artist.findMany({
+      where: { name: { contains: query, mode: 'insensitive' } },
+      select: { artist_id: true, name: true },
+    });
+
+    const albums = await prisma.album.findMany({
+      where: { title: { contains: query, mode: 'insensitive' } },
+      select: { album_id: true, title: true, cover_art_url: true },
+    });
+
+    const playlists = await prisma.playlist.findMany({
+      where: { name: { contains: query, mode: 'insensitive' } },
+      select: { playlist_id: true, name: true },
+    });
+
+    res.json([
+      ...songs.map((song) => ({ type: 'song', id: song.track_id, name: song.title })),
+      ...artists.map((artist) => ({ type: 'artist', id: artist.artist_id, name: artist.name })),
+      ...albums.map((album) => ({ type: 'album', id: album.album_id, name: album.title })),
+      ...playlists.map((playlist) => ({ type: 'playlist', id: playlist.playlist_id, name: playlist.name })),
+    ]);
+  } catch (error) {
+    console.error("Error during search:", error);
+    res.status(500).json({ error: "Search failed" });
   }
 });
+
 
 
 // Server startup

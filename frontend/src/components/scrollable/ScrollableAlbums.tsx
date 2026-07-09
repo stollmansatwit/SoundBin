@@ -18,7 +18,7 @@ export function ScrollableAlbums() {
 
   useEffect(() => {
     const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
-
+    
     fetch(`${apiBaseUrl}/api/album-path`)
       .then((response) => {
         if (!response.ok) {

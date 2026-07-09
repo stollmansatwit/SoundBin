@@ -28,8 +28,16 @@ export function ScrollablePlaylists() {
         <li className='w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth scrollbar-thumb-black shadow-lg'>
           {data.slice(0, 16).reverse().map((item: { img: string | undefined; id: number | undefined }) => (
             <div className='inline-block p-2 cursor-pointer'>
-              <img className=' w-[120px] inline-block p-2 cursor-pointer transition-transform ease-linear' src={item.img} alt='album cover' />
-              <label className='flex justify-center text-white text-sm'>Playlist {item.id}</label>
+              <img
+                className=' w-[120px] inline-block p-2 cursor-pointer transition-transform ease-linear'
+                src={item.img}
+                alt='album cover'
+                key={item.id} />
+              <label
+                className='flex justify-center text-white text-sm'
+                key={item.id}>
+                Playlist {item.id}
+              </label>
             </div>
           ))}
 
