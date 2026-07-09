@@ -4,6 +4,7 @@ type Album = {
   album_id: string;
   artist_id: string;
   title: string;
+  release_date?: any;
   cover_art_url?: string;
 };
 
@@ -21,6 +22,7 @@ interface Props {
 export default function AlbumPopUp({ album, onClose }: Props) {
   const [songs, setSongs] = useState<Track[]>([]);
   const [loadingTracks, setLoadingTracks] = useState(true);
+  const [artistName, setArtistName] = useState<string>("");
 
   const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
@@ -37,6 +39,17 @@ export default function AlbumPopUp({ album, onClose }: Props) {
         console.error("Failed to fetch tracks:", err);
         setLoadingTracks(false)
       });
+
+      // Fetch artist name if artist_id exists
+    if (album.artist_id) {
+      fetch(`${apiBaseUrl}/api/artist-name?id=${album.artist_id}`)
+        .then((res) => res.json())
+        .then((data: any) => {
+          // Assuming the response is { name: "Artist Name" } or similar
+          setArtistName(data.name || "Unknown Artist");
+        })
+        .catch(err => console.error("Failed to fetch artist:", err));
+    }
   }, [album?.album_id]);
 
 
@@ -47,6 +60,13 @@ export default function AlbumPopUp({ album, onClose }: Props) {
     return `${mins}:${secs}`;
   };
 
+  const formatTotalDuration = (totalSeconds: number) => {
+    const hrs = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    const secs = Math.floor(totalSeconds % 60);
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const getCoverImage = (path?: string) => {
     if (!path || path == "" || path == null) {
       return "/defaultAlbum.png";
@@ -55,62 +75,91 @@ export default function AlbumPopUp({ album, onClose }: Props) {
     return `${apiBaseUrl}/assets/${file}`;
   };
 
-  const getSequenceNumber = () => {
+  const getYear = (date: any) => {
+    if (!date) return null;
+    // If it's a string like "2013-01-01...", take first 4 chars
+    if (typeof date === 'string') {
+      return date.substring(0, 4);
+    }
+    // If it's a Date object or timestamp
+    const d = new Date(date);
+    return d.getFullYear().toString();
+  };
 
-  }
+  // Logic to handle optional year & duration in the info bar
+  const displayYear = getYear(album.release_date); 
+  const totalDuration = formatTotalDuration(songs.reduce((acc, s) => acc + s.duration, 0));
   
+  // Construct the display string: "12 songs • 01:30:00" or "12 songs • 01:30:00 • 2024"
+  const infoBar = (
+    <div className="text-sm text-gray-500 mb-6 border-b border-gray-700 pb-4">
+      {songs.length} songs &nbsp;•&nbsp; {totalDuration} {displayYear ? `   •   ${displayYear}`:''} 
+    </div>
+  );
+
   // still needs updates but good starter
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900/80 p-6 rounded-lg max-w-md w-full relative border border-gray-700 shadow-2xl">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+      <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-4xl w-full relative shadow-2xl overflow-hidden">
         <button 
           onClick={onClose}
-          className="absolute top-2 right-2 text-white bg-red-500 px-2 py-1 rounded"
+          className="absolute top-4 right-4 text-white bg-red-600 px-4 py-1 rounded-md hover:bg-red-700 transition-colors z-10"
         >
           Close
         </button>
         
-        <div className="flex flex-col items-center">
-          <img 
-            src={getCoverImage(album.cover_art_url)} 
-            alt={album.title}
-            className="w-48 h-48 rounded-full mb-4 border-4 border-white"
-          />
-          <h2 className="text-2xl font-bold text-white mb-4">{album.title}</h2>
-          
-          <div className="w-full">
-            <h3 className="text-gray-400 mb-2">Tracklist:</h3>
-            <ul className="space-y-2">
-              {loadingTracks ? (
-                <li className="text-white opacity-50">Loading tracks...</li>
-              ) : songs.length > 0 ? (
-                songs.map((song, index) => (
-                  <li key={index} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-none">
+        <div className="flex flex-col md:flex-row">
+          {/* Left Side: Artwork & Info */}
+          <div className="p-8 bg-gradient-to-b from-gray-800 to-gray-900 flex flex-col items-center justify-center border-r border-gray-700 w-full md:w-1/3">
+            <img 
+              src={getCoverImage(album.cover_art_url)} 
+              alt={album.title}
+              className="w-64 h-64 aspect-square object-cover rounded-lg shadow-2xl border-2 border-gray-600 mb-4"
+            />
+            <h2 className="text-2xl font-bold text-white text-center">{album.title}</h2>
+          </div>
 
-                    {/* Left side: Track Number and Title */}
-                    <div className="flex items-center gap-4">
-                      <span className="text-gray-500 text-sm w-4">{song.albumSequence?.[0]?.sequence_number ? song.albumSequence?.[0]?.sequence_number : index + 1}</span>
-                      <span className="text-white font-medium">{song.title}</span>
-                    </div>
+          {/* Right Side: Tracklist */}
+          <div className="p-8 w-full md:w-2/3 bg-gray-900">
+            <h3 className="text-3xl font-bold text-white mb-1">{album.title}</h3>
+            <p className="text-lg text-gray-400 mb-1">{artistName || "Loading Artist..."}</p>
+            
+            {/* Info Bar: [# songs - duration - year (optional)] */}
+            {infoBar}
 
-                    {/* Right side: Duration and Play Button */}
-                    <div className="flex items-center gap-3">
-                      <span className="text-gray-400 text-sm ml-auto">
-                        {formatDuration(song.duration)}
-                      </span>
-                      <button className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors">
-                         {/* Placeholder for Play Button Icon */}
-                        <svg viewBox="0 0 24 24" fill="white" className="w-4 h-4">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </li>
-                ))
-              ) : (
-                <li className="text-gray-500">No tracks found.</li>
-              )}
-            </ul>
+            <div className="w-full overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
+              <ul className="space-y-1">
+                {loadingTracks ? (
+                  <li className="text-white opacity-50 italic">Loading tracks...</li>
+                ) : songs.length > 0 ? (
+                  songs.map((song, index) => (
+                    <li key={index} className="flex items-center justify-between py-3 border-b border-gray-800 last:border-none hover:bg-white/5 px-2 rounded transition-colors">
+                      {/* Left side: Track Number and Title */}
+                      <div className="flex items-center gap-4">
+                        <span className="text-gray-500 text-sm w-6">
+                          {song.albumSequence?.[0]?.sequence_number || index + 1}
+                        </span>
+                        <span className="text-white font-medium">{song.title}</span>
+                      </div>
+
+                      {/* Right side: Duration and Play Button */}
+                      <div className="flex items-center gap-4">
+                        <span className="text-gray-400 text-sm">
+                          {formatDuration(song.duration)}
+                        </span>
+                        <button className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors border border-white/10">
+                           <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-gray-500">No tracks found.</li>
+                )}
+              </ul>
+            </div>
           </div>
         </div>
       </div>

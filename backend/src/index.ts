@@ -8,6 +8,7 @@ import 'dotenv/config';
 // import routes
 import uploadRoutes from './routes/upload_routes';
 import ablumRoutes from './routes/album_routes'
+import artistRoutes from './routes/artist_routes'
 
 import { prisma } from "./lib/database";
 import './services/watcher'
@@ -86,6 +87,8 @@ app.get('/schema/columns', async (_req: Request, res: Response) => {
 app.use('/api', uploadRoutes);
 // Grabs the album photos
 app.use('/api', ablumRoutes);
+// Grabs the artist name
+app.use('/api', artistRoutes);
 
 
 // // Get album cover art URLs TODO: Replace with code that grabs cover_art_url from public.album table. Do this after upload works
