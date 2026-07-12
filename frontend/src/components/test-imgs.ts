@@ -6,7 +6,7 @@ export const data = [
     },
     {
         id: 2,
-        img: 'https://www.indieground.net/images/blog/2024/indieblog-best-album-covers-2010s-07.jpg',
+        img: 'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExb3p5ZHl6ajFibGI0aGdyaGo0dnhxMmRoc3d4bTRrOGYzMmIzNXZwaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LMNsgeBFskg4sd7bWk/giphy.gif',
         playlistUrl: 'https://images.pexels.com/photos/38267716/pexels-photo-38267716.jpeg',
     },
     {
@@ -26,7 +26,7 @@ export const data = [
     },
     {
         id: 6,
-        img: 'https://www.indieground.net/images/blog/2024/indieblog-best-album-covers-2010s-07.jpg',
+        img: 'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExb3p5ZHl6ajFibGI0aGdyaGo0dnhxMmRoc3d4bTRrOGYzMmIzNXZwaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LMNsgeBFskg4sd7bWk/giphy.gif',
         playlistUrl: 'https://images.pexels.com/photos/38267716/pexels-photo-38267716.jpeg',
     },
     {
@@ -46,7 +46,7 @@ export const data = [
     },
     {
         id: 10,
-        img: 'https://www.indieground.net/images/blog/2024/indieblog-best-album-covers-2010s-07.jpg',
+        img: 'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExb3p5ZHl6ajFibGI0aGdyaGo0dnhxMmRoc3d4bTRrOGYzMmIzNXZwaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LMNsgeBFskg4sd7bWk/giphy.gif',
         playlistUrl: 'https://images.pexels.com/photos/38267716/pexels-photo-38267716.jpeg',
     },
     {
@@ -66,7 +66,7 @@ export const data = [
     },
     {
         id: 14,
-        img: 'https://www.indieground.net/images/blog/2024/indieblog-best-album-covers-2010s-07.jpg',
+        img: 'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExb3p5ZHl6ajFibGI0aGdyaGo0dnhxMmRoc3d4bTRrOGYzMmIzNXZwaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LMNsgeBFskg4sd7bWk/giphy.gif',
         playlistUrl: 'https://images.pexels.com/photos/38267716/pexels-photo-38267716.jpeg',
     },
     {

@@ -10,11 +10,17 @@ export function SearchBar() {
   const [name, setName] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searched, setSearched] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0)
+
 
   const handleSearch = async (e: React.ChangeEvent<HTMLFormElement>) => {
+    setSearched(true)
+    // Reload key is so search bar re-renders when going to a different page like from home to library for example
+    setReloadKey(prev=>prev+1)
     e.preventDefault();
 
-    if (!name || name.trim().length < 2) return;
+
+
 
     const apiBaseUrl = "http://localhost:3000";
     try {
@@ -26,16 +32,22 @@ export function SearchBar() {
 
       const data = (await res.json()) as SearchResult[];
       setResults(data);
+      // if data is an empty array, it means the search query has no results
+      if (data.length === 0) {
+        console.log("no results")
+      }
+      
     } catch (error) {
       console.error("Failed to fetch search results:", error);
     }
     finally {
-      setSearched(true);
+      setName("")
+
     }
   };
 
-  return (
-    <div>
+  return ( 
+    <div key = {reloadKey}>
       <form className="flex items-center justify-center p-4" onSubmit={handleSearch}>
         <input
           id="search-bar"
@@ -58,13 +70,12 @@ export function SearchBar() {
           ))}
         </ul>
       )}
-      {results.length === 0 && name && searched && (
+      {results.length==0&&searched&&(
         <ul className="bg-white/10 max-h-60 overflow-auto p-2 m-4 rounded">
           <li className="p-2 cursor-pointer hover:bg-white/20">
             No results found
           </li>
-        </ul>
-      )}
+        </ul>)}
     </div>
   );
 }

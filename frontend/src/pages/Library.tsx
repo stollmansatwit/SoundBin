@@ -6,6 +6,7 @@ import { SearchBar } from '../components/SearchBar'
 export default function Library() {
   const [isNavOpen, setIsNavOpen] = useState(false)
 
+
   const openNav = () => {
     setIsNavOpen(true)
   }

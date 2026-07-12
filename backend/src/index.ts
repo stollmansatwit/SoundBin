@@ -7,7 +7,7 @@ import 'dotenv/config';
 // import functions
 // import routes
 import uploadRoutes from './routes/upload_routes';
-import ablumRoutes from './routes/album_routes'
+import albumRoutes from './routes/album_routes'
 
 import { prisma } from "./lib/database";
 import './services/watcher'
@@ -85,23 +85,9 @@ app.get('/schema/columns', async (_req: Request, res: Response) => {
 // API response for uploading single file
 app.use('/api', uploadRoutes);
 // Grabs the album photos
-app.use('/api', ablumRoutes);
+app.use('/api', albumRoutes);
 
 
-// // Get album cover art URLs TODO: Replace with code that grabs cover_art_url from public.album table. Do this after upload works
-// app.get('/api/album-links', async (_req: Request, res: Response) => {
-//   try {
-//     const albums = await prisma.album.$queryRaw<{ cover_art_url: string }[]>(Prisma.sql`
-//       SELECT cover_art_url FROM album
-//     `);
-
-//     res.json({ albums });
-//   } catch (error) {
-//     console.error('Album query error:', error);
-//     res.status(500).json({ ok: false, error: 'Unable to load album links' });
-//   }
-// });
-// TODO: User Authentication Endpoints
 
 
 // Search Database for songs, artists, albums, and playlists
@@ -114,7 +100,7 @@ app.use('/api', ablumRoutes);
 app.get('/api/search', async (req: Request, res: Response) => {
   const query = req.query.q as string;
 
-  if (!query || query.trim().length < 2) {
+  if (!query || query.trim().length < 1) {
     return res.json([]);
   }
   
@@ -151,6 +137,22 @@ app.get('/api/search', async (req: Request, res: Response) => {
   }
 });
 
+
+app.get('/api/tracks', async (req: Request, res: Response) => {
+  try {
+    const tracks = await prisma.track.findMany({
+      select: {
+        track_id: true,
+        title: true,
+      },
+    });
+
+    res.json(tracks);
+  } catch (error) {
+    console.error("Error fetching tracks:", error);
+    res.status(500).json({ error: "Failed to fetch tracks" });
+  }
+});
 
 
 // Server startup
