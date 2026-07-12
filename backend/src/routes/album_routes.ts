@@ -17,6 +17,7 @@ router.get('/album-path', async (_req: Request, res: Response) => {
         artist_id: true,
         title: true,
         cover_art_url: true,
+        release_date: true,
       },
     });
 

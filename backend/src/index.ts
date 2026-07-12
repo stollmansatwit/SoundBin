@@ -9,6 +9,9 @@ import 'dotenv/config';
 import uploadRoutes from './routes/upload_routes';
 import albumRoutes from './routes/album_routes'
 
+
+
+
 import { prisma } from "./lib/database";
 import './services/watcher'
 
@@ -85,7 +88,10 @@ app.get('/schema/columns', async (_req: Request, res: Response) => {
 // API response for uploading single file
 app.use('/api', uploadRoutes);
 // Grabs the album photos
+
 app.use('/api', albumRoutes);
+
+
 
 
 
