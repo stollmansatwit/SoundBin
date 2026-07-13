@@ -22,7 +22,6 @@ export default function Library() {
       <Header />
       <SearchBar />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
-      
       <RecentListenTable />
     </div>
   )
