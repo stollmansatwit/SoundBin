@@ -22,7 +22,7 @@ const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets
 
 export function RecentListenTable() {
   //TODO: show full song name on hover
-  const MAX_SONG_NAME_LENGTH = 10;
+  const MAX_SONG_NAME_LENGTH = 13;
 
   const [hoveredTrackId, setHoveredTrackId] = useState<string | null>(null);
   const [albums, setAlbums] = useState<Album[]>([]);
@@ -118,7 +118,7 @@ export function RecentListenTable() {
           {combinedItems.map((item) => (
             <div
 
-              className="inline-block w-40 hover:w-[var(--hover-width)] transition-all duration-300 border border-gray-400 rounded-lg hover:bg-gray-700"
+              className="inline-block w-48 hover:w-[var(--hover-width)] transition-all duration-300 border border-gray-400 rounded-lg hover:bg-gray-700"
               style={{
                 "--hover-width": `${(item.trackTitle.length * 10 + 160)}px`,
               }}
