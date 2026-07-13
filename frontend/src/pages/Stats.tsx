@@ -72,7 +72,7 @@ getNumbers()
 
   return (
 
-    <div className={`min-h-screen bg-linear-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
+    <div className={`min-h-screen bg-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
       <Header />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
       <div className='border border-[rgba(255,255,255,0.5)] rounded-2xl shadow-2xl m-5'>

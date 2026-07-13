@@ -8,6 +8,7 @@ import 'dotenv/config';
 // import routes
 import uploadRoutes from './routes/upload_routes';
 import albumRoutes from './routes/album_routes'
+import artistRoutes from './routes/artist_routes'
 
 
 
@@ -91,7 +92,7 @@ app.use('/api', uploadRoutes);
 
 app.use('/api', albumRoutes);
 
-
+app.use('/api', artistRoutes);
 
 
 
