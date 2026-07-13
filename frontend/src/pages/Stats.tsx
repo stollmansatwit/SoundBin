@@ -9,7 +9,7 @@ What kind of stats do we want?
 */
 
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavBar } from '../components/NavBar';
 import { Header } from '../components/Header';
 import {
@@ -29,8 +29,17 @@ import { Bar } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, LineElement, PointElement);
 
+
+type Counts = {
+  numSongs: number;
+  numAlbums: number;
+  numPlaylists: number;
+};
+
+
 export default function Stats() {
   const [isNavOpen, setIsNavOpen] = useState(false)
+  const [nums, setNums] = useState<Counts | null>(null);
 
   const openNav = () => {
     setIsNavOpen(true)
@@ -39,10 +48,27 @@ export default function Stats() {
   const closeNav = () => {
     setIsNavOpen(false)
   }
+  useEffect(() => {
+  const getNumbers = async () => {
+    const apiBaseUrl = "http://localhost:3000";
+    try {
+      const res = await fetch(`${apiBaseUrl}/api/counts`);
+      if (!res.ok) {
+        console.error(`Request failed with status ${res.status}`);
+        return;
+      }
+      
+      const data = (await res.json()) as Counts;
+      setNums(data);
+    } catch (error) {
+      console.error("Failed to fetch results:", error);
+    }
+  };
 
-  const numSongs = 0 // SELECT count(songs) FROM public.song;
-  const numAlbums = 0 // SELECT count(albums) FROM public.album;
-  const numPlaylists = 0 // SELECT count(playlists) FROM public.playlist;
+getNumbers()
+}, []);
+
+
 
   return (
 
@@ -50,9 +76,9 @@ export default function Stats() {
       <Header />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
       <div className='border border-[rgba(255,255,255,0.5)] rounded-2xl shadow-2xl m-5'>
-        <p className="text-gray-300 mt-3 ml-10">You have {numSongs} songs in your library</p>
-        <p className="text-gray-300 mt-3 ml-10">You have {numAlbums} albums in your library</p>
-        <p className="text-gray-300 mt-3 ml-10">You have {numPlaylists} playlists in your library</p>
+        <p className="text-gray-300 mt-3 ml-10">You have {nums?.numSongs} songs in your library</p>
+        <p className="text-gray-300 mt-3 ml-10">You have {nums?.numAlbums} albums in your library</p>
+        <p className="text-gray-300 mt-3 ml-10">You have {nums?.numPlaylists} playlists in your library</p>
       </div>
       <div className="p-4">
         <h2 className="text-2xl font-bold text-white">Stats</h2>
@@ -114,7 +140,7 @@ export default function Stats() {
           }]
         }} />
       </div>
-            <div className="w-1/4 bg-white">
+      <div className="w-1/4 bg-white">
         <Line data={{
           labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
           datasets: [{
@@ -125,7 +151,7 @@ export default function Stats() {
             backgroundColor: 'rgba(53, 162, 235, 0.5)',
             tension: 0.1
           }]
-        }}/>
+        }} />
       </div>
     </div>
   )

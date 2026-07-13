@@ -42,7 +42,6 @@ export function SearchBar() {
     }
     finally {
       setName("")
-
     }
   };
 
