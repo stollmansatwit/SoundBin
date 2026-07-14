@@ -9,7 +9,7 @@ import 'dotenv/config';
 import uploadRoutes from './routes/upload_routes';
 import albumRoutes from './routes/album_routes'
 import artistRoutes from './routes/artist_routes'
-
+import statsRoutes from './routes/stats_routes'
 
 
 
@@ -93,7 +93,7 @@ app.use('/api', uploadRoutes);
 app.use('/api', albumRoutes);
 
 app.use('/api', artistRoutes);
-
+app.use('/api', statsRoutes);
 
 
 
@@ -144,18 +144,7 @@ app.get('/api/search', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/api/counts', async (req: Request, res: Response) => {
-  try {
-    const numSongs = await prisma.track.count();
-    const numAlbums = await prisma.album.count();
-    const numPlaylists = await prisma.playlist.count();
 
-    res.json({ numSongs, numAlbums, numPlaylists });
-  } catch (error) {
-    console.error("Error fetching counts:", error);
-    res.status(500).json({ error: "Failed to fetch counts" });
-  }
-});
 
 app.get('/api/tracks', async (req: Request, res: Response) => {
   try {

@@ -28,7 +28,7 @@ export function RecentListenTable() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
-  const [divMultiplier, setDivMultiplier] = useState(1);
+
 
   useEffect(() => {
     const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
@@ -121,8 +121,9 @@ export function RecentListenTable() {
               className="inline-block w-48 hover:w-[var(--hover-width)] transition-all duration-300 border border-gray-400 rounded-lg hover:bg-gray-700"
               style={{
                 "--hover-width": `${(item.trackTitle.length * 10 + 160)}px`,
-              }}
-              key={item.album.album_id}
+              } as React.CSSProperties}
+              
+              key={item.track_id}
               onMouseEnter={() => setHoveredTrackId(item.track_id)}
               onMouseLeave={() => setHoveredTrackId(null)}>
               <img className='inline-block justify-center w-10 m-auto rounded-[16px]' src={getCoverImage(item.album.cover_art_url)} alt={item.album.title} />

@@ -21,6 +21,7 @@ export default function App() {
     setIsNavOpen(false)
   }
 
+
   const [showUpload, setShowUpload] = useState(false);
 
   const openUpload = () => {
@@ -42,7 +43,7 @@ export default function App() {
       <ScrollableAlbums />
       <RecentListenTable />
       {showUpload && (
-        <UploadButton onClose={closeUpload} />
+        <UploadButton onClose={closeUpload}/>
       )}
     </div>
 

@@ -48,10 +48,18 @@ export function UploadButton({ onClose }: UploadButtonProps) {
     } finally {
       setUploading(false);
       onClose();
+      refreshPage();
     }
 
   }
 
+  function refreshPage() {
+    // wait a second
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+    
+  }
 
 
   return (
