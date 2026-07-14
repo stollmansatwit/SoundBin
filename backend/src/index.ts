@@ -152,6 +152,8 @@ app.get('/api/tracks', async (req: Request, res: Response) => {
       select: {
         track_id: true,
         title: true,
+        album_id: true,
+        duration: true,
       },
     });
 
