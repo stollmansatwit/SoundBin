@@ -31,6 +31,7 @@ type ColumnRow = {
 app.use(express.json());
 app.use(cors({ origin: 'http://127.0.0.1:5173' }));
 
+
 app.use('/assets', express.static(path.join(process.cwd(), 'uploads', 'assets')));
 
 
@@ -152,8 +153,6 @@ app.get('/api/tracks', async (req: Request, res: Response) => {
       select: {
         track_id: true,
         title: true,
-        album_id: true,
-        duration: true,
       },
     });
 

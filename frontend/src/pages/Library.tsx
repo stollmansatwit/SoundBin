@@ -36,7 +36,7 @@ export default function Library() {
           <div className="rounded-b-2xl rounded-tr-2xl bg-white/20 backdrop-blur-sm p-6 shadow-xl min-h-[420px]">
             {activeSection === 'albums' && <AlbumGrid />}
             {activeSection === 'songs' && <SongsTable />}
-            {activeSection === 'artists' && <ArtistGrid />}
+            {/* {activeSection === 'artists' && <ArtistGrid />} */}
             {activeSection === 'playlists' && <PlaylistGrid />}
           </div>
         </div>

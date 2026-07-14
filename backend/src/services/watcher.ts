@@ -7,6 +7,7 @@
 import chokidar from 'chokidar';
 import { extractMetadata } from '../utils/metadata'; 
 import {prisma} from "../lib/database"
+import { isDate } from 'util/types';
 
 const BaseDir = process.env.DOCKER_SONG_FILE_LOCATION;
 const targetDir = `${BaseDir}/songs`;
@@ -26,6 +27,15 @@ const watcher = chokidar.watch(uploadPath, {
 // Helper functions
 function UnknownArtistAndAlbum(){
 
+}
+
+function getDate(dateString: string | undefined): Date | null {
+  if (!dateString) {
+    return null;
+  }
+  const date = new Date(dateString);
+  // if isNaN(date.getTime()) is true, it means the date is not a valid date, so we return null
+  return isDate(date.getTime()) ? date : null;
 }
 
 
@@ -116,14 +126,17 @@ watcher.on('add', (filePath: string) => {
             });
             // 2.4. If Album exists, get Album ID
             if (existingAlbum) { albumID = existingAlbum.album_id;
-            } else { // Album doesn't exisit
+            } else { // Album doesn't exist
+
+              
               const newAlbum = await prisma.album.create({
                 data:{
                   title: metadata.album,
                   artist_id: artistID,
-                  release_date: metadata.date ? new Date(`${metadata.date}-01-01`) : null,
+                  release_date: getDate(metadata.date),
                   cover_art_url: metadata.cover_url,
                 }
+                
               });
               albumID = newAlbum.album_id;
             }
@@ -170,7 +183,7 @@ watcher.on('add', (filePath: string) => {
                 data:{
                   title: 'Unknown',
                   artist_id: artistID,
-                  release_date: metadata.date ? new Date(`${metadata.date}-01-01`) : null,
+                  release_date: getDate(metadata.date),
                   cover_art_url: null,
                 }
               });
@@ -185,7 +198,7 @@ watcher.on('add', (filePath: string) => {
         const track = await prisma.track.create({
           data: {
             title: metadata.title,
-            release_date: metadata.date ? new Date(`${metadata.date}-01-01`) : null,
+            release_date: getDate(metadata.date),
             duration: metadata.duration,
             cover_art_url: metadata.cover_url,
             album: albumID ? {connect:{album_id: albumID}} : undefined,
