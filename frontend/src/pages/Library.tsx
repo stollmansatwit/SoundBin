@@ -8,21 +8,32 @@ import { LibraryTabs, type LibrarySection } from '../components/library/LibraryT
 import { AlbumGrid } from '../components/library/AlbumGrid'
 import { ArtistGrid } from '../components/library/ArtistGrid'
 import { PlaylistGrid } from '../components/library/PlaylistGrid'
+import { Upload } from '../components/Upload'
+import { UploadButton } from '../components/UploadFileButton'
 
 
 
 export default function Library() {
   const [isNavOpen, setIsNavOpen] = useState(false)
   const [activeSection, setActiveSection] = useState<LibrarySection>('albums')
+  const [showUpload, setShowUpload] = useState(false);
 
-  
-  
-    
+  const openUpload = () => {
+    setShowUpload(true);
+  };
+
+  const closeUpload = () => {
+    setShowUpload(false);
+  };
+
+
+
   const openNav = () => setIsNavOpen(true)
   const closeNav = () => setIsNavOpen(false)
 
   return (
     <div className={`min-h-screen bg-linear-to-t from-orange-400 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
+      <Upload onOpen={openUpload} />
       <Header />
       <SearchBar />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
@@ -41,6 +52,9 @@ export default function Library() {
           </div>
         </div>
       </main>
+      {showUpload && (
+        <UploadButton onClose={closeUpload} />
+      )}
     </div>
   )
 }

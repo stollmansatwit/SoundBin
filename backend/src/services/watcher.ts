@@ -2,7 +2,7 @@
  * @file Finds files and uploads them to prisma database using Chokidar
  * @module FileWatcher
  * @author Ian MacDougall
- * @version 0.2
+ * @version 0.3
  */
 import chokidar from 'chokidar';
 import { extractMetadata } from '../utils/metadata'; 
