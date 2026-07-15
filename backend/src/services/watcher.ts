@@ -7,7 +7,7 @@
 import chokidar from 'chokidar';
 import { extractMetadata } from '../utils/metadata'; 
 import {prisma} from "../lib/database"
-import { isDate } from 'util/types';
+import { isDate, isNumberObject } from 'util/types';
 
 const BaseDir = process.env.DOCKER_SONG_FILE_LOCATION;
 const targetDir = `${BaseDir}/songs`;
@@ -30,12 +30,36 @@ function UnknownArtistAndAlbum(){
 }
 
 function getDate(dateString: string | undefined): Date | null {
+
+  /**
+   * First check if dateString exists
+   * Then turn dateString into a date and check if it is valid and if so return it
+   * Then Check if substring(0,10) gives a valid date and if so return it
+   * Then check if substring (0,4) gives a valid number and if so, add 01-01 for month and day and return it
+   * Then if all else fails, return null
+   * 
+   */
   if (!dateString) {
     return null;
   }
+  const first10 = dateString.substring(0,10)
+  const first4 = Number(dateString.substring(0,4))
   const date = new Date(dateString);
-  // if isNaN(date.getTime()) is true, it means the date is not a valid date, so we return null
-  return isDate(date.getTime()) ? date : null;
+
+  if (isDate(date)){
+    return date
+  }
+  if(isDate(new Date(first10))){
+    return new Date(first10)
+  }
+  const year = Number(dateString.substring(0, 4));
+    if (!Number.isNaN(year)) {
+        const yearDate = new Date(`${year}-01-01`);
+        if (isDate(yearDate)) {
+            return yearDate;
+        }
+    }
+  return null
 }
 
 
