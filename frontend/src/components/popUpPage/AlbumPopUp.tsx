@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import { PlayButton } from "../buttons/PlayButton";
 
 type Album = {
   album_id: string;
@@ -9,8 +10,10 @@ type Album = {
 };
 
 type Track = {
+  track_id: number;
   title: string;
   duration: number;
+  files?: {storage_path_url: string};
   albumSequence?: {sequence_number: number}[];
 }
 
@@ -19,7 +22,7 @@ interface Props {
   onClose: () => void;
 }
 
-export default function AlbumPopUp({ album, onClose }: Props) {
+export default function AlbumPopUp({ album, onClose}: Props) {
   const [songs, setSongs] = useState<Track[]>([]);
   const [loadingTracks, setLoadingTracks] = useState(true);
   const [artistName, setArtistName] = useState<string>("");
@@ -32,6 +35,7 @@ export default function AlbumPopUp({ album, onClose }: Props) {
     fetch(`${apiBaseUrl}/api/album-track-list?id=${album.album_id}`)
       .then((res) => res.json())
       .then((data: Track[] = []) => {
+        console.log("Recieved Tracks: ", data);
         setSongs(data);
         setLoadingTracks(false);
       })
@@ -130,14 +134,14 @@ export default function AlbumPopUp({ album, onClose }: Props) {
             <div className="w-full overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
               <ul className="space-y-1">
                 {loadingTracks ? (
-                  <li className="text-white opacity-50 italic">Loading tracks...</li>
+                  <li key="loading" className="text-white opacity-50 italic">Loading tracks...</li>
                 ) : songs.length > 0 ? (
-                  songs.map((song, index) => (
-                    <li key={index} className="flex items-center justify-between py-3 border-b border-gray-800 last:border-none hover:bg-white/5 px-2 rounded transition-colors">
+                  songs.map((song) => (
+                    <li key={song.track_id} className="flex items-center justify-between py-3 border-b border-gray-800 last:border-none hover:bg-white/5 px-2 rounded transition-colors">
                       {/* Left side: Track Number and Title */}
                       <div className="flex items-center gap-4">
                         <span className="text-gray-500 text-sm w-6">
-                          {song.albumSequence?.[0]?.sequence_number || index + 1}
+                          {song.albumSequence?.[0]?.sequence_number || songs.indexOf(song) + 1}
                         </span>
                         <span className="text-white font-medium">{song.title}</span>
                       </div>
@@ -147,16 +151,14 @@ export default function AlbumPopUp({ album, onClose }: Props) {
                         <span className="text-gray-400 text-sm">
                           {formatDuration(song.duration)}
                         </span>
-                        <button className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors border border-white/10">
-                           <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
-                        </button>
+                        <PlayButton
+                          trackId={song.track_id}
+                          />
                       </div>
                     </li>
                   ))
                 ) : (
-                  <li className="text-gray-500">No tracks found.</li>
+                  <li key="empty" className="text-gray-500">No tracks found.</li>
                 )}
               </ul>
             </div>

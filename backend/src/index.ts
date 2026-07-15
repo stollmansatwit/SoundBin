@@ -9,6 +9,7 @@ import 'dotenv/config';
 import uploadRoutes from './routes/upload_routes';
 import albumRoutes from './routes/album_routes'
 import artistRoutes from './routes/artist_routes'
+import trackRoutes from './routes/track_routes'
 import statsRoutes from './routes/stats_routes'
 
 
@@ -29,10 +30,27 @@ type ColumnRow = {
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: 'http://127.0.0.1:5173' }));
+app.use(cors({ origin: ['http://127.0.0.1:5173', 'http://localhost:5173'], 
+              methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+              allowedHeaders: ['Content-Type', 'Authorization'],
+              credentials: true}));
 
 
 app.use('/assets', express.static(path.join(process.cwd(), 'uploads', 'assets')));
+app.use('/songs', express.static(path.join(process.cwd(), 'uploads', 'songs'), { // set expliced to allow for audio streaming
+  etag: false,
+  lastModified: false,
+  setHeaders: (res, filePath) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+
+    if (filePath.endsWith('.mp3')) res.setHeader('Content-Type', 'audio/mpeg');
+    if (filePath.endsWith('.flac')) res.setHeader('Content-Type', 'audio/flac');
+    if (filePath.endsWith('.ogg')) res.setHeader('Content-Type', 'audio/ogg');
+    
+    // Crucial for media streaming: allow ranges
+    res.setHeader('Accept-Ranges', 'bytes');
+  }
+}));
 
 
 // Health check endpoint with DB connection test
@@ -94,6 +112,7 @@ app.use('/api', uploadRoutes);
 app.use('/api', albumRoutes);
 
 app.use('/api', artistRoutes);
+app.use('/api', trackRoutes);
 app.use('/api', statsRoutes);
 
 

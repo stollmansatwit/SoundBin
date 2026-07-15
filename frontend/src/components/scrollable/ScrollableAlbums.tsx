@@ -17,9 +17,11 @@ export function ScrollableAlbums() {
   const [loading, setLoading] = useState(true);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
 
-  useEffect(() => {
-    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
+  const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
+  
+
+  useEffect(() => {
     fetch(`${apiBaseUrl}/api/album-path`)
       .then((response) => {
         if (!response.ok) {
@@ -40,7 +42,6 @@ export function ScrollableAlbums() {
   }, []);
 
   const getCoverImage = (path?: string) => {
-    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
     if (!path || path == "" || path == null) {
       return DEFAULT_IMAGE;
     }
