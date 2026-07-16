@@ -41,6 +41,7 @@ export function UploadButton({ onClose }: UploadButtonProps) {
 
       if (response.ok) {
         alert("Upload successful");
+        refreshPage();
       }
     } catch (error) {
       alert("Upload successful");
@@ -49,7 +50,7 @@ export function UploadButton({ onClose }: UploadButtonProps) {
       setUploading(false);
       onClose();
 
-      refreshPage();
+
     }
 
   }
@@ -58,9 +59,15 @@ export function UploadButton({ onClose }: UploadButtonProps) {
     // wait 5 seconds
     setTimeout(() => {
       window.location.reload();
-    }, 5000);
+    }, 2000);
     
   }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      onClose();
+    }
+  });
 
 
   return (

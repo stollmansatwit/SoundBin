@@ -66,13 +66,19 @@ export default function SongPopUp({ track, album, onClose }: Props) {
     }
   }, [album?.album_id]);
 
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      onClose();
+    }
+  });
+
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-gray-700 shadow-2xl">
         {/* Ambient glow pulled from the artwork, sitting behind everything */}
         <div
-          className="absolute inset-0 scale-125 opacity-40 blur-3xl"
+          className="absolute inset-0 scale-125 opacity-80 blur-3xl"
           style={{
             backgroundImage: `url(${coverSrc})`,
             backgroundSize: "cover",
@@ -104,7 +110,7 @@ export default function SongPopUp({ track, album, onClose }: Props) {
           <p className="text-base text-gray-300 mt-2 text-center">
             {artistName || "Loading artist…"}
           </p>
-          <p className="text-sm text-gray-500 mt-1 text-center">
+          <p className="text-sm text-gray-300 mt-1 text-center">
             {album.title}
           </p>
           {/* make sure that track_id is not null so we can actually play the audio through the player */}
@@ -112,6 +118,7 @@ export default function SongPopUp({ track, album, onClose }: Props) {
             song.track_id && (
               <PlayButton
                 trackId={song.track_id}
+                
               />
             )
           ))}

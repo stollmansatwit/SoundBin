@@ -100,6 +100,11 @@ export default function AlbumPopUp({ album, onClose}: Props) {
       {songs.length} songs &nbsp;•&nbsp; {totalDuration} {displayYear ? `   •   ${displayYear}`:''} 
     </div>
   );
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      onClose();
+    }
+  });
 
   // still needs updates but good starter
   return (
