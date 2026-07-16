@@ -39,7 +39,7 @@ export default function App() {
       <Header />
       <SearchBar />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
-      <ScrollablePlaylists />
+      {/* <ScrollablePlaylists /> */}
       <ScrollableAlbums />
       <RecentListenTable />
       {showUpload && (

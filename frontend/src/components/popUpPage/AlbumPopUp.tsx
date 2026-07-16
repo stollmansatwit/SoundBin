@@ -35,7 +35,7 @@ export default function AlbumPopUp({ album, onClose}: Props) {
     fetch(`${apiBaseUrl}/api/album-track-list?id=${album.album_id}`)
       .then((res) => res.json())
       .then((data: Track[] = []) => {
-        console.log("Recieved Tracks: ", data);
+        
         setSongs(data);
         setLoadingTracks(false);
       })

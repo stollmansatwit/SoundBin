@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import AlbumPopUp from "../popUpPage/AlbumPopUp"
 
+// create Album type
 type Album = {
   album_id: string;
   artist_id: string;
@@ -16,6 +17,7 @@ export function AlbumGrid() {
   const [loading, setLoading] = useState(true);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
 
+  // useEffect to call backend api/album-path
   useEffect(() => {
     const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
@@ -47,7 +49,7 @@ export function AlbumGrid() {
     return `${apiBaseUrl}/assets/${file}`;
   };
 
-  const displayAlbum = Array.isArray(albums) ? albums : [];
+
 
   // TODO: replace MOCK_ALBUMS with data fetched from the library API
   return (

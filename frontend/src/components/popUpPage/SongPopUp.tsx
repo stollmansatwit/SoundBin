@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
+import { PlayButton } from "../buttons/PlayButton";
 
-type Album = {
+export type Album = {
   album_id: string;
   artist_id: string;
   title: string;
   cover_art_url?: string;
 };
 
-type Track = {
+export type Track = {
   title: string;
+  track_id?: number;
 };
 
-interface Props {
+export type Props = {
   album: Album;
   track: Track;
   onClose: () => void;
@@ -19,6 +21,7 @@ interface Props {
 
 export default function SongPopUp({ track, album, onClose }: Props) {
   const [artistName, setArtistName] = useState<string>("");
+  const [songs, setSongs] = useState<Track[]>([]);
 
   const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
@@ -37,6 +40,32 @@ export default function SongPopUp({ track, album, onClose }: Props) {
   };
 
   const coverSrc = getCoverImage(album.cover_art_url);
+  useEffect(() => {
+    if (!album?.album_id) return;
+    fetch(`${apiBaseUrl}/api/album-track-list?id=${album.album_id}`)
+      .then((res) => res.json())
+      .then((data: Track[] = []) => {
+
+        setSongs(data);
+
+      })
+      .catch((err) => {
+        console.error("Failed to fetch tracks:", err);
+
+      });
+
+    // Fetch artist name if artist_id exists
+    if (album.artist_id) {
+      fetch(`${apiBaseUrl}/api/artist-name?id=${album.artist_id}`)
+        .then((res) => res.json())
+        .then((data: any) => {
+          // Assuming the response is { name: "Artist Name" } or similar
+          setArtistName(data.name || "Unknown Artist");
+        })
+        .catch(err => console.error("Failed to fetch artist:", err));
+    }
+  }, [album?.album_id]);
+
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
@@ -50,13 +79,15 @@ export default function SongPopUp({ track, album, onClose }: Props) {
             backgroundPosition: "center",
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-800/90 to-gray-900/95" />
+        {/* The styles on this div control the background of the song pop up */}
+        <div className="absolute inset-0 bg-linear-to-b from-gray-100/1 to-gray-900/20" />
 
         {/* Content */}
         <div className="relative flex flex-col items-center px-8 pt-14 pb-8">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-white bg-red-600 px-4 py-1 rounded-md hover:bg-red-700 transition-colors z-10"
+            
           >
             Close
           </button>
@@ -76,6 +107,15 @@ export default function SongPopUp({ track, album, onClose }: Props) {
           <p className="text-sm text-gray-500 mt-1 text-center">
             {album.title}
           </p>
+          {/* make sure that track_id is not null so we can actually play the audio through the player */}
+          {songs.map((song) => (
+            song.track_id && (
+              <PlayButton
+                trackId={song.track_id}
+              />
+            )
+          ))}
+
         </div>
       </div>
     </div>

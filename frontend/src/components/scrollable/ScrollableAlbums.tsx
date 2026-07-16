@@ -31,7 +31,6 @@ export function ScrollableAlbums() {
       })
       .then((data: Album[]) => {
         setAlbums(data);
-        console.log(data)
       })
       .catch((error) => {
         console.error("Failed to fetch albums:", error);
