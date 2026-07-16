@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import SongPopUp from '../popUpPage/SongPopUp';
 
 type Album = {
   album_id: string;
@@ -28,6 +29,7 @@ export function RecentListenTable() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState<CombinedItem | null>(null);
 
 
   useEffect(() => {
@@ -81,10 +83,13 @@ export function RecentListenTable() {
     return `${apiBaseUrl}/assets/${file}`;
   };
 
-  const combinedItems: CombinedItem[] = tracks.map((track, index) => ({
-    album: albums[index] || { album_id: '', artist_id: '', title: '', cover_art_url: undefined },
-    trackTitle: track.title, album_id: track.album_id,
-    trackTitleFull: track.title, track_id: track.track_id,
+  const lookupAlbumById = (albumId: string): Album | undefined => {
+    return albums.find(album => album.album_id === albumId);
+  };
+  const combinedItems: CombinedItem[] = tracks.map((track) => ({
+    album: lookupAlbumById(track.album_id) || { album_id: '', artist_id: '', title: '', cover_art_url: undefined },
+    trackTitle: track.title,
+    track_id: track.track_id,
   }));
 
   if (loading) {
@@ -94,22 +99,6 @@ export function RecentListenTable() {
 
 
   return (
-    // <>
-    //   <p className='text-center text-lg font-bold sticky text-white'>Recently Listened To</p>
-    //   <div className='scrollbar-thumb-black shadow-lg whitespace-nowrap overflow-y-hidden'>
-    //     <li className='w-full overflow-x-auto overflow-y-hidden scroll-smooth scrollbar-thumb-black shadow-lg'>
-    //       {data.map((item: { id: number | undefined; img: string | undefined }) => (
-    //         <div
-    //           className='inline-block ml-2 mr-2 cursor-pointer w-40 h-10 border border-gray-400 rounded-lg shadow-lg hover:bg-gray-700 transition-colors duration-300'
-    //           key={item.id}>
-    //           <img className='inline-block justify-center w-10 m-auto rounded-[16px]' src={item.img} alt='album cover' />
-    //           <label className='text-white text-sm m-5'>Song {item.id}</label>
-    //         </div>
-    //       ))}
-    //     </li>
-    //   </div>
-    // </>
-
     <>
       <p className='text-center text-lg font-bold sticky text-white'>Recently Listened To</p>
       <div className='scrollbar-thumb-black shadow-lg whitespace-nowrap overflow-y-hidden'>
@@ -117,25 +106,35 @@ export function RecentListenTable() {
 
           {combinedItems.map((item) => (
             <div
-
-              className="inline-block w-48 hover:w-[var(--hover-width)] transition-all duration-300 border border-gray-400 rounded-lg hover:bg-gray-700"
+              className="inline-block w-48 hover:w-[var(--hover-width)] transition-all duration-300 border border-gray-400 rounded-lg hover:bg-gray-700 cursor-pointer"
               style={{
                 "--hover-width": `${(item.trackTitle.length * 10 + 160)}px`,
               } as React.CSSProperties}
               
               key={item.track_id}
               onMouseEnter={() => setHoveredTrackId(item.track_id)}
-              onMouseLeave={() => setHoveredTrackId(null)}>
+              onMouseLeave={() => setHoveredTrackId(null)}
+              onClick={() => setSelectedItem(item)}>
               <img className='inline-block justify-center w-10 m-auto rounded-[16px]' src={getCoverImage(item.album.cover_art_url)} alt={item.album.title} />
               <label className="text-white m-4">
                 {item.trackTitle.length > MAX_SONG_NAME_LENGTH && hoveredTrackId !== item.track_id
                   ? `${item.trackTitle.slice(0, MAX_SONG_NAME_LENGTH)}...`
                   : item.trackTitle}
+                  
               </label>
             </div>
           ))}
         </li >
       </div >
+
+      {selectedItem && (
+        <SongPopUp
+          album={selectedItem.album}
+          track={{ title: selectedItem.trackTitle }}
+          onClose={() => setSelectedItem(null)}
+        />
+      )}
+
     </>
   );
 }
