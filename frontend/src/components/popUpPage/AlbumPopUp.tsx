@@ -1,21 +1,7 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import { PlayButton } from "../buttons/PlayButton";
-
-type Album = {
-  album_id: string;
-  artist_id: string;
-  title: string;
-  release_date?: any;
-  cover_art_url?: string;
-};
-
-type Track = {
-  track_id: number;
-  title: string;
-  duration: number;
-  files?: {storage_path_url: string};
-  albumSequence?: {sequence_number: number}[];
-}
+import { type Album } from "../../types";
+import { type Track } from "../../types";
 
 interface Props {
   album: Album;

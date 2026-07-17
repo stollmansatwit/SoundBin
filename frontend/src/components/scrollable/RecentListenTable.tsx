@@ -1,23 +1,12 @@
 import { useEffect, useState } from 'react';
 import SongPopUp from '../popUpPage/SongPopUp';
+import { type Album, type Track } from '../../types';
 
-type Album = {
-  album_id: string;
-  artist_id: string;
-  title: string;
-  cover_art_url?: string;
-};
-
-type Track = {
-  track_id: string
-  title: string
-  album_id: string
-};
 
 type CombinedItem = {
   album: Album;
   trackTitle: string;
-  track_id: string;
+  track_id: number;
 };
 const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets once better image found
 
@@ -83,11 +72,11 @@ export function RecentListenTable() {
     return `${apiBaseUrl}/assets/${file}`;
   };
 
-  const lookupAlbumById = (albumId: string): Album | undefined => {
-    return albums.find(album => album.album_id === albumId);
+  const lookupAlbumById = (albumId: number): Album | undefined => {
+    return albums.find(album => Number(album.album_id) === albumId);
   };
   const combinedItems: CombinedItem[] = tracks.map((track) => ({
-    album: lookupAlbumById(track.album_id) || { album_id: '', artist_id: '', title: '', cover_art_url: undefined },
+    album: lookupAlbumById(track.album_id) || { album_id: 0, artist_id: null, title: '', cover_art_url: undefined },
     trackTitle: track.title,
     track_id: track.track_id,
   }));
@@ -112,12 +101,12 @@ export function RecentListenTable() {
               } as React.CSSProperties}
               
               key={item.track_id}
-              onMouseEnter={() => setHoveredTrackId(item.track_id)}
+              onMouseEnter={() => setHoveredTrackId(String(item.track_id))}
               onMouseLeave={() => setHoveredTrackId(null)}
               onClick={() => setSelectedItem(item)}>
               <img className='inline-block justify-center w-10 m-auto rounded-[16px]' src={getCoverImage(item.album.cover_art_url)} alt={item.album.title} />
               <label className="text-white m-4">
-                {item.trackTitle.length > MAX_SONG_NAME_LENGTH && hoveredTrackId !== item.track_id
+                {item.trackTitle.length > MAX_SONG_NAME_LENGTH && hoveredTrackId !== String(item.track_id)
                   ? `${item.trackTitle.slice(0, MAX_SONG_NAME_LENGTH)}...`
                   : item.trackTitle}
                   
@@ -130,7 +119,7 @@ export function RecentListenTable() {
       {selectedItem && (
         <SongPopUp
           album={selectedItem.album}
-          track={{ title: selectedItem.trackTitle }}
+          track={{ title: selectedItem.trackTitle, track_id: selectedItem.track_id, album_id: selectedItem.album.album_id, duration: tracks.find(track => track.track_id === selectedItem.track_id)?.duration || 0 }}
           onClose={() => setSelectedItem(null)}
         />
       )}

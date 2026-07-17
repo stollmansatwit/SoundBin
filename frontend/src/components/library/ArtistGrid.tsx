@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react"
-
-type Album = {
-  album_id: string;
-  artist_id: string;
-  title: string;
-  release_date?: any;
-  cover_art_url?: string;
-};
+import {type Album} from '../../types'
 
 type Track = {
   title: string;

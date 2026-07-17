@@ -108,9 +108,7 @@ app.get('/schema/columns', async (_req: Request, res: Response) => {
 // API response for uploading single file
 app.use('/api', uploadRoutes);
 // Grabs the album photos
-
 app.use('/api', albumRoutes);
-
 app.use('/api', artistRoutes);
 app.use('/api', trackRoutes);
 app.use('/api', statsRoutes);

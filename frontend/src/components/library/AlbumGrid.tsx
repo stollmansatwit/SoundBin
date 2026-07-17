@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react"
 import AlbumPopUp from "../popUpPage/AlbumPopUp"
+import { type Album } from "../../types"
 
-// create Album type
-type Album = {
-  album_id: string;
-  artist_id: string;
-  title: string;
-  release_date?: any;
-  cover_art_url?: string;
-};
+
 
 const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets once better image found
 

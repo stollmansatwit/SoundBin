@@ -1,19 +1,10 @@
 import { useEffect, useState } from "react";
 import { PlayButton } from "../buttons/PlayButton";
+import {type Album, type Track} from "../../types";
 
-export type Album = {
-  album_id: string;
-  artist_id: string;
-  title: string;
-  cover_art_url?: string;
-};
 
-export type Track = {
-  title: string;
-  track_id?: number;
-};
 
-export type Props = {
+interface Props {
   album: Album;
   track: Track;
   onClose: () => void;
@@ -72,6 +63,7 @@ export default function SongPopUp({ track, album, onClose }: Props) {
     }
   });
 
+  
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
@@ -114,11 +106,12 @@ export default function SongPopUp({ track, album, onClose }: Props) {
             {album.title}
           </p>
           {/* make sure that track_id is not null so we can actually play the audio through the player */}
+          
           {songs.map((song) => (
             song.track_id && (
               <PlayButton
                 trackId={song.track_id}
-                
+                key={song.track_id}
               />
             )
           ))}

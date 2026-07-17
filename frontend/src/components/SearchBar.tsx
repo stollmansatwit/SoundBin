@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import SongPopUp, { type Album, type Track } from "./popUpPage/SongPopUp";
+import SongPopUp from "./popUpPage/SongPopUp";
 import AlbumPopUp from "./popUpPage/AlbumPopUp";
+import { type Album, type Track } from "../types";
 
 type SearchResult = {
   type: string;
@@ -21,6 +22,7 @@ export function SearchBar() {
 
 
   const handleSearch = async (e: React.ChangeEvent<HTMLFormElement>) => {
+    
     setSearched(true)
     // Reload key is so search bar re-renders when going to a different page like from home to library for example
     setReloadKey(prev => prev + 1)
@@ -41,15 +43,17 @@ export function SearchBar() {
       setResults(data);
       // if data is an empty array, it means the search query has no results
       if (data.length === 0) {
-        console.log("no results")
-      }
+        console.log("no results")}
+
 
     } catch (error) {
       console.error("Failed to fetch search results:", error);
     }
     finally {
       // setName("")
+      
     }
+    
   };
 
   useEffect(() => {
@@ -76,7 +80,7 @@ export function SearchBar() {
   const handleClick = (r: SearchResult) => {
     // if our search result is an album, find the full album object from the albums state and set it to selectedAlbum, which will trigger the AlbumPopUp to open
     if (r.type === 'album') {
-      const fullAlbum = albums.find((a) => a.album_id === r.id);
+      const fullAlbum = albums.find((a) => a.album_id === Number(r.id));
       if (fullAlbum) {
         setSelectedAlbum(fullAlbum);
       } else {
@@ -85,8 +89,13 @@ export function SearchBar() {
       return;
     }
     else if (r.type === 'song') {
-      const fullTrack: Track = { title: r.name };
-      const fullAlbum = albums.find((a) => a.album_id === r.id);
+      const fullTrack: Track = {
+        title: r.name,
+        track_id: 0,
+        duration: 0,
+        album_id: 0
+      };
+      const fullAlbum = albums.find((a) => a.album_id === Number(r.id));
       if (fullAlbum) {
         setSelectedAlbum(fullAlbum);
       } else {
@@ -102,7 +111,7 @@ export function SearchBar() {
     // This function highlights the search query in the result text by wrapping it in <mark> tags. It uses a regular expression to find all occurrences of the query, ignoring case.
     const regex = new RegExp(`(${query})`, 'gi');
     // Note the use of class here instead of className, because this is rendered as HTML and not as JSX
-    return text.replace(regex, '<mark class = "bg-blue-400 text-gray-200">$1</mark>');
+    return text.replace(regex, '<mark class = "bg-white/40 ">$1</mark>');
   };
 
   const closePopUp = () => {

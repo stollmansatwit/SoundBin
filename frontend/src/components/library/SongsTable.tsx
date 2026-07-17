@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react"
+import SongPopUp from "../popUpPage/SongPopUp";
+import { type Track } from "../../types";
+import AlbumPopUp from "../popUpPage/AlbumPopUp";
 
 type Album = {
   album_id: number;
@@ -12,12 +15,7 @@ type Artist = {
   name: string;
 };
 
-type Track = {
-  track_id: number;
-  title: string;
-  album_id: number | null;
-  duration: number;
-};
+
 
 type CombinedItem = {
   album: Album;
@@ -134,7 +132,8 @@ export function SongsTable() {
         trackTitle: track.title,
         track_id: track.track_id,
         artist: artist.name ? artist : { artist_id: 0, name: 'Unknown Artist' },
-        trackDuration: formatDuration(track.duration),
+        trackDuration: formatDuration(track.duration)
+
       };
     });
   
@@ -156,7 +155,7 @@ export function SongsTable() {
         </thead>
         <tbody>
           {combinedItems.map((item) => (
-            <tr key={item.track_id} className="border-t border-gray-200 hover:bg-orange-50">
+            <tr key={item.track_id} className="border-t border-gray-200 hover:bg-white/80" onClick={() => console.log("hi")}>
               <td className="px-3 py-2.5 font-bold text-gray-900">{item.trackTitle}</td>
               <td className="px-3 py-2.5 font-normal text-gray-600">{item.artist.name}</td>
               <td className="px-3 py-2.5 font-normal text-gray-600">{item.album.title}</td>
