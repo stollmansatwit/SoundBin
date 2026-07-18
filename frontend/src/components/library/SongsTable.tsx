@@ -1,148 +1,114 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react";
+import { type Track, type Album } from "../../types";
 import SongPopUp from "../popUpPage/SongPopUp";
-import { type Track } from "../../types";
-import AlbumPopUp from "../popUpPage/AlbumPopUp";
 
-type Album = {
-  album_id: number;
-  artist_id: number | null;
-  title: string;
-  cover_art_url?: string;
-};
-
-type Artist = {
-  artist_id: number;
-  name: string;
-};
-
-
+const API_BASE_URL = "http://localhost:3000"; // Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`
 
 type CombinedItem = {
+  track: Track;
   album: Album;
-  trackTitle: string;
-  track_id: number;
-  artist: Artist;
   trackDuration: string;
+  artist_id: number | null;
+  artistName: string;
 };
 
-// const MOCK_SONGS: Track[] = [
-//   { id: '1', title: 'Amber Static', artist: 'Marlow Reed', album: 'Nightcolors', duration: '3:24' },
-//   { id: '2', title: 'Slow Fade', artist: 'The Quiet Hours', album: 'Static Bloom', duration: '4:02' },
-//   { id: '3', title: 'Undertow', artist: 'Coastal Drift', album: 'Low Tide', duration: '2:57' },
-//   { id: '4', title: 'Cardboard Sky', artist: 'June Arcade', album: 'Paper Planets', duration: '3:41' },
-//   { id: '5', title: 'Copper Line', artist: 'Marlow Reed', album: 'Rust & Gold', duration: '3:15' },
-// ]
-
 export function SongsTable() {
-    const [albums, setAlbums] = useState<Album[]>([]);
-    const [tracks, setTracks] = useState<Track[]>([]);
-    const [artists, setArtists] = useState<Artist[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    const formatDuration = (seconds: number) => {
-      const minutes = Math.floor(seconds / 60);
-      const remainder = seconds % 60;
-      return `${minutes}:${remainder.toString().padStart(2, '0')}`;
-    };
-
-    useEffect(() => {
-      const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [artistNames, setArtistNames] = useState<Record<number, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState<CombinedItem | null>(null);
   
-      const fetchAlbums = fetch(`${apiBaseUrl}/api/album-path`).then((response) => {
-        if (!response.ok) {
-          throw new Error(`Album request failed with status ${response.status}`);
-        }
-        return response.json() as Promise<Album[]>;
-      });
-  
-      const fetchTracks = fetch(`${apiBaseUrl}/api/tracks`).then((response) => {
-        if (!response.ok) {
-          throw new Error(`Track request failed with status ${response.status}`);
-        }
-        return response.json() as Promise<Track[]>;
-      });
 
-      Promise.all([fetchAlbums, fetchTracks])
-        .then(async ([albumData, trackData]) => {
-          const uniqueArtistIds = Array.from(
-            new Set(albumData.map((album) => album.artist_id).filter((artistId): artistId is number => artistId !== null)),
-          );
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainder = seconds % 60;
+    return `${minutes}:${remainder.toString().padStart(2, "0")}`;
+  };
 
-          const artistResults = await Promise.all(
-            uniqueArtistIds.map(async (artistId) => {
-              const response = await fetch(`${apiBaseUrl}/api/artist-name?id=${artistId}`);
-              if (!response.ok) {
-                throw new Error(`Artist request failed with status ${response.status}`);
-              }
-
-              const data = await response.json() as { name?: string };
-              return { artist_id: artistId, name: data.name || '' };
-            }),
-          );
-
-          setAlbums(albumData);
-          setTracks(trackData);
-          
-        })
-        .catch((error) => {
-          console.error("Failed to fetch library data:", error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }, []);
-  
-    useEffect(() => {
-      const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
-  
-      const fetchArtists = fetch(`${apiBaseUrl}/api/artist-name`).then((response) => {
-        if (!response.ok) {
-          throw new Error(`Artist request failed with status ${response.status}`);
-        }
-        console.log(response.json());
-        return response.json() as Promise<Artist[]>;
+  // Fetch albums + tracks
+  useEffect(() => {
+    const fetchAlbums = fetch(`${API_BASE_URL}/api/album-path`).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Album request failed with status ${response.status}`);
       }
-      );
-      fetchArtists
-        .then((artistData) => {
-          setArtists(artistData);
-        })
-        .catch((error) => {
-          console.error("Failed to fetch artists:", error, artists);
-        });
-    }, []);
-  
+      return response.json() as Promise<Album[]>;
+    });
 
-  
-  
-    const combinedItems: CombinedItem[] = tracks.map((track) => {
-      const album = albums.find((candidate) => candidate.album_id === track.album_id) || {
-        album_id: 0,
-        artist_id: null,
-        title: '',
-        cover_art_url: undefined,
-      };
+    const fetchTracks = fetch(`${API_BASE_URL}/api/tracks`).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Track request failed with status ${response.status}`);
+      }
+      return response.json() as Promise<Track[]>;
+    });
 
-      const artist = album.artist_id
-        ? artists.find((candidate) => candidate.artist_id === album.artist_id) || { artist_id: album.artist_id, name: '' }
-        : { artist_id: 0, name: '' };
+    Promise.all([fetchAlbums, fetchTracks])
+      .then(([albumData, trackData]) => {
+        setAlbums(albumData);
+        setTracks(trackData);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch library data:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  // Fetch artist names for every unique artist_id found on albums
+  useEffect(() => {
+    if (albums.length === 0) return;
+
+    const uniqueArtistIds = [
+      ...new Set(albums.map((a) => a.artist_id).filter((id): id is number => id !== null)),
+    ];
+
+    if (uniqueArtistIds.length === 0) return;
+
+    Promise.all(
+      uniqueArtistIds.map((id) =>
+        fetch(`${API_BASE_URL}/api/artist-name?id=${id}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Artist name request failed with status ${response.status}`);
+            }
+            return response.json() as Promise<{ name: string }>;
+          })
+          .then((data) => [id, data.name] as const)
+      )
+    )
+      .then((entries) => {
+        setArtistNames(Object.fromEntries(entries));
+      })
+      .catch((error) => {
+        console.error("Failed to fetch artist names:", error);
+      });
+  }, [albums]);
+
+  // Resolve each track to its album + artist name
+  const combinedItems: CombinedItem[] = useMemo(() => {
+  return tracks
+    .map((track) => {
+      const album = albums.find((a) => a.album_id === track.album_id);
+      if (!album) return null;
 
       return {
+        track,
         album,
-        trackTitle: track.title,
-        track_id: track.track_id,
-        artist: artist.name ? artist : { artist_id: 0, name: 'Unknown Artist' },
-        trackDuration: formatDuration(track.duration)
-
+        trackDuration: formatDuration(track.duration),
+        artist_id: album.artist_id,
+        artistName: album.artist_id !== null ? artistNames[album.artist_id] ?? "" : "",
       };
-    });
-  
+    })
+    .filter((item): item is CombinedItem => item !== null);
+}, [tracks, albums, artistNames]);
 
   if (loading) {
     return <p className="text-center text-white">Loading...</p>;
   }
 
   return (
+    <>
     <div className="max-h-105 overflow-y-auto rounded-lg">
       <table className="w-full text-left text-sm">
         <thead className="sticky top-0 bg-white/95 text-xs font-bold uppercase tracking-wide text-gray-500">
@@ -155,9 +121,13 @@ export function SongsTable() {
         </thead>
         <tbody>
           {combinedItems.map((item) => (
-            <tr key={item.track_id} className="border-t border-gray-200 hover:bg-white/80" onClick={() => console.log("hi")}>
-              <td className="px-3 py-2.5 font-bold text-gray-900">{item.trackTitle}</td>
-              <td className="px-3 py-2.5 font-normal text-gray-600">{item.artist.name}</td>
+            <tr
+              key={item.track.track_id}
+              className="border-t border-gray-200 hover:bg-white/80"
+              onClick={() => setSelectedItem(item)}
+            >
+              <td className="px-3 py-2.5 font-bold text-gray-900">{item.track.title}</td>
+              <td className="px-3 py-2.5 font-normal text-gray-600">{item.artistName}</td>
               <td className="px-3 py-2.5 font-normal text-gray-600">{item.album.title}</td>
               <td className="px-3 py-2.5 text-right font-normal text-gray-500">{item.trackDuration}</td>
             </tr>
@@ -165,5 +135,13 @@ export function SongsTable() {
         </tbody>
       </table>
     </div>
+          {selectedItem && (
+            <SongPopUp
+              album={selectedItem.album}
+              track={{ title: selectedItem.track.title, track_id: selectedItem.track.track_id, album_id: selectedItem.album.album_id, duration: tracks.find(track => track.track_id === selectedItem.track.track_id)?.duration || 0 }}
+              onClose={() => setSelectedItem(null)}
+            />
+          )}
+    </>
   )
 }
