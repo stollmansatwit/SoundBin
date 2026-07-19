@@ -7,6 +7,7 @@ import { UploadButton } from '../components/UploadFileButton'
 import { Header } from '../components/Header'
 import { SearchBar } from '../components/SearchBar'
 import { Upload } from '../components/Upload'
+import { HealthCheck } from '../components/HealthCheck'
 
 
 

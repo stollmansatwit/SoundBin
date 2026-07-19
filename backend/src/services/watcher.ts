@@ -220,45 +220,62 @@ watcher.on('add', (filePath: string) => {
 
         // 3. Create track
         // should check if track already exists
-        const track = await prisma.track.create({
-          data: {
-            title: metadata.title,
-            release_date: getDate(metadata.date),
+        const existingTrack = await prisma.track.findFirst({
+          where: {
+            title: {
+              equals: metadata.title,
+              mode: 'insensitive'
+            },
             duration: metadata.duration,
-            cover_art_url: metadata.cover_url,
-            album: albumID ? { connect: { album_id: albumID } } : undefined,
-            genres: genreID ? { create: { genre_id: genreID } } : undefined
+            
           }
         });
-
-        // 4. Create Album Track Sequence
-        const trackNum = metadata.track ? metadata.track : null;
-        if (albumID && trackNum) {
-          await prisma.albumTrackSequence.create({
+        var track;
+        if (existingTrack) {
+          console.log(`Track already exists: ${existingTrack.title}`);
+          track = existingTrack;
+        }
+        else {
+          track = await prisma.track.create({
             data: {
-              album_id: albumID,
-              track_id: track.track_id,
-              sequence_number: trackNum
+              title: metadata.title,
+              release_date: getDate(metadata.date),
+              duration: metadata.duration,
+              cover_art_url: metadata.cover_url,
+              album: albumID ? { connect: { album_id: albumID } } : undefined,
+              genres: genreID ? { create: { genre_id: genreID } } : undefined,
             }
           });
-        }
 
-        // 5. Handle Track Contributors ?
-
-        // 6. Create Track File
-        await prisma.trackFile.create({
-          data: {
-            track_id: track.track_id,
-            storage_path_url: filePath,
-            bitrate: metadata.bitrate, // KBps
-            sample_rate: metadata.sample_rate,
-            channels: metadata.channels,
-            codec: metadata.codec,
-            file_mtime: new Date()
-            //file_hash String  @db.VarChar(64)
+          // 4. Create Album Track Sequence
+          const trackNum = metadata.track ? metadata.track : null;
+          if (albumID && trackNum) {
+            await prisma.albumTrackSequence.create({
+              data: {
+                album_id: albumID,
+                track_id: track.track_id,
+                sequence_number: trackNum
+              }
+            });
           }
-        });
-        console.log(`Successfully indexed: ${track.title}`);
+
+          // 5. Handle Track Contributors ?
+
+          // 6. Create Track File
+          await prisma.trackFile.create({
+            data: {
+              track_id: track.track_id,
+              storage_path_url: filePath,
+              bitrate: metadata.bitrate, // KBps
+              sample_rate: metadata.sample_rate,
+              channels: metadata.channels,
+              codec: metadata.codec,
+              file_mtime: new Date()
+              //file_hash String  @db.VarChar(64)
+            }
+          });
+          console.log(`Successfully indexed: ${track.title}`);
+        }
       } catch (err) {
         console.error("Error saving to database:", err);
       }
