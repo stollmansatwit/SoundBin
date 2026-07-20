@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import icon from '../assets/icons8-check-mark-60.png'
 export function HealthCheck() {
     const [healthStatus, setHealthStatus] = React.useState<{ ok: boolean; db: string } | null>(null);
 
@@ -19,8 +18,8 @@ export function HealthCheck() {
 
     return (
         <>
-            <div className = 'absolute right-5 top-4'>
-                <h1 className='text-white hover:underline'>{healthStatus?.ok ?  <div className = 'text-green-300'>Database Connected</div> : <div className = 'text-red-300'>Database Disconnected</div>}</h1>
+            <div className = 'absolute right-5 top-4 transition-opacity ease-out duration-[1000ms] opacity-0 base-state:opacity-100'>
+                <h1 className='text-white'>{healthStatus?.ok ?  <div className = 'text-green-300'>Database Connected</div> : <div className = 'text-red-300'>Database Disconnected</div>}</h1>
             </div>
         </>
     )
