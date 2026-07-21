@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { PlayButton } from "../buttons/PlayButton";
 import { type Album } from "../../types";
 import { type Track } from "../../types";
@@ -8,7 +8,7 @@ interface Props {
   onClose: () => void;
 }
 
-export default function AlbumPopUp({ album, onClose}: Props) {
+export default function AlbumPopUp({ album, onClose }: Props) {
   const [songs, setSongs] = useState<Track[]>([]);
   const [loadingTracks, setLoadingTracks] = useState(true);
   const [artistName, setArtistName] = useState<string>("");
@@ -21,7 +21,7 @@ export default function AlbumPopUp({ album, onClose}: Props) {
     fetch(`${apiBaseUrl}/api/album-track-list?id=${album.album_id}`)
       .then((res) => res.json())
       .then((data: Track[] = []) => {
-        
+
         setSongs(data);
         setLoadingTracks(false);
       })
@@ -30,7 +30,7 @@ export default function AlbumPopUp({ album, onClose}: Props) {
         setLoadingTracks(false)
       });
 
-      // Fetch artist name if artist_id exists
+    // Fetch artist name if artist_id exists
     if (album.artist_id) {
       fetch(`${apiBaseUrl}/api/artist-name?id=${album.artist_id}`)
         .then((res) => res.json())
@@ -77,13 +77,13 @@ export default function AlbumPopUp({ album, onClose}: Props) {
   };
 
   // Logic to handle optional year & duration in the info bar
-  const displayYear = getYear(album.release_date); 
+  const displayYear = getYear(album.release_date);
   const totalDuration = formatTotalDuration(songs.reduce((acc, s) => acc + s.duration, 0));
-  
+
   // Construct the display string: "12 songs • 01:30:00" or "12 songs • 01:30:00 • 2024"
   const infoBar = (
     <div className="text-sm text-gray-500 mb-6 border-b border-gray-700 pb-4">
-      {songs.length} songs &nbsp;•&nbsp; {totalDuration} {displayYear ? `   •   ${displayYear}`:''} 
+      {songs.length} songs &nbsp;•&nbsp; {totalDuration} {displayYear ? `   •   ${displayYear}` : ''}
     </div>
   );
   document.addEventListener("keydown", (event) => {
@@ -92,22 +92,26 @@ export default function AlbumPopUp({ album, onClose}: Props) {
     }
   });
 
+  const coverSrc = getCoverImage(album.cover_art_url);
   // still needs updates but good starter
   return (
+
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-4xl w-full relative shadow-2xl overflow-hidden">
-        <button 
+
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white bg-red-600 px-4 py-1 rounded-md hover:bg-red-700 transition-colors z-10"
         >
           Close
         </button>
-        
+
         <div className="flex flex-col md:flex-row">
+
           {/* Left Side: Artwork & Info */}
-          <div className="p-8 bg-gradient-to-b from-gray-800 to-gray-900 flex flex-col items-center justify-center border-r border-gray-700 w-full md:w-1/3">
-            <img 
-              src={getCoverImage(album.cover_art_url)} 
+          <div className="p-8 bg-gradient-to-b from-gray-800 to-gray-900 flex flex-col items-center justify-center border-r border-gray-700 w-full md:w-1/3 ">
+            <img
+              src={getCoverImage(album.cover_art_url)}
               alt={album.title}
               className="w-64 h-64 aspect-square object-cover rounded-lg shadow-2xl border-2 border-gray-600 mb-4"
             />
@@ -115,10 +119,22 @@ export default function AlbumPopUp({ album, onClose}: Props) {
           </div>
 
           {/* Right Side: Tracklist */}
-          <div className="p-8 w-full md:w-2/3 bg-gray-900">
+          <div className="p-8 w-full md:w-2/3 bg-transparent relative z-0 overflow-hidden">
+
+            {/* Blurred background layer */}
+            <div
+              className="absolute inset-0 -z-10"
+              style={{
+                backgroundImage: `url(${coverSrc})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                filter: "blur(100px)",
+                transform: "scale(1.8)", // hides blurred edges from bleeding outside the container
+              }}
+            />
             <h3 className="text-3xl font-bold text-white mb-1">{album.title}</h3>
             <p className="text-lg text-gray-400 mb-1">{artistName || "Loading Artist..."}</p>
-            
+
             {/* Info Bar: [# songs - duration - year (optional)] */}
             {infoBar}
 
@@ -134,7 +150,8 @@ export default function AlbumPopUp({ album, onClose}: Props) {
                         <span className="text-gray-500 text-sm w-6">
                           {song.albumSequence?.[0]?.sequence_number || songs.indexOf(song) + 1}
                         </span>
-                        <span className="text-white font-medium">{song.title}</span>
+                        <span className="text-white font-medium">
+                          {song.title}</span>
                       </div>
 
                       {/* Right side: Duration and Play Button */}
@@ -144,9 +161,12 @@ export default function AlbumPopUp({ album, onClose}: Props) {
                         </span>
                         <PlayButton
                           trackId={song.track_id}
-                          />
+                        />
+
                       </div>
+
                     </li>
+
                   ))
                 ) : (
                   <li key="empty" className="text-gray-500">No tracks found.</li>

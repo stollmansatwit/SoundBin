@@ -182,4 +182,21 @@ router.get('/stats/listening-time', async (_req: Request, res: Response) => {
   }
 });
 
+router.get('/stats/date-uploaded', async (_req: Request, res: Response) => {
+  try {
+    const rows = await prisma.trackFile.groupBy({
+      by: ['file_mtime'],
+      _count: {
+        track_id: true,
+      },
+      orderBy: {
+        file_mtime: 'asc',
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching date uploaded stats:', error);
+    res.status(500).json({ error: 'Failed to fetch date uploaded stats' });
+  }
+});
+
 export default router;
