@@ -19,7 +19,7 @@ export function HealthCheck() {
     return (
         <>
             <div className = 'absolute right-5 top-4'>
-                <h1 className='text-white'>{healthStatus?.ok ?  <div className = 'text-green-300'>Database Connected</div> : <div className = 'text-red-300'>Database Disconnected</div>}</h1>
+                <h1 className='text-white'>{healthStatus?.ok ?  <div className = 'text-green-200'>Database Connected</div> : <div className = 'text-red-200'>Database Disconnected</div>}</h1>
             </div>
         </>
     )

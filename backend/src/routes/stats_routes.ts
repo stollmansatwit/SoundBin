@@ -193,6 +193,17 @@ router.get('/stats/date-uploaded', async (_req: Request, res: Response) => {
         file_mtime: 'asc',
       },
     });
+
+    // Roll up per-timestamp rows into per-day totals
+    const byDay = new Map<string, number>();
+    for (const row of rows) {
+      const day = row.file_mtime.toISOString().split('T')[0];
+      byDay.set(day, (byDay.get(day) ?? 0) + row._count.track_id);
+    }
+
+    res.json(
+      Array.from(byDay.entries()).map(([date, count]) => ({ date, count })),
+    );
   } catch (error) {
     console.error('Error fetching date uploaded stats:', error);
     res.status(500).json({ error: 'Failed to fetch date uploaded stats' });

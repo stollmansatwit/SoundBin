@@ -41,6 +41,11 @@ type GenreBreakdown = {
   genres: SeriesPoint[];
 };
 
+type DateUploadedPoint = {
+  date: string;
+  count: number;
+};
+
 type RangeKey = 'day' | 'week' | 'month';
 
 const listenRangeMeta: Record<RangeKey, { title: string; endpoint: string }> = {
@@ -134,6 +139,7 @@ export default function Stats() {
   const [listeningTrend, setListeningTrend] = useState<SeriesPoint[]>([]);
   const [selectedRange, setSelectedRange] = useState<RangeKey>('week');
   const [loading, setLoading] = useState(true);
+  const [uploadSeries, setUploadSeries] = useState<SeriesPoint[]>([]);
 
   const openNav = () => {
     setIsNavOpen(true);
@@ -157,13 +163,14 @@ export default function Stats() {
 
     const loadStats = async () => {
       try {
-        const [summary, genreData, dailyData, weeklyData, monthlyData, trendData] = await Promise.all([
+        const [summary, genreData, dailyData, weeklyData, monthlyData, trendData, uploadData] = await Promise.all([
           fetchJson<Counts>('/api/stats/summary'),
           fetchJson<GenreBreakdown>('/api/stats/genres'),
           fetchJson<SeriesPoint[]>('/api/stats/listens/day'),
           fetchJson<SeriesPoint[]>('/api/stats/listens/week'),
           fetchJson<SeriesPoint[]>('/api/stats/listens/month'),
           fetchJson<SeriesPoint[]>('/api/stats/listening-time'),
+          fetchJson<DateUploadedPoint[]>('/api/stats/date-uploaded'),
         ]);
 
         setCounts(summary);
@@ -172,6 +179,7 @@ export default function Stats() {
         setWeeklySeries(weeklyData);
         setMonthlySeries(monthlyData);
         setListeningTrend(trendData);
+        setUploadSeries(uploadData.map((point) => ({ label: point.date, value: point.count })));
       } catch (error) {
         console.error('Failed to fetch stats:', error);
       } finally {
@@ -238,6 +246,21 @@ export default function Stats() {
     ],
   }), [listeningTrend]);
 
+  const uploadChartData = useMemo(() => ({
+    labels: uploadSeries.map((point) => point.label),
+    datasets: [
+      {
+        label: 'Tracks uploaded',
+        data: uploadSeries.map((point) => point.value),
+        backgroundColor: 'rgba(251, 146, 60, 0.85)',
+        borderColor: 'rgba(251, 146, 60, 0.85)',
+        borderWidth: 8,
+        borderRadius: 12,
+        tension: 0.05,
+      },
+    ],
+  }), [uploadSeries]);
+
   return (
     <div className={`min-h-screen bg-linear-to-t from-orange-200 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
       <Header />
@@ -251,6 +274,21 @@ export default function Stats() {
           </div>
 
           <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <div className="rounded-3xl border border-white/20 bg-slate-950/35 p-5 shadow-2xl backdrop-blur-md xl:col-span-2">
+              <div className="mb-4">
+                <h2 className="text-xl font-black text-white">Tracks uploaded over time</h2>
+                <p className="text-sm text-white/70">Library growth by daily uploads</p>
+              </div>
+
+              <div className="h-80">
+                {loading ? (
+                  <div className="flex h-full items-center justify-center text-white/70">Loading chart data...</div>
+                ) : (
+                  <Line data={uploadChartData} options={lineOptions} />
+                )}
+              </div>
+            </div>
+
             <div className="rounded-3xl border border-white/20 bg-slate-950/35 p-5 shadow-2xl backdrop-blur-md xl:col-span-2">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
