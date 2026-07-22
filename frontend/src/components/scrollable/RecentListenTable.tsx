@@ -40,7 +40,7 @@ export function RecentListenTable() {
 
     Promise.all([fetchAlbums, fetchTracks])
       .then(([albumData, trackData]) => {
-        if (trackData.some(track => track.title.length > MAX_SONG_NAME_LENGTH)) {
+        if (trackData.some(track => track.title && track.title.length > MAX_SONG_NAME_LENGTH)) {
           // If any track title exceeds the max length, truncate the titles
           trackData = trackData.map(track => ({
             ...track,
@@ -77,8 +77,8 @@ export function RecentListenTable() {
   };
   const combinedItems: CombinedItem[] = tracks.map((track) => ({
     album: lookupAlbumById(track.album_id) || { album_id: 0, artist_id: null, title: '', cover_art_url: undefined },
-    trackTitle: track.title,
-    track_id: track.track_id,
+    trackTitle: track.title ? track.title: "",
+    track_id: track.track_id ? track.track_id: 0,
   }));
 
   if (loading) {
