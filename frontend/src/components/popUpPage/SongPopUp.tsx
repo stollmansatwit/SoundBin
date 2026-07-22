@@ -112,6 +112,9 @@ export default function SongPopUp({ track, album, onClose }: Props) {
               <PlayButton
                 trackId={song.track_id}
                 key={song.track_id}
+                albumId={album.album_id}
+                artistId={album.artist_id}
+                index={-1}
               />
             )
           ))}
