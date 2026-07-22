@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import { useAudio } from "../../context/AudioContext";
-import type { Track, ArtistData } from "../../types"
+import type { Track } from "../../types"
 
 interface PlayButtonProps {
   trackId: number;
@@ -21,7 +21,6 @@ export function PlayButton({ trackId, albumId, artistId, index,  className = "" 
 
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [artistName, setArtistName] = useState<string>("");
 
   
   const handleClick = async () => {
@@ -39,12 +38,12 @@ export function PlayButton({ trackId, albumId, artistId, index,  className = "" 
   
     } else { // index = -1, playing just 1 song, so just play it
       if (!artistId) return;
-
+      let artistName = "Unknown Artist";
       try{
         const response = await fetch (`${apiBaseUrl}/api/artist-name?id=${artistId}`);
         if (!response.ok) throw new Error(`Failed to fetch artist name: ${response.statusText}`);
         const rawArtistName = await response.json();
-        setArtistName(rawArtistName.name);
+        artistName = rawArtistName.name || "Unknown Artist";
       } catch (error) {
         console.error("[PlayButton] Error fetching artist name:", error);
       }
@@ -59,7 +58,7 @@ export function PlayButton({ trackId, albumId, artistId, index,  className = "" 
           title: rawData.title,
           artist: artistName,
           duration: rawData.duration,
-          cover_art_url: rawData.album?.cover_art_url, // Extract from nested album
+          cover_art_url: rawData.cover_art_url, // Extract from nested album
           files: rawData.files ? [{ storage_path_url: rawData.files[0]?.storage_path_url }] : undefined,
           albumSequence: rawData.albumSequence[0]?.sequence_number ? [{ sequence_number: rawData.albumSequence[0]?.sequence_number}] : [{sequence_number: 0}]
         };

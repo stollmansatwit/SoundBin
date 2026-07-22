@@ -30,7 +30,6 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
   const title = currentTrackMetadata?.title || `Track #${currentTrackId}`;
   const artist = currentTrackMetadata?.artist || "Unknown Artist";
   const coverArt = currentTrackMetadata?.cover_art_url || "";
-  console.log(JSON.stringify(currentTrackMetadata));
 
   /**
    * Helpers
@@ -71,6 +70,18 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
     return <Icons.ShuffleOff />;
   };
 
+  
+  const getCoverImage = (path?: string) => {
+    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
+    const DEFAULT_IMAGE = "/defaultAlbum.png";
+    if (!path || path == "" || path == null) {
+      return DEFAULT_IMAGE;
+    }
+
+    const file = path.split('/').pop();
+    return `${apiBaseUrl}/assets/${file}`;
+  };
+
 
   return (
     <div className={`fixed bottom-0 left-0 right-0 z-50 ${className}`}>
@@ -93,7 +104,7 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
             {/* Album Art */}
             <div className="w-full md:w-1/3 aspect-square bg-gray-800 rounded-lg shadow-xl overflow-hidden flex-shrink-0 group relative">
                {coverArt ? (
-                 <img src={coverArt} alt="Album Cover" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                 <img src={getCoverImage(coverArt)} alt="Album Cover" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                ) : (
                  <div className="w-full h-full flex items-center justify-center text-gray-600">
                    <svg className="w-20 h-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
@@ -177,7 +188,7 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
             {/* Mini Art */}
             <div className="w-14 h-14 bg-gray-800 rounded shadow flex-shrink-0 overflow-hidden">
                {coverArt ? (
-                 <img src={coverArt} alt="" className="w-full h-full object-cover" />
+                 <img src={getCoverImage(coverArt)} alt="" className="w-full h-full object-cover" />
                ) : (
                  <div className="w-full h-full flex items-center justify-center text-gray-600">♫</div>
                )}
