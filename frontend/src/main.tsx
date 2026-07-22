@@ -27,26 +27,11 @@ const router = createBrowserRouter([
 
 
 
-const getTrackAudioUrl = async (trackId: number): Promise<string | null> => {
+const getTrackAudioUrl = async (storage_path_url: string): Promise<string | null> => {
   const apiBaseUrl = 'http://localhost:3000'; 
  
   try {
-    const response = await fetch(`${apiBaseUrl}/api/tracks/${trackId}`);
-
-    if (!response.ok) {
-      console.error(`Failed to fetch track ${trackId}`);
-      return null;
-    }
-
-    const trackData = await response.json();
-    const file = trackData.files?.[0];
-
-    if (!file || !file.storage_path_url) {
-      console.error(`No file found for track ${trackId}`);
-      return null;
-    }
-    console.log(`file path: ${file.storage_path_url}`)
-    const publicPath = file.storage_path_url.replace('/app/uploads/','');
+    const publicPath = storage_path_url.replace('/app/uploads/','');
     return `${apiBaseUrl}/${publicPath}`;
   } catch (error) {
     console.error('Error resolving track URL:', error);

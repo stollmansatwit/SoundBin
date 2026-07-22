@@ -44,7 +44,8 @@ router.get('/tracks/:trackId', async (req: Request, res: Response) => {
         files: true, // This grabs the TrackFile[] related to this track
         album: {
           select: { title: true } // Optional: if you want album info too
-        }
+        },
+        albumSequence: true
       }
     });
 

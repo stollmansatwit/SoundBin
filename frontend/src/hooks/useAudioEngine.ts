@@ -1,126 +1,43 @@
-/**
- * Manages the HTML5 audio object internally
- * Handles track URL resolution based on trackId
- * Provides state management for play/pause status
- * returns functions and state for components to consume
- */
-
 import { useState, useEffect, useRef } from 'react';
+import { AudioEngine} from '../audio/AudioEngine';
+import type {AudioEngineState, AudioContextType, AudioEngineOptions} from '../types';
+import type { Track } from '../types';
 
-interface AudioEngineOptions {
-  // URL resolution function - maps trackId to actual audio URL
-  getTrackUrl: (trackId: number) => string | null;
-}
+/**
+ * A thin React hook that bridges the singleton AudioEngine to React state.
+ */
+export function useAudioEngine(options: AudioEngineOptions): AudioContextType {
+  const engineRef = useRef<AudioEngine>(null!); // Non-null assertion because we init immediately if needed
 
-interface AudioState {
-  isPlaying: boolean;
-  currentTrackId: number | null;
-  currentTime: number;
-  duration: number;
-  error: string | null;
-}
+  // Initialize or get existing singleton
+  if (!engineRef.current) {
+    engineRef.current = AudioEngine.getInstance(options);
+  }
 
-export function useAudioEngine(options: AudioEngineOptions) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [state, setState] = useState<AudioState>({
-    isPlaying: false,
-    currentTrackId: null,
-    currentTime: 0,
-    duration: 0,
-    error: null,
-  });
+  const [state, setState] = useState<AudioEngineState>(engineRef.current.getState());
 
   useEffect(() => {
-    // Create audio element on mount
-    const audio = new Audio();
-    audioRef.current = audio;
-
-    // Set up event listeners
-    audio.addEventListener('timeupdate', () => {
-      setState(prev => ({ ...prev, currentTime: audio.currentTime }));
-    });
-
-    audio.addEventListener('loadedmetadata', () => {
-      setState(prev => ({ ...prev, duration: audio.duration }));
-    });
-
-    audio.addEventListener('error', (e) => {
-      console.error('[AudioEngine] Playback error:', e);
-      setState(prev => ({ 
-        ...prev, 
-        error: 'Failed to load audio',
-        isPlaying: false 
-      }));
-    });
-
-    audio.addEventListener('ended', () => {
-      setState(prev => ({ ...prev, isPlaying: false, currentTrackId: null }));
+    const engine = engineRef.current;
+    
+    // Subscribe to state changes from the engine
+    const unsubscribe = engine.subscribe((newState) => {
+      setState(newState as AudioEngineState);
     });
 
     return () => {
-      audio.pause();
-      audio.src = '';
-      audioRef.current = null;
+      unsubscribe();
     };
   }, []);
 
-  const play = async (trackId: number) => {
-    try {
-      if (!audioRef.current) return;
-
-      let url: string | null;
-      const result = options.getTrackUrl?.(trackId);
-
-      if (result instanceof Promise) {
-        url = await result;
-      } else {
-        url = result;
-      }
-
-      if (!url){ throw new Error(`No audio source found for track ${trackId}`); }
-    
-      audioRef.current.pause();
-      
-      // Set new source and play
-      audioRef.current.src = url;
-      await audioRef.current.play();
-      
-      setState(prev => ({ 
-        ...prev, 
-        isPlaying: true, 
-        currentTrackId: trackId,
-        error: null 
-      }));
-    } catch (error) {
-      console.error('[AudioEngine] Play error:', error);
-      setState(prev => ({ 
-        ...prev, 
-        error: 'Failed to play audio',
-        isPlaying: false 
-      }));
-    }
-  };
-
-  const pause = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setState(prev => ({ ...prev, isPlaying: false }));
-    }
-  };
-
-  const togglePlay = (trackId: number) => {
-    if (state.isPlaying && state.currentTrackId === trackId) {
-      pause();
-    } else {
-      play(trackId);
-    }
-  };
-
+  // Return the full context including state and methods
   return {
     ...state,
-    play,
-    pause,
-    togglePlay,
-    audioRef: () => audioRef.current,
+    setQueue: (tracks: Track[]) => engineRef.current.setQueue(tracks),
+    toggleShuffle: () => engineRef.current.toggleShuffle(),
+    toggleRepeat: () => engineRef.current.toggleRepeat(),
+    playNext: () => engineRef.current.playNext(),
+    playPrevious: () => engineRef.current.playPrevious(),
+    pause: () => engineRef.current.pause(),
+    togglePlay: () => engineRef.current.togglePlay(),
   };
 }

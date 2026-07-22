@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import AlbumPopUp from "../popUpPage/AlbumPopUp";
-
-type Album = {
-  album_id: string;
-  artist_id: string;
-  title: string;
-  release_date?: any;
-  cover_art_url?: string;
-};
+import type { Album } from "../../types";
 
 const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets once better image found
 
@@ -52,19 +45,6 @@ export function ScrollableAlbums() {
   const displayAlbum = Array.isArray(albums) ? albums : [];
 
   return (
-    /**
-     * <>
-      <p className='text-center text-lg font-bold sticky text-white'>Albums</p>
-      <div className='relative flex items-center scrollbar-thumb-black scrollbar-auto scrollbar ease-in duration-75 shadow-lg'>
-        <li className='w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth p-1'>
-          <div id='slider'></div>
-          {data.map((item: { img: string | undefined; }) => (
-            <img className=' w-40 inline-block p-2 cursor-pointer transition-transform ease-linear duration-[300ms] hover:duration-[2000ms] hover:rotate-[360deg] hover:scale-105 rounded-full' src={item.img} alt='album cover' />
-          ))}
-        </li>
-      </div>
-    </>
-     */
     <>
       <p className="text-center text-lg font-bold sticky text-white">Albums</p>
       <div className="relative flex items-center scrollbar-thumb-black scrollbar-auto scrollbar ease-in duration-75 shadow-lg">

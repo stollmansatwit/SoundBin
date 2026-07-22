@@ -161,6 +161,9 @@ export default function AlbumPopUp({ album, onClose }: Props) {
                         </span>
                         <PlayButton
                           trackId={song.track_id}
+                          albumId={song.album_id}
+                          artistId={album.artist_id}
+                          index={-1}//{song.albumSequence?.[0]?.sequence_number || songs.indexOf(song) + 1}
                         />
 
                       </div>
