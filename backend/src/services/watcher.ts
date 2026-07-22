@@ -13,12 +13,17 @@ import path from 'path';
 const BaseDir = process.env.DOCKER_SONG_FILE_LOCATION;
 const BaseDirString = String(BaseDir);
 console.log(`BaseDir: ${BaseDirString}`);
-const targetDir = path.resolve(BaseDirString, 'songs');
-const uploadPath = String(targetDir);
+const targetDir = path.join(BaseDirString, 'songs');
+
+
+const usePolling = process.env.CHOKIDAR_USEPOLLING === 'true' || process.env.NODE_ENV === 'docker';
 
 // Initialize watcher
-const watcher = chokidar.watch(uploadPath, {
+const watcher = chokidar.watch(targetDir, {
   persistent: true,
+
+  usePolling,
+  binaryInterval: 300,
   ignoreInitial: true,
   awaitWriteFinish: {
     stabilityThreshold: 2000, // wait 2 seconds to finish
@@ -63,7 +68,7 @@ function getDate(dateString: string | undefined): Date | null {
   return null
 }
 
-console.log(`Watching for new files in: ${uploadPath}`);
+console.log(`Watching for new files in: ${targetDir}`);
 
 
 /** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
