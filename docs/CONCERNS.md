@@ -19,4 +19,5 @@ Need to think out several different types of uploadable songs so they can be pro
 # Running on Windows
 Running on other operating systems works but the correct version of node and npm need to be installed
 https://nodejs.org/en/download/
+Make sure Windows has .env file
 >Should be worked on after confirmed normal and edge cases for upload
