@@ -42,13 +42,14 @@ export default function SongPopUp({ track, album, onClose }: Props) {
         .then((data: any) => {
           // Assuming the response is { name: "Artist Name" } or similar
           setArtistName(data.name || "Unknown Artist");
+          
         })
         .catch(err => console.error("Failed to fetch artist:", err));
     }
-  }, [album?.album_id]);
+  }, [album.album_id, album.artist_id, artistName, track.track_id]);
 
 
-  
+  console.log(artistName)
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
