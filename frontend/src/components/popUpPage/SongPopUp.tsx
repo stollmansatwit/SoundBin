@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { PlayButton } from "../buttons/PlayButton";
 import {type Album, type Track} from "../../types";
 
-
-
 interface Props {
   album: Album;
   track: Track;
@@ -12,17 +10,10 @@ interface Props {
 
 export default function SongPopUp({ track, album, onClose }: Props) {
   const [artistName, setArtistName] = useState<string>("");
-  const [songs, setSongs] = useState<Track[]>([]);
+  const [song, setSong] = useState<Track | null>(null);
 
   const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
-  useEffect(() => {
-    if (!album?.artist_id) return;
-    fetch(`${apiBaseUrl}/api/artist-name?id=${album.artist_id}`)
-      .then((res) => res.json())
-      .then((data: any) => setArtistName(data.name || "Unknown Artist"))
-      .catch((err) => console.error("Failed to fetch artist:", err));
-  }, [album?.artist_id]);
 
   const getCoverImage = (path?: string) => {
     if (!path) return "/defaultAlbum.png";
@@ -31,21 +22,20 @@ export default function SongPopUp({ track, album, onClose }: Props) {
   };
 
   const coverSrc = getCoverImage(album.cover_art_url);
+
   useEffect(() => {
-    if (!album?.album_id) return;
-    fetch(`${apiBaseUrl}/api/album-track-list?id=${album.album_id}`)
+
+    fetch(`${apiBaseUrl}/api/tracks/${track.track_id}`)
       .then((res) => res.json())
-      .then((data: Track[] = []) => {
-
-        setSongs(data);
-
+      .then((data: Track) => {
+        console.log("Fetched track data:", data);
+        setSong(data || null);
       })
       .catch((err) => {
-        console.error("Failed to fetch tracks:", err);
-
+        console.error("Failed to fetch track:", err);
       });
 
-    // Fetch artist name if artist_id exists
+      // Fetch artist name if artist_id exists
     if (album.artist_id) {
       fetch(`${apiBaseUrl}/api/artist-name?id=${album.artist_id}`)
         .then((res) => res.json())
@@ -57,11 +47,6 @@ export default function SongPopUp({ track, album, onClose }: Props) {
     }
   }, [album?.album_id]);
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      onClose();
-    }
-  });
 
   
 
@@ -107,8 +92,8 @@ export default function SongPopUp({ track, album, onClose }: Props) {
           </p>
           {/* make sure that track_id is not null so we can actually play the audio through the player */}
           
-          {songs.map((song) => (
-            song.track_id && (
+          
+            {song && (
               <PlayButton
                 trackId={song.track_id}
                 key={song.track_id}
@@ -116,8 +101,7 @@ export default function SongPopUp({ track, album, onClose }: Props) {
                 artistId={album.artist_id}
                 index={-1}
               />
-            )
-          ))}
+          )}
 
         </div>
       </div>
