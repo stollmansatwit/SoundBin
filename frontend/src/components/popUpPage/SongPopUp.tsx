@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { PlayButton } from "../buttons/PlayButton";
 import {type Album, type Track} from "../../types";
 
-
-
 interface Props {
   album: Album;
   track: Track;
@@ -16,13 +14,6 @@ export default function SongPopUp({ track, album, onClose }: Props) {
 
   const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
-  useEffect(() => {
-    if (!album?.artist_id) return;
-    fetch(`${apiBaseUrl}/api/artist-name?id=${album.artist_id}`)
-      .then((res) => res.json())
-      .then((data: any) => setArtistName(data.name || "Unknown Artist"))
-      .catch((err) => console.error("Failed to fetch artist:", err));
-  }, [album?.artist_id]);
 
   const getCoverImage = (path?: string) => {
     if (!path) return "/defaultAlbum.png";
