@@ -105,12 +105,12 @@ export function RecentListenTable() {
               onMouseLeave={() => setHoveredTrackId(null)}
               onClick={() => setSelectedItem(item)}>
               <img className='inline-block justify-center w-10 m-auto rounded-[16px]' src={getCoverImage(item.album.cover_art_url)} alt={item.album.title} />
-              <label className="text-white m-4">
+              <div className="text-white m-4 inline-block">
                 {item.trackTitle.length > MAX_SONG_NAME_LENGTH && hoveredTrackId !== String(item.track_id)
                   ? `${item.trackTitle.slice(0, MAX_SONG_NAME_LENGTH)}...`
                   : item.trackTitle}
                   
-              </label>
+              </div>
             </div>
           ))}
         </li >
