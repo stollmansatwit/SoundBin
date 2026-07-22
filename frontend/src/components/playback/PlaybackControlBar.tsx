@@ -56,6 +56,8 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
     RepeatAll: () => <svg className="w-5 h-5 text-gray-400 hover:text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>,
     RepeatOne: () => <div className="relative w-5 h-5 text-green-500"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg><span className="absolute top-0 right-0 text-[8px] font-bold leading-none">1</span></div>,
     RepeatOff: () => <svg className="w-5 h-5 text-gray-400 hover:text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>,
+    Queue: () => <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/></svg>,
+    Dots: () => <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>,
   };
 
   const getRepeatIcon = () => {
@@ -175,42 +177,97 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
       {/* Mini Player (Collapsed) */}
       {!isExpanded && (
         <div className="bg-[#18181b] border-t border-white/10 shadow-2xl">
-           {/* Mini Progress Bar */}
-           <div className="h-0.5 w-full bg-gray-700 cursor-pointer hover:h-1 transition-all">
-              <div className="h-full bg-green-500" style={{ width: `${progress}%` }} />
-           </div>
-
-           <div 
-             className="p-3 flex items-center gap-4 cursor-pointer hover:bg-[#282828] transition-colors"
-             onClick={() => setIsExpanded(true)}
-            >
+          
+          {/* Main Content Row */}
+          <div 
+            className="p-3 flex items-center gap-4 hover:bg-[#282828] transition-colors"
+          >
             
-            {/* Mini Art */}
-            <div className="w-14 h-14 bg-gray-800 rounded shadow flex-shrink-0 overflow-hidden">
-               {coverArt ? (
-                 <img src={getCoverImage(coverArt)} alt="" className="w-full h-full object-cover" />
-               ) : (
-                 <div className="w-full h-full flex items-center justify-center text-gray-600">♫</div>
-               )}
-            </div>
-
-            {/* Mini Info */}
-            <div className="flex-1 min-w-0 grid grid-cols-[1fr_auto] items-center gap-4">
-               <div className="overflow-hidden">
-                 <h4 className="text-white font-semibold truncate">{title}</h4>
-                 <p className="text-gray-400 text-xs truncate">{artist}</p>
-               </div>
-            </div>
-
-            {/* Mini Controls */}
-            <button 
-              onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-              className="w-10 h-10 flex items-center justify-center text-white hover:text-green-500 transition-colors"
+            {/* 1. Album Art & Title Section (Left) */}
+            <div 
+              className="flex items-center gap-4 w-1/3 min-w-0 cursor-pointer"
+              onClick={() => setIsExpanded(true)}
             >
-               {isPlaying ? <Icons.Pause /> : <Icons.Play />}
-            </button>
-          </div>
+              {/* Mini Art */}
+              <div className="w-14 h-14 bg-gray-800 rounded shadow flex-shrink-0 overflow-hidden">
+                 {coverArt ? (
+                   <img src={getCoverImage(coverArt)} alt="" className="w-full h-full object-cover" />
+                 ) : (
+                   <div className="w-full h-full flex items-center justify-center text-gray-600">♫</div>
+                 )}
+              </div>
+
+              {/* Mini Info */}
+              <div className="min-w-0">
+                <h4 className="text-white font-semibold truncate">{title}</h4>
+                <p className="text-gray-400 text-xs truncate">{artist}</p>
+              </div>
+            </div>
+
+            {/* 2. Progress Bar Section (Centered) */}
+            <div className="flex-1 flex items-center justify-center px-2">
+              <span className="text-[10px] text-gray-400 font-mono w-8 text-right mr-2">{formatTime(currentTime)}</span>
+              
+              {/* Container to hold the bar and center it visually */}
+              <div className="flex-1 max-w-xs mx-2 group relative cursor-pointer">
+                <div className="h-1 bg-gray-600 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-white group-hover:bg-green-500 transition-colors" 
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+
+              <span className="text-[10px] text-gray-400 font-mono w-8 ml-2">{formatTime(duration)}</span>
+            </div>
+
+            {/* 3. Transport Controls (Right of Middle) */}
+            <div className="flex items-center gap-3">
+              <button onClick={playPrevious} className="text-gray-400 hover:text-white transition-colors p-1">
+                <Icons.Prev />
+              </button>
+
+              <button 
+                onClick={togglePlay} 
+                className="w-9 h-9 flex items-center justify-center text-white hover:text-green-500 transition-colors"
+              >
+                {isPlaying ? <Icons.Pause /> : <Icons.Play />}
+              </button>
+
+              <button onClick={playNext} className="text-gray-400 hover:text-white transition-colors p-1">
+                <Icons.Next />
+              </button>
+            </div>
+
+            {/* 4. Action Buttons (Far Right) */}
+            <div className="flex items-center gap-3 ml-3 border-l border-white/10 pl-3">
+              <button 
+                onClick={() => { /* Implement View Queue */ }} 
+                className="text-gray-400 hover:text-white transition-colors p-1"
+                title="View Queue"
+              >
+                <Icons.Queue />
+              </button>
+              
+              <button 
+                onClick={() => { /* Implement More Options */ }} 
+                className="text-gray-400 hover:text-white transition-colors p-1"
+                title="More options"
+              >
+                <Icons.Dots />
+              </button>
+              
+              {/* Expand/Collapse Button */}
+              <button 
+                onClick={() => setIsExpanded(!isExpanded)} 
+                className="text-gray-400 hover:text-white transition-colors p-1"
+                title={isExpanded ? "Minimize" : "Expand"}
+              >
+                <Icons.ChevronDown />
+              </button>
+            </div>
         </div>
+      </div>
       )}
     </div>
   );
