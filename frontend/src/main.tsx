@@ -10,9 +10,14 @@ import User from './pages/User.tsx';
 import { Columns } from './pages/Columns.tsx';
 
 import { AudioProvider } from './context/AudioContext';
+import Login from './pages/Login.tsx';
+import Welcome from './pages/Welcome.tsx';
+import RegisterUser from './pages/RegisterUser.tsx';
 
 const router = createBrowserRouter([
-  {path: '/', element: <App />},
+  {path: '/', element: <Welcome />},
+  {path: '/login', element: <Login />},
+  {path: '/register', element: <RegisterUser />},
   {path: '/navbar', element: <NavBar isOpen={false} openNav={function (): void {
     throw new Error('Function not implemented.');
   } } closeNav={function (): void {

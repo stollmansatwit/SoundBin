@@ -4,6 +4,9 @@ import path from 'path';
 import type { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
 import 'dotenv/config';
+import bcrypt from 'bcryptjs';
+
+
 // import functions
 // import routes
 import uploadRoutes from './routes/upload_routes';
@@ -179,6 +182,72 @@ app.get('/api/tracks', async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching tracks:", error);
     res.status(500).json({ error: "Failed to fetch tracks" });
+  }
+});
+
+
+app.post('api/auth/register', async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+
+  try {
+    // Check if user exists
+    const existingUser = await prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: "Username already exists" });
+    }
+
+    // Hash the password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create new user
+    const newUser = await prisma.user.create({
+      data: {
+        username: username,
+        password_hash: hashedPassword,
+      },
+    });
+
+    res.status(201).json({ message: "User registered successfully", userId: newUser.user_id });
+  } catch (error) {
+    console.error("Error during registration:", error);
+    res.status(500).json({ error: "Registration failed" });
+  }
+});
+
+
+
+
+// login endpoint needs to compare hashed password from the database with the password provided by the user. 
+// Use bcrypt to compare the hashed password with a hashed version of the plain text password.
+app.post('/api/auth/login', async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+  try {
+    const user = await prisma.user.findUnique({
+      select: {
+        username: true,
+        password_hash: true, // Assuming the password is stored as a hashed value in the database
+      },
+      where: { username },
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+    
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    // If we reach here, the user is authenticated
+    res.json({ message: "Login successful" });
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ error: "Login failed" });
   }
 });
 
