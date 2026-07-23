@@ -21,6 +21,7 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
     playNext,
     playPrevious,
     //currentQueue - used for viewing queue
+    seek,
   } = useAudio();
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -72,7 +73,11 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
     return <Icons.ShuffleOff />;
   };
 
-  
+  /**
+   * 
+   * @param path 
+   * @returns 
+   */
   const getCoverImage = (path?: string) => {
     const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
     const DEFAULT_IMAGE = "/defaultAlbum.png";
@@ -83,6 +88,20 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
     const file = path.split('/').pop();
     return `${apiBaseUrl}/assets/${file}`;
   };
+
+  /**
+   * 
+   */
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!duration || duration <= 0) return;
+    const bar = e.currentTarget;
+    const rect = bar.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const fraction = Math.max(0, Math.min(clickX / width, 1));
+    seek(fraction * duration);
+  }
+
 
 
   return (
@@ -124,10 +143,11 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
               </div>
 
               {/* Progress Bar */}
-              <div className="group relative pt-2">
+               <div className="group relative pt-2">
                 <div 
                   className="h-1 bg-gray-700 rounded-full cursor-pointer hover:bg-gray-600 transition-colors"
                   role="progressbar"
+                  onClick={handleProgressClick}
                 >
                   <div 
                     className="h-full bg-white group-hover:bg-green-500 transition-all relative" 
@@ -183,34 +203,38 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
             className="p-3 flex items-center gap-4 hover:bg-[#282828] transition-colors"
           >
             
-            {/* 1. Album Art & Title Section (Left) */}
-            <div 
-              className="flex items-center gap-4 w-1/3 min-w-0 cursor-pointer"
-              onClick={() => setIsExpanded(true)}
-            >
-              {/* Mini Art */}
-              <div className="w-14 h-14 bg-gray-800 rounded shadow flex-shrink-0 overflow-hidden">
-                 {coverArt ? (
-                   <img src={getCoverImage(coverArt)} alt="" className="w-full h-full object-cover" />
-                 ) : (
-                   <div className="w-full h-full flex items-center justify-center text-gray-600">♫</div>
-                 )}
+            {/* 1. Left Section: Art, Info & Transport */}
+            <div className="flex items-center gap-4 flex-shrink-0">
+              
+              {/* Art & Info */}
+              <div 
+                className="flex items-center gap-3 min-w-0 cursor-pointer"
+                onClick={() => setIsExpanded(true)}
+              >
+                <div className="w-12 h-12 bg-gray-800 rounded shadow flex-shrink-0 overflow-hidden">
+                   {coverArt ? (
+                     <img src={getCoverImage(coverArt)} alt="" className="w-full h-full object-cover" />
+                   ) : (
+                     <div className="w-full h-full flex items-center justify-center text-gray-600">♫</div>
+                   )}
+                </div>
+
+                <div className="min-w-0">
+                  <h4 className="text-white font-semibold truncate text-sm">{title}</h4>
+                  <p className="text-gray-400 text-xs truncate">{artist}</p>
+                </div>
               </div>
 
-              {/* Mini Info */}
-              <div className="min-w-0">
-                <h4 className="text-white font-semibold truncate">{title}</h4>
-                <p className="text-gray-400 text-xs truncate">{artist}</p>
-              </div>
+              {/* Vertical Divider */}
+              <div className="h-6 w-px bg-white/10"></div>
             </div>
 
-            {/* 2. Progress Bar Section (Centered) */}
-            <div className="flex-1 flex items-center justify-center px-2">
+            {/* 2. Progress Bar Section (Centered in remaining space) */}
+            <div className="flex-1 flex items-center px-4 max-w-md mx-auto">
               <span className="text-[10px] text-gray-400 font-mono w-8 text-right mr-2">{formatTime(currentTime)}</span>
               
-              {/* Container to hold the bar and center it visually */}
-              <div className="flex-1 max-w-xs mx-2 group relative cursor-pointer">
-                <div className="h-1 bg-gray-600 rounded-full overflow-hidden">
+              <div className="flex-1 mx-2 group relative cursor-pointer" onClick={handleProgressClick}>
+                <div className="h-0.5 bg-gray-600 rounded-full overflow-hidden hover:h-1 transition-all">
                   <div 
                     className="h-full bg-white group-hover:bg-green-500 transition-colors" 
                     style={{ width: `${progress}%` }}

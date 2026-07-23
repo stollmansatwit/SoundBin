@@ -74,6 +74,7 @@ export type AudioContextType = AudioEngineState & {
   playPrevious: () => void;
   pause: () => void;
   togglePlay: () => void;
+  seek: (time: number) => void;
 };
 
 export interface AudioEngineOptions {

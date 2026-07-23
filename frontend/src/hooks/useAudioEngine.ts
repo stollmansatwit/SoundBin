@@ -39,5 +39,6 @@ export function useAudioEngine(options: AudioEngineOptions): AudioContextType {
     playPrevious: () => engineRef.current.playPrevious(),
     pause: () => engineRef.current.pause(),
     togglePlay: () => engineRef.current.togglePlay(),
+    seek: (time: number) => engineRef.current.seek(time),
   };
 }

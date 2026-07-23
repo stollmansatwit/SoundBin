@@ -477,6 +477,16 @@ export class AudioEngine {
     this.audio.src = '';
     AudioEngine.instance = null;
   }
+
+  /**
+   * Seek to a time in seconds
+   */
+  public seek(time: number) {
+    if(this.audio && !isNaN(this.audio.duration)) {
+      this.audio.currentTime = Math.max(0, Math.min(time, this.audio.duration));
+      this.updateState({ currentTime: this.audio.currentTime });
+    }
+  }
   
   // Keep for backwards compatibility if needed, but prefer playNext/togglePlay
   public async play(_trackId: number) {
