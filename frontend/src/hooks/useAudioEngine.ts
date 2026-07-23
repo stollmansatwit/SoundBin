@@ -32,7 +32,7 @@ export function useAudioEngine(options: AudioEngineOptions): AudioContextType {
   // Return the full context including state and methods
   return {
     ...state,
-    setQueue: (tracks: Track[]) => engineRef.current.setQueue(tracks),
+    setQueue: (tracks: Track[], startIndex=0) => engineRef.current.setQueue(tracks, startIndex),
     toggleShuffle: () => engineRef.current.toggleShuffle(),
     toggleRepeat: () => engineRef.current.toggleRepeat(),
     playNext: () => engineRef.current.playNext(),

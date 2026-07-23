@@ -35,7 +35,39 @@ export function PlayButton({ trackId, albumId, artistId, index,  className = "" 
     setHasError(false);
 
     if (index >= 0 ) { // add album to queue, previous and next
-  
+      try {
+        if (!artistId) return;
+        let artistName = "Unknown Artist";
+        try{
+          const response = await fetch (`${apiBaseUrl}/api/artist-name?id=${artistId}`);
+          if (!response.ok) throw new Error(`Failed to fetch artist name: ${response.statusText}`);
+          const rawArtistName = await response.json();
+          artistName = rawArtistName.name || "Unknown Artist";
+        } catch (error) {
+          console.error("[PlayButton] Error fetching artist name:", error);
+        }
+        const response = await fetch(`${apiBaseUrl}/api/album-track-list?id=${albumId}`);
+        if (!response.ok) throw new Error(`Failed to fetch album tracks: ${response.statusText}`);
+        const albumTracksRaw = await response.json()
+        const albumTracks: Track[] = albumTracksRaw.map((rawTrack: any) => ({
+          track_id: rawTrack.track_id,
+          album_id: rawTrack.album_id || albumId,
+          title: rawTrack.title,
+          artist: artistName|| "Unknown Artist",
+          duration: rawTrack.duration,
+          cover_art_url: rawTrack.cover_art_url,
+          files: rawTrack.files ? [{ storage_path_url: rawTrack.files[0]?.storage_path_url }] : undefined,
+          albumSequence: rawTrack.albumSequence?.[0]?.sequence_number ? [{ sequence_number: rawTrack.albumSequence[0]?.sequence_number }] : [{ sequence_number: 0 }]
+        }));
+
+        setQueue(albumTracks, index);
+        togglePlay()
+      } catch (error) {
+        console.error("[PlayButton] Error fetching album tracks:", error);
+        setHasError(true);
+      } finally {
+        setIsLoading(false);
+      }
     } else { // index = -1, playing just 1 song, so just play it
       if (!artistId) return;
       let artistName = "Unknown Artist";
@@ -62,6 +94,7 @@ export function PlayButton({ trackId, albumId, artistId, index,  className = "" 
           files: rawData.files ? [{ storage_path_url: rawData.files[0]?.storage_path_url }] : undefined,
           albumSequence: rawData.albumSequence[0]?.sequence_number ? [{ sequence_number: rawData.albumSequence[0]?.sequence_number}] : [{sequence_number: 0}]
         };
+
         setQueue([trackData]);
         togglePlay();
         } catch (error) {

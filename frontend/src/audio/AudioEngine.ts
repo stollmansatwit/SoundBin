@@ -89,14 +89,12 @@ export class AudioEngine {
    * @returns 
    */
   public setQueue(tracks: Track[], startIndex = 0) {
-    console.log("Setting queue:", tracks[0]?.title);
     
     // Stop any currently playing audio to clear state and buffer
     this.audio.pause();
     this.audio.src = ''; // Clear source so togglePlay knows it needs to load
     
     let finalTracks = [...tracks];
-    let indexToPlay = startIndex;
 
     if (!finalTracks || finalTracks.length === 0) {
       this.updateState({ 
@@ -109,18 +107,27 @@ export class AudioEngine {
       return;
     }
 
-    // If shuffle is enabled, reshuffle the queue
+    let indexToPlay = startIndex;
+
+    // 1. Handle Shuffle first
     if (this.state.shuffleMode) {
       for (let i = finalTracks.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [finalTracks[i], finalTracks[j]] = [finalTracks[j], finalTracks[i]];
       }
-      indexToPlay = 0;
+      // If shuffling, we typically start at the beginning of the new shuffled list 
+      // unless you want to find the clicked track in the new shuffle.
+      indexToPlay = 0; 
     } else {
-      if (indexToPlay >= finalTracks.length) {
+      // 2. Handle Index Bounds for non-shuffled mode
+      if (indexToPlay < 0) {
         indexToPlay = 0;
+      } else if (indexToPlay >= finalTracks.length) {
+        indexToPlay = finalTracks.length - 1;
       }
     }
+    console.log("Setting queue:", tracks[indexToPlay]?.title, "at index:", indexToPlay);
+
 
     this.updateState({
       currentQueue: finalTracks,
@@ -129,7 +136,7 @@ export class AudioEngine {
       isPlaying: false, // Explicitly false because we cleared src
       currentTrackId: null, // Clear ID until playback starts
       currentTime: 0,
-      error: null
+      error: null,
     });
 
     if ('mediaSession' in navigator) {
@@ -299,13 +306,14 @@ export class AudioEngine {
    */
   public playPrevious() {
     if (this.audio.currentTime > 3) {
-      this.audio.currentTime = 0; // Restart song if played for 3+ seconds
-    } else {
-      const newIndex = this.state.queueIndex - 1;
-      if (newIndex >= 0) {
-        this.updateState({ queueIndex: newIndex });
-        this.playNext(); // Replays the previous track in the list
-      }
+      this.audio.currentTime = 0; 
+      return;
+    }
+
+    const newIndex = this.state.queueIndex - 1;
+    
+    if (newIndex >= 0) {
+      this.playNextAt(newIndex);
     }
   }
 

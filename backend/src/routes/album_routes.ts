@@ -75,5 +75,16 @@ router.get('/album-track-list', async (req: Request, res: Response) => {
 });
 
 
+/**
+ * Finds the album artist
+ */
+router.get('/album-artist', async (req: Request, res: Response) => {
+  const {albumID} = req.query;
+  if(!albumID) return res.status(400).json({error: "Album ID is required"});
+  const artist = await prisma.album.findFirst({
+    where:{ album_id: Number(albumID) },
+    select:{ artist_id: true}
+  })
+})
 
 export default router;

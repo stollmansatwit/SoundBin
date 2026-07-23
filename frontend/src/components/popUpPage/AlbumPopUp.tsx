@@ -163,7 +163,7 @@ export default function AlbumPopUp({ album, onClose }: Props) {
                           trackId={song.track_id}
                           albumId={song.album_id}
                           artistId={album.artist_id}
-                          index={-1}//{song.albumSequence?.[0]?.sequence_number || songs.indexOf(song) + 1}
+                          index={songs.indexOf(song)}
                         />
 
                       </div>
