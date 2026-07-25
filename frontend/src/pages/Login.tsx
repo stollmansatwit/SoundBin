@@ -2,7 +2,7 @@
 // Login page including a form for user authentication and a button to submit that links to API for authentication.
 // After authentication, routes to App.tsx page. If authentication fails, displays an error message and allow retries
 
-import bcrypt from "bcryptjs";
+//import bcrypt from "bcryptjs";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 /*
