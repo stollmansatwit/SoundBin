@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { ScrollableArtistAlbums } from '../scrollable/artist/ScrollableArtistAlbums'
-//import { ScrollableArtistTracks} from '../scrollable/artist/ScrollableArtistAlbums'
+import { ScrollableArtistAlbums } from '../scrollable/artist/ScrollableArtistAlbums';
+import { ScrollableArtistTracks} from '../scrollable/artist/ScrollableArtistTracks';
 import type { Artist, Album, Track, Playlist, PlaylistItem } from "../../types";
 
 interface Props {
@@ -13,7 +13,6 @@ const DEFAULT_IMAGE = "/defaultAlbum.png";
 
 // Placeholder types for the future components to avoid errors in this file
 // These components will be imported later
-declare const ScrollableArtistTracks: React.FC<{ artistId: number }>;
 declare const ScrollableArtistPlaylists: React.FC<{ artistId: number }>;
 
 export default function ArtistPopUp({ artist, onClose }: Props) {
@@ -190,11 +189,7 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
           {/* Tracks */}
           <div className="mb-8">
             <h2 className="text-xl font-bold text-white mb-4">Tracks</h2>
-            {/* Replace with actual component later */}
-            {/* <ScrollableArtistTracks artistId={artist.artist_id} /> */}
-            <div className="bg-gray-800/50 p-4 rounded-lg text-gray-500 italic">
-              Tracks section placeholder (component ScrollableArtistTracks will go here)
-            </div>
+            < ScrollableArtistTracks tracks={tracks} />
           </div>
 
           {/* Playlists */}
