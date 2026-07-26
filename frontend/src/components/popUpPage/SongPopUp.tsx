@@ -3,13 +3,14 @@ import { PlayButton } from "../buttons/PlayButton";
 import {type Album, type Track} from "../../types";
 
 interface Props {
-  album: Album;
+  album_id: Number;
   track: Track;
   onClose: () => void;
 }
 
-export default function SongPopUp({ track, album, onClose }: Props) {
+export default function SongPopUp({ track, album_id, onClose }: Props) {
   const [artistName, setArtistName] = useState<string>("");
+  const [artistId, setArtistID] = useState<number>(0);
   const [song, setSong] = useState<Track | null>(null);
 
   const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
@@ -21,7 +22,7 @@ export default function SongPopUp({ track, album, onClose }: Props) {
     return `${apiBaseUrl}/assets/${file}`;
   };
 
-  const coverSrc = getCoverImage(album.cover_art_url);
+  const coverSrc = getCoverImage(track.cover_art_url);
 
   useEffect(() => {
 
@@ -36,17 +37,17 @@ export default function SongPopUp({ track, album, onClose }: Props) {
       });
 
       // Fetch artist name if artist_id exists
-    if (album.artist_id) {
-      fetch(`${apiBaseUrl}/api/artist-name?id=${album.artist_id}`)
+    if (track.track_id) {
+      fetch(`${apiBaseUrl}/api/track-artist?trackID=${track.track_id}`)
         .then((res) => res.json())
         .then((data: any) => {
           // Assuming the response is { name: "Artist Name" } or similar
           setArtistName(data.name || "Unknown Artist");
-          
+          setArtistID(data.artist_id)
         })
         .catch(err => console.error("Failed to fetch artist:", err));
     }
-  }, [album.album_id, album.artist_id, artistName, track.track_id]);
+  }, []);
 
 
   console.log(artistName)
@@ -78,7 +79,7 @@ export default function SongPopUp({ track, album, onClose }: Props) {
 
           <img
             src={coverSrc}
-            alt={album.title}
+            alt={song ? song.title : "Unkown Track"}
             className="w-56 h-56 aspect-square object-cover rounded-lg shadow-2xl border-2 border-gray-600 mb-6"
           />
 
@@ -89,7 +90,7 @@ export default function SongPopUp({ track, album, onClose }: Props) {
             {artistName || "Loading artist…"}
           </p>
           <p className="text-sm text-gray-300 mt-1 text-center">
-            {album.title}
+            {artistName}
           </p>
           {/* make sure that track_id is not null so we can actually play the audio through the player */}
           
@@ -98,8 +99,8 @@ export default function SongPopUp({ track, album, onClose }: Props) {
               <PlayButton
                 trackId={song.track_id}
                 key={song.track_id}
-                albumId={album.album_id}
-                artistId={album.artist_id}
+                albumId={song.album_id}
+                artistId={artistId}
                 index={-1}
               />
           )}

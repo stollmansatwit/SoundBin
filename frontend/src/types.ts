@@ -16,7 +16,7 @@ export type Album = {
 export type Track = {
   track_id: number;
   album_id: number;
-  title?: string;
+  title: string;
   artist?: string;
   duration?: number;
   cover_art_url?: string;
@@ -34,8 +34,30 @@ export type TrackData = {
 /** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  Artist Types
  */
-export type ArtistData = {
+export type Artist = {
+  artist_id: number;
+  name:      string;
+  bio?:       string;
+  image_url?: string;
+}
+
+/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *  Playlist Types
+ */
+export type Playlist = {
+  playlist_id: number;
+  user_id: number;
   name: string;
+  description?: string;
+  source_type: string
+  date_created: any;
+}
+
+export type PlaylistItem = {
+  playlist_item_id: number;
+  playlist_item: number;
+  track_id: number;
+  sequence_number: number;
 }
 
 /** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
