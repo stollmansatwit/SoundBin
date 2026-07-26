@@ -118,7 +118,7 @@ export function RecentListenTable() {
 
       {selectedItem && (
         <SongPopUp
-          album={selectedItem.album}
+          album_id={selectedItem.album.album_id}
           track={{ title: selectedItem.trackTitle, track_id: selectedItem.track_id, album_id: selectedItem.album.album_id, duration: tracks.find(track => track.track_id === selectedItem.track_id)?.duration || 0 }}
           onClose={() => setSelectedItem(null)}
         />

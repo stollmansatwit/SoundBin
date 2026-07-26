@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { ScrollableAlbums } from '../components/scrollable/ScrollableAlbums';
+import { ScrollableArtists } from '../components/scrollable/ScrollableArtists';
+import { ScrollableTracks } from '../components/scrollable/ScrollableTracks';
 import { NavBar } from '../components/NavBar';
 import { RecentListenTable } from '../components/scrollable/RecentListenTable';
 import { UploadButton } from '../components/UploadFileButton';
@@ -32,6 +34,8 @@ export default function App() {
       {/* <ScrollablePlaylists /> */}
       <ScrollableAlbums />
       <RecentListenTable />
+      <ScrollableArtists />
+      <ScrollableTracks />
       {showUpload && (
         <UploadButton onClose={() => setShowUpload(false)}/>
       )}

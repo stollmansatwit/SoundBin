@@ -7,7 +7,7 @@ const router = Router();
 /**
  * @param get `/api/tracks`
  */
-router.get('/tracks', async (req: Request, res: Response) => {
+router.get('/tracks', async (_req: Request, res: Response) => {
   try {
     const tracks = await prisma.track.findMany({
       select: {
@@ -31,7 +31,7 @@ router.get('/tracks', async (req: Request, res: Response) => {
  */
 router.get('/tracks/:trackId', async (req: Request, res: Response) => {
   try {
-    const trackId = parseInt(req.params.trackId);
+    const trackId = parseInt(req.params.trackId as string);
     
     if (isNaN(trackId)) {
       return res.status(400).json({ error: "Invalid track ID" });
@@ -60,6 +60,33 @@ router.get('/tracks/:trackId', async (req: Request, res: Response) => {
   }
 });
 
+
+router.get('/track-artist', async (req: Request, res: Response) => {
+    const {trackID} = req.query;
+    if (!trackID) { return res.status(400).json({error: "Track ID is required"});}
+    const trackIDnum = Number(trackID);
+    if (isNaN(trackIDnum)) {res.status(400).json({ error: "Invalid Track ID" });}
+
+    try {
+      const artist = await prisma.track.findUnique({
+      where: { track_id: trackIDnum},
+      select: {
+        contributors: {
+          where: { role: 'artist' },
+          select: {
+            artist: {
+              select: { name: true, artist_id: true},
+            }
+          }
+        }
+      }
+    });
+    res.json(artist)
+    } catch (error) {
+      console.error("Error fetching track artist:", error);
+      res.status(500).json({ error: "Failed to fetch track artist" });
+    }
+  });
 
 
 
