@@ -84,7 +84,27 @@ router.get('/album-artist', async (req: Request, res: Response) => {
   const artist = await prisma.album.findFirst({
     where:{ album_id: Number(albumID) },
     select:{ artist_id: true}
-  })
-})
+  });
+  res.json(artist);
+});
+
+
+router.get('/album-title', async (req: Request, res: Response) => {
+  const {albumID} = req.query;
+  if (!albumID) return res.status(400).json({error: "Album ID is required"});
+  const albumIDnum = Number(albumID);
+  if (isNaN(albumIDnum)) return res.status(400).json({Error: "Album ID must be a number"});
+  try {
+    const title = await prisma.album.findUnique({
+      where: {album_id: albumIDnum},
+      select: {title: true},
+    });
+    res.json(title);
+  } catch (error) {
+    console.error("Error fetching title from album:", error);
+    res.status(500).json({ error: "Failed to fetch album title" });
+  }
+});
+
 
 export default router;

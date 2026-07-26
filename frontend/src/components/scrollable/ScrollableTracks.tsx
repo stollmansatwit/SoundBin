@@ -49,41 +49,59 @@ export function ScrollableTracks() {
   
 
   return (
-    <>
-      <p className='text-center text-lg font-bold sticky text-white'>Songs</p>
-      <div className='relative w-full overflow-x-auto whitespace-nowrap pb-4 pl-4 scrollbar-thumb-black'>
-        <div className="inline-flex gap-4 px-2">
+     <>
+      <p className='text-center text-lg font-bold sticky text-white mb-4'>Songs</p>
+      
+      {/* Container handles the scrolling and spacing between items via gap */}
+      <div className="relative w-full overflow-x-auto whitespace-nowrap pb-6 pl-6 scrollbar-thumb-black">
+        <div className="inline-flex gap-6 px-2">
 
           {tracks.map((song) => (
             <div
-              className="group relative inline-block w-[180px] transition-all duration-300 
-                         border border-transparent bg-gray-900/40 hover:bg-gray-800 
-                         rounded-xl hover:border-white/20 shadow-md hover:shadow-lg 
+              // CSS Updates:
+              // 1. rounded-lg: Softer corners than xl, but still rectangular
+              // 2. bg-gray-800/50: Subtle transparent background
+              // 3. border-gray-700/30: Very faint border for definition without harsh lines
+              // 4. hover:bg-gray-700 & hover:border-white/10: Smooth transition on hover
+              // 5. shadow-sm/md: Adds depth
+              className="group relative inline-flex w-[200px] flex-col 
+                         bg-gray-800/40 hover:bg-gray-700/60 
+                         border border-gray-700/30 hover:border-white/10 
+                         rounded-lg transition-all duration-200 
+                         shadow-sm hover:shadow-md
                          cursor-pointer overflow-hidden"
+              
+              // Dynamic width based on title length, but min/max constraints keep it rectangular
               style={{
-                "--hover-width": `${(song.title.length * 10 + 160)}px`,
-              } as React.CSSProperties}
+                minWidth: "200px",
+                maxWidth: `${(song.title.length * 10 + 200)}px`,
+              }}
               
               key={song.track_id}
               onMouseEnter={() => setHoveredTrackId(String(song.track_id))}
               onMouseLeave={() => setHoveredTrackId(null)}
               onClick={() => setSelectedItem(song)}>
-              <div className="p-3">
+              
+              <div className="p-3 flex items-center gap-3">
+                {/* Smaller, rounded image */}
                 <img 
-                  className='w-full aspect-square object-cover rounded-lg mb-3 shadow-sm' 
+                  className='w-12 h-12 object-cover rounded-md shadow-sm bg-gray-900' 
                   src={getCoverImage(song.cover_art_url)} 
                   alt={song.title} 
                 />
                 
-                <div className="flex flex-col items-center">
-                   <span className={`text-white font-medium truncate w-full text-center ${hoveredTrackId === String(song.track_id) ? 'opacity-100' : 'opacity-90'} transition-opacity`}>
+                <div className="flex flex-col justify-center min-w-0">
+                   {/* Text truncation handled naturally by CSS */}
+                   <span className={`text-sm font-medium text-gray-100 truncate w-full ${hoveredTrackId === String(song.track_id) ? 'text-white' : 'text-gray-300'} transition-colors`}>
                     {song.title.length > MAX_SONG_NAME_LENGTH && hoveredTrackId !== String(song.track_id)
                       ? `${song.title.slice(0, MAX_SONG_NAME_LENGTH)}...`
                       : song.title}
                    </span>
-                   <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
                 </div>
               </div>
+              
+              {/* Subtle hover indicator line at the bottom */}
+              <div className="h-1 bg-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></div>
             </div>
           ))}
         </div>

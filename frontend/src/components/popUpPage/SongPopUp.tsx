@@ -3,13 +3,14 @@ import { PlayButton } from "../buttons/PlayButton";
 import {type Album, type Track} from "../../types";
 
 interface Props {
-  album_id: Number;
+  album_id: number;
   track: Track;
   onClose: () => void;
 }
 
 export default function SongPopUp({ track, album_id, onClose }: Props) {
   const [artistName, setArtistName] = useState<string>("");
+  const [albumName, setAlbumName] = useState<string>("");
   const [artistId, setArtistID] = useState<number>(0);
   const [song, setSong] = useState<Track | null>(null);
 
@@ -29,7 +30,6 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
     fetch(`${apiBaseUrl}/api/tracks/${track.track_id}`)
       .then((res) => res.json())
       .then((data: Track) => {
-        console.log("Fetched track data:", data);
         setSong(data || null);
       })
       .catch((err) => {
@@ -41,16 +41,22 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
       fetch(`${apiBaseUrl}/api/track-artist?trackID=${track.track_id}`)
         .then((res) => res.json())
         .then((data: any) => {
-          // Assuming the response is { name: "Artist Name" } or similar
-          setArtistName(data.name || "Unknown Artist");
-          setArtistID(data.artist_id)
+          setArtistName(data.contributors[0].artist.name || "Unknown Artist");
+          setArtistID(data.contributors[0].artist.artist_id)
         })
         .catch(err => console.error("Failed to fetch artist:", err));
+
+      fetch(`${apiBaseUrl}/api/album-title?albumID=${album_id}`)
+        .then((res) => res.json())
+        .then((data: Album) => {
+          setAlbumName(data.title);
+        })
+        .catch((error) => {
+          console.error('Failed to fetch track:', error)
+        });
     }
   }, []);
 
-
-  console.log(artistName)
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
@@ -90,7 +96,7 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
             {artistName || "Loading artist…"}
           </p>
           <p className="text-sm text-gray-300 mt-1 text-center">
-            {artistName}
+            {albumName ? albumName : ""}
           </p>
           {/* make sure that track_id is not null so we can actually play the audio through the player */}
           

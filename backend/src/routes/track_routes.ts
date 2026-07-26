@@ -13,6 +13,7 @@ router.get('/tracks', async (_req: Request, res: Response) => {
       select: {
         track_id: true,
         title: true,
+        cover_art_url: true,
         album_id: true,
         duration: true,
         // Do NOT include files here to keep the list response fast
