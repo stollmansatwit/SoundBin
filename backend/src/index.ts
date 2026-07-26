@@ -186,7 +186,7 @@ app.get('/api/tracks', async (req: Request, res: Response) => {
 });
 
 
-app.post('api/auth/register', async (req: Request, res: Response) => {
+app.post('/api/auth/register', async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   try {
@@ -198,6 +198,9 @@ app.post('api/auth/register', async (req: Request, res: Response) => {
     if (existingUser) {
       return res.status(400).json({ error: "Username already exists" });
     }
+    if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
+     return res.status(400).json({ error: "Username and password are required" });
+   }
 
     // Hash the password
     const saltRounds = 10;
@@ -208,6 +211,7 @@ app.post('api/auth/register', async (req: Request, res: Response) => {
       data: {
         username: username,
         password_hash: hashedPassword,
+        display_name: username, // Default display name to username
       },
     });
 
