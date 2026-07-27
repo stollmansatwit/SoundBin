@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Request, Response } from 'express';
 import { prisma } from '../lib/database';
+import { getRecentListens } from '../lib/activity';
 
 const router = Router();
 
@@ -173,5 +174,75 @@ router.get('/artist-tracks', async (req: Request, res: Response) => {
 });
 
 
+
+/**
+ * @param get `/api/artist-playlists`
+ * @description Playlists that contain at least one track this artist contributed to.
+ * Powers the "Featured In Playlists" section on the artist page.
+ */
+router.get('/artist-playlists', async (req: Request, res: Response) => {
+  try {
+    const { artistID } = req.query;
+    if (!artistID) return res.status(400).json({ error: "Artist ID is required" });
+    const artistIdNum = Number(artistID);
+    if (isNaN(artistIdNum)) return res.status(400).json({ error: "Invalid Artist ID" });
+
+    const playlists = await prisma.playlist.findMany({
+      where: {
+        items: {
+          some: {
+            track: {
+              contributors: {
+                some: { artist_id: artistIdNum },
+              },
+            },
+          },
+        },
+      },
+      select: {
+        playlist_id: true,
+        user_id: true,
+        name: true,
+        description: true,
+        source_type: true,
+        date_created: true,
+        cover_art_url: true,
+      },
+      orderBy: { date_created: 'desc' },
+    });
+
+    res.json(playlists);
+  } catch (error) {
+    console.error("Error fetching artist playlists:", error);
+    res.status(500).json({ error: "Failed to fetch artist playlists" });
+  }
+});
+
+/**
+ * @param get `/api/artist-recent-listens`
+ * @description Most recently listened-to tracks (deduplicated by track) for tracks this
+ * artist contributed to. Powers the "Recently Listened To" section on the artist page.
+ * @queryParam `limit` - max number of tracks to return (default 12, max 50)
+ */
+router.get('/artist-recent-listens', async (req: Request, res: Response) => {
+  try {
+    const { artistID } = req.query;
+    if (!artistID) return res.status(400).json({ error: "Artist ID is required" });
+    const artistIdNum = Number(artistID);
+    if (isNaN(artistIdNum)) return res.status(400).json({ error: "Invalid Artist ID" });
+
+    const limit = Math.min(Number(req.query.limit) || 12, 50);
+
+    const recent = await getRecentListens(
+      { track: { contributors: { some: { artist_id: artistIdNum } } } },
+      limit,
+    );
+
+    res.json(recent);
+  } catch (error) {
+    console.error("Error fetching artist recent listens:", error);
+    res.status(500).json({ error: "Failed to fetch artist recent listens" });
+  }
+});
 
 export default router;

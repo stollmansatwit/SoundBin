@@ -26,6 +26,14 @@ export function ScrollableArtistAlbums({ albums }: AlbumListProps) {
 
   const displayAlbum = Array.isArray(albums) ? albums : [];
 
+  if (displayAlbum.length === 0) {
+    return (
+      <div className="bg-gray-800/50 p-4 rounded-lg text-gray-500 italic">
+        No albums for this artist yet.
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="relative flex items-center scrollbar-thumb-black scrollbar-auto scrollbar ease-in duration-75 shadow-lg">

@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { Request, Response } from 'express';
 import { prisma } from '../lib/database';
+import { getRecentListens } from '../lib/activity';
 
 const router = Router();
 
@@ -105,51 +106,7 @@ router.patch('/activity/:id', async (req: Request, res: Response) => {
 router.get('/activity/recent', async (req: Request, res: Response) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 12, 50);
-
-    const rows = await prisma.activity.findMany({
-      where: { track_id: { not: null } },
-      orderBy: { played_at: 'desc' },
-      take: limit * 4, // over-fetch since we dedupe by track below
-      include: {
-        track: {
-          include: { album: true },
-        },
-      },
-    });
-
-    const seen = new Set<number>();
-    const recent: Array<{
-      activity_id: number;
-      played_at: Date;
-      duration_played: number | null;
-      track_id: number;
-      title: string;
-      duration: number;
-      cover_art_url: string | null;
-      album_id: number | null;
-      album_title: string | null;
-    }> = [];
-
-    for (const row of rows) {
-      if (!row.track || row.track_id === null) continue;
-      if (seen.has(row.track_id)) continue;
-      seen.add(row.track_id);
-
-      recent.push({
-        activity_id: row.activity_id,
-        played_at: row.played_at,
-        duration_played: row.duration_played,
-        track_id: row.track.track_id,
-        title: row.track.title,
-        duration: row.track.duration,
-        cover_art_url: row.track.cover_art_url ?? row.track.album?.cover_art_url ?? null,
-        album_id: row.track.album_id,
-        album_title: row.track.album?.title ?? null,
-      });
-
-      if (recent.length >= limit) break;
-    }
-
+    const recent = await getRecentListens({}, limit);
     res.json(recent);
   } catch (error) {
     console.error('Error fetching recent activity:', error);
