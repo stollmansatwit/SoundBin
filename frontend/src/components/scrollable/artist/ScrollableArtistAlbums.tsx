@@ -32,18 +32,17 @@ export function ScrollableArtistAlbums({ albums }: AlbumListProps) {
         <li className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth p-1">
           <div id="slider"></div>
           {displayAlbum.map((album) => (
-                <div>
-                <img
-                key={album.album_id}
+            <div key={album.album_id} className="inline-block">
+              <img
                 onClick={() => setSelectedAlbum(album)}
                 className=" w-40 inline-block p-2 cursor-pointer transition-transform ease-linear duration-[300ms] hover:duration-[2000ms] hover:rotate-[360deg] hover:scale-105 rounded-full"
                 src={getCoverImage(album.cover_art_url)}
                 alt={album.title}
-                />
-                <p className="text-white text-base font-semibold mb-3 truncate w-40 text-center leading-tight">
-                    {album.title}
-                </p>
-            </div>
+              />
+              <p className="text-white text-base font-semibold mb-3 truncate w-40 text-center leading-tight">
+                  {album.title}
+              </p>
+          </div>
           ))}
         </li>
       </div>

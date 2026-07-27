@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { PlayButton } from "../buttons/PlayButton";
-import { type Album } from "../../types";
-import { type Track } from "../../types";
+import { PlayAlbum } from "../buttons/PlayAlbum";
+import type { Album, Track } from "../../types";
 
 interface Props {
   album: Album;
@@ -116,6 +116,12 @@ export default function AlbumPopUp({ album, onClose }: Props) {
               className="w-64 h-64 aspect-square object-cover rounded-lg shadow-2xl border-2 border-gray-600 mb-4"
             />
             <h2 className="text-2xl font-bold text-white text-center">{album.title}</h2>
+            <PlayAlbum 
+              tracks={songs} 
+              albumId={album.album_id} 
+              artistName={artistName}
+            />
+
           </div>
 
           {/* Right Side: Tracklist */}

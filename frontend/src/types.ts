@@ -51,6 +51,7 @@ export type Playlist = {
   description?: string;
   source_type: string
   date_created: any;
+  cover_art_url?: string;
 }
 
 export type PlaylistItem = {
@@ -93,6 +94,8 @@ export type AudioContextType = AudioEngineState & {
   toggleShuffle: () => void;
   toggleRepeat: () => void;
   playNext: () => Promise<void>; // Play from current queue index or next if ended
+  removeFromQueue: (index: number) => void;
+  playTrackAt: (index: number) => Promise<void>;
   playPrevious: () => void;
   pause: () => void;
   togglePlay: () => void;

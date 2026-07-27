@@ -169,22 +169,6 @@ app.get('/api/search', async (req: Request, res: Response) => {
 
 
 
-app.get('/api/tracks', async (req: Request, res: Response) => {
-  try {
-    const tracks = await prisma.track.findMany({
-      select: {
-        track_id: true,
-        title: true,
-      },
-    });
-
-    res.json(tracks);
-  } catch (error) {
-    console.error("Error fetching tracks:", error);
-    res.status(500).json({ error: "Failed to fetch tracks" });
-  }
-});
-
 
 app.post('/api/auth/register', async (req: Request, res: Response) => {
   const { username, password } = req.body;
