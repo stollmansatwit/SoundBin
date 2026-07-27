@@ -43,28 +43,24 @@ export function UploadButton({ onClose }: UploadButtonProps) {
         body: formData,
       });
 
+      const data = await response.json().catch(() => null);
+
       if (response.ok) {
-        alert("Upload successful");
-        refreshPage();
+        alert(data?.message ?? "Upload successful");
+        // The server now waits for indexing to finish before responding,
+        // so there's no need to delay the reload for the watcher to catch up.
+        window.location.reload();
+      } else {
+        alert(data?.message ?? "Upload failed. Please try again.");
       }
     } catch (error) {
-      alert("Upload successful");
+      alert("Upload failed. Please check your connection and try again.");
       console.error("Upload failed", error);
     } finally {
       setUploading(false);
       onClose();
-
-
     }
 
-  }
-
-  function refreshPage() {
-    // wait 5 seconds
-    setTimeout(() => {
-      window.location.reload();
-    }, 2000);
-    
   }
 
   document.addEventListener("keydown", (event) => {
@@ -122,3 +118,4 @@ export function UploadButton({ onClose }: UploadButtonProps) {
     </div>
   );
 }
+
