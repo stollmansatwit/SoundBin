@@ -26,63 +26,38 @@ export function ScrollableArtistTracks({ tracks }: TrackListProps) {
   };
 
   return (
-     <>
-      {/* Container handles the scrolling and spacing between items via gap */}
-      <div className="relative w-full overflow-x-auto whitespace-nowrap pb-6 pl-6 scrollbar-thumb-black">
-        <div className="inline-flex gap-6 px-2">
-
-          {tracks.map((song) => (
+    <>
+      <p className="text-center text-lg font-bold sticky text-white">Albums</p>
+      <div className="relative flex items-center scrollbar-thumb-black scrollbar-auto scrollbar ease-in duration-75 shadow-lg">
+        <li className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth p-1">
+          <div id="slider"></div>
+          {playlists.map((playlist) => (
             <div
-              className="group relative inline-flex w-[200px] flex-col 
-                         bg-gray-800/40 hover:bg-gray-700/60 
-                         border border-gray-700/30 hover:border-white/10 
-                         rounded-lg transition-all duration-200 
-                         shadow-sm hover:shadow-md 
-                         cursor-pointer overflow-hidden"
-              
-              style={{
-                minWidth: "200px",
-                maxWidth: `${(song.title.length * 10 + 200)}px`,
-              }}
-              
-              key={song.track_id}
-              onMouseEnter={() => setHoveredTrackId(String(song.track_id))}
-              onMouseLeave={() => setHoveredTrackId(null)}
-              onClick={() => setSelectedItem(song)}>
-              
-              <div className="p-3 flex items-center gap-3">
-                {/* Smaller, rounded image */}
-                <img 
-                  className='w-12 h-12 object-cover rounded-md shadow-sm bg-gray-900' 
-                  src={getCoverImage(song.cover_art_url)} 
-                  alt={song.title} 
+              key={playlist.playlist_id}
+              onClick={() => setSelectedPlaylist(playlist)}
+              className="inline-block p-2 cursor-pointer transition-transform ease-linear hover:scale-105 flex flex-col items-center"
+            >
+              <div className="w-40 h-40 overflow-hidden rounded-lg">
+                <img
+                  className="w-full h-full object-cover cursor-pointer transition-transform ease-linear duration-[300ms]"
+                  src={getCoverImage(playlist.cover_art_url)}
+                  alt={playlist.name}
                 />
-                
-                <div className="flex flex-col justify-center min-w-0">
-                   {/* Text truncation handled naturally by CSS */}
-                   <span className={`text-sm font-medium text-gray-100 truncate w-full ${hoveredTrackId === String(song.track_id) ? 'text-white' : 'text-gray-300'} transition-colors`}>
-                    {song.title.length > MAX_SONG_NAME_LENGTH && hoveredTrackId !== String(song.track_id)
-                      ? `${song.title.slice(0, MAX_SONG_NAME_LENGTH)}...`
-                      : song.title}
-                   </span>
-                </div>
               </div>
-              
-              {/* Subtle hover indicator line at the bottom */}
-              <div className="h-1 bg-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></div>
+              <p className="text-white text-center mt-2 text-sm truncate max-w-[160px]">
+                {playlist.name}
+              </p>
             </div>
           ))}
-        </div>
-      </div >
-
-      {selectedItem && (
-        <SongPopUp
-          album_id={selectedItem.album_id}
-          track={selectedItem}
-          onClose={() => setSelectedItem(null)}
-        />
-      )}
-
+        </li>
+      </div>
+        {selectedPlaylist && (
+          <PlaylistPopUp
+            playlist={selectedPlaylist}
+            onClose={() => setSelectedPlaylist(null)}
+            onDeleted={() => setPlaylists((prev) => prev.filter((p) => p.playlist_id !== selectedPlaylist.playlist_id))}
+          />
+        )}
     </>
   );
 }

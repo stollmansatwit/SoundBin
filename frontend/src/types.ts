@@ -91,6 +91,7 @@ export interface AudioEngineState extends AudioState {
 // Type for the context/provider to expose
 export type AudioContextType = AudioEngineState & {
   setQueue: (tracks: Track[], startIndex?: number) => void;
+  addToQueue: (tracks: Track[]) => void;
   toggleShuffle: () => void;
   toggleRepeat: () => void;
   playNext: () => Promise<void>; // Play from current queue index or next if ended

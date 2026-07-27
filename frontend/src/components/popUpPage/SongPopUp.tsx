@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PlayButton } from "../buttons/PlayButton";
+import { TrackOptionsMenu } from "../buttons/TrackOptionsMenu";
 import {type Album, type Track} from "../../types";
 
 interface Props {
@@ -13,6 +14,9 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
   const [albumName, setAlbumName] = useState<string>("");
   const [artistId, setArtistID] = useState<number>(0);
   const [song, setSong] = useState<Track | null>(null);
+
+  // Handle closing when clicking outside the modal content
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
@@ -57,9 +61,28 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
     }
   }, []);
 
+  // Escape key to close
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  // Handle click on overlay to close
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (overlayRef.current && e.target === overlayRef.current) {
+      onClose();
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4"
+      ref={overlayRef}
+      onClick={handleOverlayClick}
+    >
       <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-gray-700 shadow-2xl">
         {/* Ambient glow pulled from the artwork, sitting behind everything */}
         <div
@@ -70,17 +93,18 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
             backgroundPosition: "center",
           }}
         />
-        {/* The styles on this div control the background of the song pop up */}
-        <div className="absolute inset-0 bg-linear-to-b from-gray-100/1 to-gray-900/20" />
+        {/* Dark scrim + extra blur on top of the glow so text stays readable */}
+        <div className="absolute inset-0 bg-black/55 backdrop-blur-md" />
 
         {/* Content */}
         <div className="relative flex flex-col items-center px-8 pt-14 pb-8">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-white bg-red-600 px-4 py-1 rounded-md hover:bg-red-700 transition-colors z-10"
-            
+            className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10"
           >
-            Close
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
 
           <img
@@ -92,7 +116,7 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
           <h2 className="text-2xl font-bold text-white text-center leading-tight">
             {track.title}
           </h2>
-          <p className="text-base text-gray-300 mt-2 text-center">
+          <p className="text-base text-gray-200 mt-2 text-center">
             {artistName || "Loading artist…"}
           </p>
           <p className="text-sm text-gray-300 mt-1 text-center">
@@ -102,13 +126,21 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
           
           
             {song && (
-              <PlayButton
-                trackId={song.track_id}
-                key={song.track_id}
-                albumId={song.album_id}
-                artistId={artistId}
-                index={-1}
-              />
+              <div className="flex items-center gap-3 mt-4">
+                <PlayButton
+                  trackId={song.track_id}
+                  key={song.track_id}
+                  albumId={song.album_id}
+                  artistId={artistId}
+                  index={-1}
+                />
+                <TrackOptionsMenu
+                  track={song}
+                  artistId={artistId}
+                  artistName={artistName}
+                  albumTitle={albumName}
+                />
+              </div>
           )}
 
         </div>

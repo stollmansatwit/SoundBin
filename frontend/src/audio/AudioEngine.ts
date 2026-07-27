@@ -34,7 +34,7 @@ export class AudioEngine {
     this.options = options;
     this.audio = new Audio();
     
-    // Initialize extended state
+    // Initialize extended statere
     this.state = {
       isPlaying: false,
       hasQueue: false,
@@ -142,6 +142,63 @@ export class AudioEngine {
     if ('mediaSession' in navigator) {
        this.updateMediaSession();
     }
+  }
+
+  /**
+   * Append tracks to the end of the current queue without interrupting
+   * whatever is currently playing. If nothing is queued yet, this
+   * behaves like starting a fresh queue at index 0 (but does not
+   * auto-play — callers can togglePlay() themselves if desired).
+   * @param tracks
+   */
+  public addToQueue(tracks: Track[]) {
+    if (!tracks || tracks.length === 0) return;
+
+    if (!this.state.hasQueue || this.state.currentQueue.length === 0) {
+      this.updateState({
+        currentQueue: [...tracks],
+        queueIndex: 0,
+        hasQueue: true,
+      });
+      return;
+    }
+
+    this.updateState({
+      currentQueue: [...this.state.currentQueue, ...tracks],
+    });
+  }
+
+  /** 
+  * Remove a track from the queue
+  * @param index Index in currentQueue
+  */
+  public removeFromQueue(index: number) {
+    if (!this.state.hasQueue) return;
+    
+    const newQueue = [...this.state.currentQueue];
+    // Can't remove the currently playing track easily without handling playback state too.
+    // Usually you only remove "upcoming" tracks. 
+    // If index === queueIndex, we might just stop or play next immediately.
+    if (index === this.state.queueIndex) {
+      // Just play next immediately
+      this.playNext();
+      return;
+    }
+
+    newQueue.splice(index, 1);
+    
+    // Adjust queueIndex if it was after the removed item
+    let newIndex = this.state.queueIndex;
+    if (index < this.state.queueIndex) {
+      newIndex--;
+    }
+    // If we just removed an upcoming track, index stays same for subsequent items
+    
+    this.updateState({
+      currentQueue: newQueue,
+      queueIndex: newIndex,
+      hasQueue: newQueue.length > 0
+    });
   }
 
   /**
@@ -300,6 +357,11 @@ export class AudioEngine {
     await this.playNextAt(nextIndex);
   }
 
+  public async playTrackAt(index: number) {
+   // Helper to set queueIndex and play
+   this.updateState({ queueIndex: index });
+   await this.playNext(); // This will read new state and play
+  }
 
   /**
    * Play Previous

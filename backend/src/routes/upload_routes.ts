@@ -127,4 +127,61 @@ router.post('/upload', (req: UploadRequest, res: Response) => {
   });
 });
 
+/*
+Cover-image upload for things that aren't tracks (playlist art, etc).
+Stored the same way embedded/fetched artwork is: content-hashed filename
+in the shared assets dir, served back out via the existing /assets
+static route. Kept separate from the audio `upload` multer instance
+above since the allowed types/limits are different.
+*/
+const ALLOWED_IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+
+const imageUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: (_req, file, cb) => {
+    cb(null, ALLOWED_IMAGE_MIME_TYPES.has(file.mimetype));
+  },
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+});
+
+router.post('/upload-image', (req: Request, res: Response) => {
+  imageUpload.single('image')(req, res, async (err: unknown) => {
+    if (err) {
+      const message = err instanceof multer.MulterError ? err.message : 'Upload failed';
+      return res.status(400).json({ message });
+    }
+
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ message: 'No image was uploaded, or the file type is unsupported.' });
+    }
+
+    try {
+      const { createHash } = await import('crypto');
+      const fs = await import('fs/promises');
+      const path = await import('path');
+
+      const BaseDir = process.env.DOCKER_SONG_FILE_LOCATION;
+      const assetsDir = `${BaseDir}/assets`;
+      await fs.mkdir(assetsDir, { recursive: true });
+
+      const ext = file.mimetype.split('/')[1]?.replace('jpeg', 'jpg') ?? 'jpg';
+      const hash = createHash('sha256').update(file.buffer).digest('hex').slice(0, 16);
+      const fileName = `${hash}.${ext}`;
+      const outPath = path.join(assetsDir, fileName);
+
+      try {
+        await fs.access(outPath);
+      } catch {
+        await fs.writeFile(outPath, file.buffer);
+      }
+
+      res.json({ cover_art_url: outPath });
+    } catch (error) {
+      console.error('Error saving uploaded image:', error);
+      res.status(500).json({ message: 'Failed to save image' });
+    }
+  });
+});
+
 export default router;

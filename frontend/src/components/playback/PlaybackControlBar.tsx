@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAudio } from '../../context/AudioContext';
+import { PlaybarOptionsMenu } from '../buttons/PlaybarOptionsMenu';
 
 interface PlaybackControlBarProps {
   className?: string;
@@ -273,13 +274,12 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
                 <Icons.Queue />
               </button>
               
-              <button 
-                onClick={() => { /* Implement More Options */ }} 
-                className="text-gray-400 hover:text-white transition-colors p-1"
-                title="More options"
-              >
-                <Icons.Dots />
-              </button>
+              {currentTrackMetadata && (
+                <PlaybarOptionsMenu
+                  track={currentTrackMetadata}
+                  buttonClassName="text-gray-400 hover:text-white transition-colors p-1"
+                />
+              )}
               
               {/* Expand/Collapse Button */}
               <button 

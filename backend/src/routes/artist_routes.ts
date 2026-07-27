@@ -27,6 +27,24 @@ router.get('/artist-name', async (req: Request, res: Response) => {
 
 
 /**
+ * Fetches a single artist by id (full row)
+ * @param get `/api/artist/:id`
+ */
+router.get('/artist/:id', async (req: Request, res: Response) => {
+  try {
+    const artistId = Number(req.params.id);
+    if (isNaN(artistId)) return res.status(400).json({ error: "Invalid Artist ID" });
+
+    const artist = await prisma.artist.findUnique({ where: { artist_id: artistId } });
+    if (!artist) return res.status(404).json({ error: "Artist not found" });
+    res.json(artist);
+  } catch (error) {
+    console.error("Error fetching artist:", error);
+    res.status(500).json({ error: "Failed to fetch artist" });
+  }
+});
+
+/**
  * @param get `/api/artist-path`
  * @description uses `/api/artist-path` to fetch cover art from database
  * Sorted by track number, if null then by mtime

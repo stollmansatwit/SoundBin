@@ -158,7 +158,7 @@ export function SearchBar() {
             setSelectedAlbum(null)
           }
           }
-          album={selectedAlbum} />
+          album_id={selectedAlbum.album_id} />
 
       )}
       {selectedAlbum && !selectedTrack && (
