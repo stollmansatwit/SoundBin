@@ -44,17 +44,26 @@ const router = express.Router();
 /*
 Posts to the route, checks the file type to return response
 */
-router.post('/upload', upload.single('songFile'), (req: Request, res: Response) => {
+router.post('/upload', upload.array('songFiles', 20), (req: Request, res: Response) => {
 
   const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/flac', 'audio/wav'];
-  const fileType = req.file?.mimetype;
+  const files = req.files as Express.Multer.File[] | undefined;
 
-  if( !fileType || !allowedTypes.includes(fileType)) {
-    return res.status(400).json({message: "Invalid file type. Only mp3, flac, and wav are allowed."})
+  if (!files || files.length === 0) {
+    return res.status(400).json({ message: "No files were uploaded." });
   }
 
-  console.log("File saved to disk by Multer");
-  res.status(200).json({ message: "Upload successful" });
+  const invalidFiles = files.filter((file) => !allowedTypes.includes(file.mimetype));
+
+  if (invalidFiles.length > 0) {
+    const invalidNames = invalidFiles.map((file) => file.originalname).join(', ');
+    return res.status(400).json({
+      message: `Invalid file type for: ${invalidNames}. Only mp3, flac, and wav are allowed.`,
+    });
+  }
+
+  console.log(`${files.length} file(s) saved to disk by Multer`);
+  res.status(200).json({ message: "Upload successful", count: files.length });
 });
 
 export default router;
