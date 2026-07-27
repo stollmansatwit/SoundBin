@@ -1,20 +1,37 @@
 import React from "react";
 import { useAudio } from "../../context/AudioContext";
+import { AlbumOptionsMenu } from "./AlbumOptionsMenu";
+import type { Album, Track } from '../../types';
 
 interface PlayAlbumProps {
-  albumId: string;
-  tracksLength: number;
+  tracks: Track[];
+  album: Album;
+  artistName?: string;
+  /** Called after the album is deleted from the options menu. */
+  onDeleted?: () => void;
 }
 
-export function PlayAlbum({ albumId, tracksLength }: PlayAlbumProps) {
-  const { togglePlay, shuffle, repeat, toggleShuffle, toggleRepeat } = useAudio();
+export function PlayAlbum({ tracks, album, artistName, onDeleted}: PlayAlbumProps) {
+  const { shuffleMode, toggleShuffle, setQueue, togglePlay } = useAudio();
 
-  // For now, we assume the first track of the album is passed via context or we trigger a generic "Play Album" action.
-  // Since we don't have a clear "playAlbum(id)" in current Context, we might need to update Context later.
-  // Let's create a placeholder function that would ideally be in Context.
   const handlePlayAlbum = () => {
-    console.log(`Playing Album: ${albumId}`);
-    // TODO: Implement actual album playback logic in AudioContext/useAudioEngine
+    if (!tracks || tracks.length === 0) return;
+
+    // Optional: Update shuffle state immediately before playing to ensure it's reflected in queue handling if engine checks it during setQueue
+    // Note: Our AudioEngine setQueue handles shuffling internally based on current state.shuffleMode.
+    
+    const tracksWithArtist = tracks.map((track) => ({
+      ...track,
+      artist: artistName || "Unkown Artist",
+    }));
+
+    setQueue(tracksWithArtist, 0);
+    togglePlay();
+  };
+
+  const handleShuffleClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent bubbling if parent has hover effects
+    toggleShuffle();
   };
 
   return (
@@ -22,7 +39,9 @@ export function PlayAlbum({ albumId, tracksLength }: PlayAlbumProps) {
       {/* Main Play Button */}
       <button
         onClick={handlePlayAlbum}
-        className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-4 transition-colors shadow-lg"
+        disabled={tracks.length === 0}
+        className={`bg-blue-500 hover:bg-blue-600 text-white rounded-full p-4 transition-colors shadow-lg 
+          ${tracks.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
         aria-label="Play Album"
       >
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
@@ -32,11 +51,12 @@ export function PlayAlbum({ albumId, tracksLength }: PlayAlbumProps) {
 
       {/* Secondary Controls */}
       <div className="flex items-center gap-2">
-        {/* Shuffle */}
+        {/* Shuffle Toggle */}
         <button
-          onClick={toggleShuffle}
-          className={`p-2 rounded-full transition-colors ${shuffle ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+          onClick={handleShuffleClick}
+          className={`p-2 rounded-full transition-colors ${shuffleMode ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
           aria-label="Toggle Shuffle"
+          title={shuffleMode ? "Turn off shuffle" : "Turn on shuffle"}
         >
           <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
              {/* Shuffle Icon Path */}
@@ -44,35 +64,8 @@ export function PlayAlbum({ albumId, tracksLength }: PlayAlbumProps) {
           </svg>
         </button>
 
-        {/* Repeat */}
-        <button
-          onClick={toggleRepeat}
-          className={`p-2 rounded-full transition-colors ${repeat !== 'off' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
-          aria-label="Toggle Repeat"
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-             {/* Repeat Icon Path */}
-             <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
-          </svg>
-        </button>
-
         {/* More Options (...) */}
-        <div className="relative group">
-          <button
-            className="p-2 rounded-full text-gray-400 hover:text-white transition-colors"
-            aria-label="More options"
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-              <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-            </svg>
-          </button>
-          {/* Dropdown Menu (Hidden by default, shown on hover/click) */}
-          <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block w-48 bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden z-20">
-            {/* Add menu items here */}
-            <button className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">Download</button>
-            <button className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">Share</button>
-          </div>
-        </div>
+        <AlbumOptionsMenu album={album} tracks={tracks} artistName={artistName} onDeleted={onDeleted} />
       </div>
     </div>
   );

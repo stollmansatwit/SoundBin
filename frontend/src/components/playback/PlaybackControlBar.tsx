@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useAudio } from '../../context/AudioContext';
+import { PlaybarOptionsMenu } from '../buttons/PlaybarOptionsMenu';
+import { QueuePopover } from './QueuePopover';
+import { QueueList } from './QueueList';
 
 interface PlaybackControlBarProps {
   className?: string;
@@ -121,37 +124,37 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
 
       {/* Expanded View */}
       {isExpanded && (
-        <div className="bg-[#121212] text-white pt-4 pb-6 px-4 md:px-16 border-t border-white/10 shadow-2xl transition-all duration-300">
-
+        <div className="bg-[#121212] text-white pt-6 pb-10 px-4 md:px-10 lg:px-16 xl:px-24 border-t border-white/10 shadow-2xl transition-all duration-300">
+          
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Now Playing</h3>
-            <button onClick={() => setIsExpanded(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-              <Icons.ChevronDown />
-            </button>
+          <div className="flex justify-between items-center mb-8 max-w-[1600px] mx-auto">
+             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Now Playing</h3>
+             <button onClick={() => setIsExpanded(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <Icons.ChevronDown />
+             </button>
           </div>
 
           {/* Content Grid */}
-          <div className="flex flex-col md:flex-row gap-8 items-center md:items-start max-w-5xl mx-auto">
-
+          <div className="flex flex-col md:flex-row gap-10 lg:gap-14 items-center md:items-stretch max-w-[1600px] mx-auto">
+            
             {/* Album Art */}
-            <div className="w-full md:w-1/3 aspect-square bg-gray-800 rounded-lg shadow-xl overflow-hidden flex-shrink-0 group relative">
-              {coverArt ? (
-                <img src={getCoverImage(coverArt)} alt="Album Cover" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-600">
-                  <svg className="w-20 h-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" /></svg>
-                </div>
-              )}
+            <div className="w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 xl:w-96 xl:h-96 bg-gray-800 rounded-lg shadow-xl overflow-hidden flex-shrink-0 group relative">
+               {coverArt ? (
+                 <img src={getCoverImage(coverArt)} alt="Album Cover" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+               ) : (
+                 <div className="w-full h-full flex items-center justify-center text-gray-600">
+                   <svg className="w-20 h-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                 </div>
+               )}
             </div>
 
             {/* Info & Controls */}
-            <div className="w-full md:w-2/3 flex flex-col gap-6">
-
+            <div className="w-full md:flex-1 min-w-0 flex flex-col justify-center gap-6 lg:gap-8">
+              
               {/* Text Info */}
               <div className="text-center md:text-left space-y-2">
-                <h1 className="text-2xl md:text-4xl font-bold truncate leading-tight">{title}</h1>
-                <p className="text-lg text-gray-400 truncate hover:underline cursor-pointer decoration-gray-500 underline-offset-4">{artist}</p>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold truncate leading-tight">{title}</h1>
+                <p className="text-lg lg:text-xl text-gray-400 truncate hover:underline cursor-pointer decoration-gray-500 underline-offset-4">{artist}</p>
               </div>
 
               {/* Progress Bar */}
@@ -180,17 +183,17 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
                   {getShuffleIcon()}
                 </button>
 
-                <div className="flex items-center gap-6">
-                  <button onClick={playPrevious} className="text-gray-400 hover:text-white transition-colors p-2 active:scale-95">
-                    <Icons.Prev />
-                  </button>
+                 <div className="flex items-center gap-6 lg:gap-8">
+                   <button onClick={playPrevious} className="text-gray-400 hover:text-white transition-colors p-2 active:scale-95">
+                     <Icons.Prev />
+                   </button>
 
-                  <button
-                    onClick={togglePlay}
-                    className="w-16 h-16 bg-white text-black rounded-full flex items-center justify-center hover:bg-gray-200 transition-all hover:scale-105 active:scale-95"
-                  >
-                    {isPlaying ? <Icons.Pause /> : <Icons.Play />}
-                  </button>
+                   <button 
+                      onClick={togglePlay} 
+                      className="w-16 h-16 lg:w-20 lg:h-20 bg-white text-black rounded-full flex items-center justify-center hover:bg-gray-200 transition-all hover:scale-105 active:scale-95"
+                    >
+                     {isPlaying ? <Icons.Pause /> : <Icons.Play />}
+                   </button>
 
                   <button onClick={playNext} className="text-gray-400 hover:text-white transition-colors p-2 active:scale-95">
                     <Icons.Next />
@@ -201,6 +204,15 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
                   {getRepeatIcon()}
                 </button>
               </div>
+            </div>
+
+            {/* Queue Panel — capped at 40% of the viewport height. Once
+                the queue would need more room than that, it scrolls
+                internally (via QueueList's own overflow handling)
+                instead of growing the bar and pushing everything else
+                up the screen. */}
+            <div className="w-full md:w-80 lg:w-96 flex-shrink-0 md:border-l md:border-white/10 md:pl-6 lg:pl-8 flex flex-col min-h-0 max-h-[40vh]">
+              <QueueList className="h-full" />
             </div>
           </div>
         </div>
@@ -277,22 +289,15 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
 
             {/* 4. Action Buttons (Far Right) */}
             <div className="flex items-center gap-3 ml-3 border-l border-white/10 pl-3">
-              <button
-                onClick={() => { /* Implement View Queue */ }}
-                className="text-gray-400 hover:text-white transition-colors p-1"
-                title="View Queue"
-              >
-                <Icons.Queue />
-              </button>
-
-              <button
-                onClick={() => { /* Implement More Options */ }}
-                className="text-gray-400 hover:text-white transition-colors p-1"
-                title="More options"
-              >
-                <Icons.Dots />
-              </button>
-
+              <QueuePopover buttonClassName="text-gray-400 hover:text-white transition-colors p-1" />
+              
+              {currentTrackMetadata && (
+                <PlaybarOptionsMenu
+                  track={currentTrackMetadata}
+                  buttonClassName="text-gray-400 hover:text-white transition-colors p-1"
+                />
+              )}
+              
               {/* Expand/Collapse Button */}
               <button
                 onClick={() => setIsExpanded(!isExpanded)}

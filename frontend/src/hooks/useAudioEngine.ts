@@ -33,6 +33,7 @@ export function useAudioEngine(options: AudioEngineOptions): AudioContextType {
   return {
     ...state,
     setQueue: (tracks: Track[], startIndex=0) => engineRef.current.setQueue(tracks, startIndex),
+    addToQueue: (tracks: Track[]) => engineRef.current.addToQueue(tracks),
     toggleShuffle: () => engineRef.current.toggleShuffle(),
     toggleRepeat: () => engineRef.current.toggleRepeat(),
     playNext: () => engineRef.current.playNext(),
@@ -40,5 +41,8 @@ export function useAudioEngine(options: AudioEngineOptions): AudioContextType {
     pause: () => engineRef.current.pause(),
     togglePlay: () => engineRef.current.togglePlay(),
     seek: (time: number) => engineRef.current.seek(time),
+    removeFromQueue: (index) => engineRef.current.removeFromQueue(index),
+    moveQueueItem: (fromIndex, toIndex) => engineRef.current.moveQueueItem(fromIndex, toIndex),
+    playTrackAt: (index) => engineRef.current.playTrackAt(index),
   };
 }

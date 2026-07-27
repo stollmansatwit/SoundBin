@@ -13,6 +13,7 @@ import {
   PointElement,
 } from 'chart.js';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import type { TopTrack } from '../types';
 
 ChartJS.register(
   ArcElement,
@@ -140,6 +141,15 @@ export default function Stats() {
   const [selectedRange, setSelectedRange] = useState<RangeKey>('week');
   const [loading, setLoading] = useState(true);
   const [uploadSeries, setUploadSeries] = useState<SeriesPoint[]>([]);
+  const [topTracks, setTopTracks] = useState<TopTrack[]>([]);
+
+  const apiBaseUrl = 'http://localhost:3000'; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
+
+  const getCoverImage = (path?: string | null) => {
+    if (!path) return '/defaultAlbum.png';
+    const file = path.split('/').pop();
+    return `${apiBaseUrl}/assets/${file}`;
+  };
 
   const openNav = () => {
     setIsNavOpen(true);
@@ -150,8 +160,6 @@ export default function Stats() {
   };
 
   useEffect(() => {
-    const apiBaseUrl = 'http://localhost:3000';
-
     const fetchJson = async <T,>(path: string): Promise<T> => {
       const response = await fetch(`${apiBaseUrl}${path}`);
       if (!response.ok) {
@@ -163,7 +171,7 @@ export default function Stats() {
 
     const loadStats = async () => {
       try {
-        const [summary, genreData, dailyData, weeklyData, monthlyData, trendData, uploadData] = await Promise.all([
+        const [summary, genreData, dailyData, weeklyData, monthlyData, trendData, uploadData, topTracksData] = await Promise.all([
           fetchJson<Counts>('/api/stats/summary'),
           fetchJson<GenreBreakdown>('/api/stats/genres'),
           fetchJson<SeriesPoint[]>('/api/stats/listens/day'),
@@ -171,6 +179,7 @@ export default function Stats() {
           fetchJson<SeriesPoint[]>('/api/stats/listens/month'),
           fetchJson<SeriesPoint[]>('/api/stats/listening-time'),
           fetchJson<DateUploadedPoint[]>('/api/stats/date-uploaded'),
+          fetchJson<TopTrack[]>('/api/stats/top-tracks'),
         ]);
 
         setCounts(summary);
@@ -180,6 +189,7 @@ export default function Stats() {
         setMonthlySeries(monthlyData);
         setListeningTrend(trendData);
         setUploadSeries(uploadData.map((point) => ({ label: point.date, value: point.count })));
+        setTopTracks(topTracksData);
       } catch (error) {
         console.error('Failed to fetch stats:', error);
       } finally {
@@ -328,6 +338,47 @@ export default function Stats() {
                   <div className="flex h-full items-center justify-center text-white/70">Loading chart data...</div>
                 ) : (
                   <Doughnut data={genreChartData} options={doughnutOptions} />
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/20 bg-slate-950/35 p-5 shadow-2xl backdrop-blur-md">
+              <div className="mb-4">
+                <h2 className="text-xl font-black text-white">Top tracks</h2>
+                <p className="text-sm text-white/70">Your most-listened-to songs.</p>
+              </div>
+              <div className="h-80 overflow-y-auto pr-1">
+                {loading ? (
+                  <div className="flex h-full items-center justify-center text-white/70">Loading chart data...</div>
+                ) : topTracks.length === 0 ? (
+                  <div className="flex h-full items-center justify-center text-center text-sm text-white/70 px-4">
+                    Play some songs to see your top tracks here.
+                  </div>
+                ) : (
+                  <ul className="space-y-2">
+                    {topTracks.map((track, index) => (
+                      <li
+                        key={track.track_id}
+                        className="flex items-center gap-3 rounded-2xl bg-black/20 px-3 py-2"
+                      >
+                        <span className="w-5 shrink-0 text-center text-sm text-white/60">{index + 1}</span>
+                        <img
+                          src={getCoverImage(track.cover_art_url)}
+                          alt={track.title}
+                          className="h-10 w-10 shrink-0 rounded-lg object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-bold text-white">{track.title}</p>
+                          {track.album_title && (
+                            <p className="truncate text-xs text-white/60">{track.album_title}</p>
+                          )}
+                        </div>
+                        <span className="shrink-0 rounded-full bg-orange-500/20 px-2 py-1 text-xs font-bold text-orange-200">
+                          {track.play_count} {track.play_count === 1 ? 'play' : 'plays'}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </div>
             </div>

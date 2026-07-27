@@ -53,17 +53,11 @@ export function ScrollableTracks() {
       <p className='text-center text-lg font-bold sticky text-white mb-4'>Songs</p>
       
       {/* Container handles the scrolling and spacing between items via gap */}
-      <div className="relative w-full overflow-x-auto whitespace-nowrap pb-6 pl-6 scrollbar-thumb-black">
+      <div className="relative w-full overflow-x-auto whitespace-nowrap pb-6 pl-6 scrollbar-thumb-black shadow-lg">
         <div className="inline-flex gap-6 px-2">
 
           {tracks.map((song) => (
             <div
-              // CSS Updates:
-              // 1. rounded-lg: Softer corners than xl, but still rectangular
-              // 2. bg-gray-800/50: Subtle transparent background
-              // 3. border-gray-700/30: Very faint border for definition without harsh lines
-              // 4. hover:bg-gray-700 & hover:border-white/10: Smooth transition on hover
-              // 5. shadow-sm/md: Adds depth
               className="group relative inline-flex w-[200px] flex-col 
                          bg-gray-800/40 hover:bg-gray-700/60 
                          border border-gray-700/30 hover:border-white/10 

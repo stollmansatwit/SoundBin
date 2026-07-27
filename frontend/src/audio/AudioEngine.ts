@@ -11,6 +11,11 @@ export class AudioEngine {
   private listeners: Set<StateListener> = new Set();
   private options: AudioEngineOptions;
 
+  // Listen-tracking: id of the in-progress Activity row for whatever is currently loaded,
+  // so we can PATCH in the real duration_played once it stops/switches/ends.
+  private currentActivityId: number | null = null;
+  private readonly apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
+
   // Singleton pattern ensures only one instance exists across the app
   private static instance: AudioEngine | null = null;
 
@@ -34,7 +39,7 @@ export class AudioEngine {
     this.options = options;
     this.audio = new Audio();
     
-    // Initialize extended state
+    // Initialize extended statere
     this.state = {
       isPlaying: false,
       hasQueue: false,
@@ -92,6 +97,7 @@ export class AudioEngine {
     
     // Stop any currently playing audio to clear state and buffer
     this.audio.pause();
+    this.finalizeActivity(); // log the final duration for whatever was playing before we clear its src
     this.audio.src = ''; // Clear source so togglePlay knows it needs to load
     
     let finalTracks = [...tracks];
@@ -145,6 +151,101 @@ export class AudioEngine {
   }
 
   /**
+   * Insert tracks so they play next — directly after whatever is
+   * currently playing — rather than appending to the end of the queue.
+   * If nothing is queued yet, this behaves like starting a fresh queue
+   * at index 0 (but does not auto-play — callers can togglePlay()
+   * themselves if desired).
+   * @param tracks
+   */
+  public addToQueue(tracks: Track[]) {
+    if (!tracks || tracks.length === 0) return;
+
+    if (!this.state.hasQueue || this.state.currentQueue.length === 0) {
+      this.updateState({
+        currentQueue: [...tracks],
+        queueIndex: 0,
+        hasQueue: true,
+      });
+      return;
+    }
+
+    const insertAt = this.state.queueIndex + 1;
+    const newQueue = [...this.state.currentQueue];
+    newQueue.splice(insertAt, 0, ...tracks);
+
+    this.updateState({
+      currentQueue: newQueue,
+    });
+  }
+
+  /** 
+  * Remove a track from the queue
+  * @param index Index in currentQueue
+  */
+  public removeFromQueue(index: number) {
+    if (!this.state.hasQueue) return;
+    
+    const newQueue = [...this.state.currentQueue];
+    // Can't remove the currently playing track easily without handling playback state too.
+    // Usually you only remove "upcoming" tracks. 
+    // If index === queueIndex, we might just stop or play next immediately.
+    if (index === this.state.queueIndex) {
+      // Just play next immediately
+      this.playNext();
+      return;
+    }
+
+    newQueue.splice(index, 1);
+    
+    // Adjust queueIndex if it was after the removed item
+    let newIndex = this.state.queueIndex;
+    if (index < this.state.queueIndex) {
+      newIndex--;
+    }
+    // If we just removed an upcoming track, index stays same for subsequent items
+    
+    this.updateState({
+      currentQueue: newQueue,
+      queueIndex: newIndex,
+      hasQueue: newQueue.length > 0
+    });
+  }
+
+  /**
+   * Reorder an upcoming track within the queue (drag & drop support).
+   * Only tracks that come after the currently playing track may be moved,
+   * and a track can never be dragged above the "next song" slot
+   * (i.e. queueIndex + 1) — it can only ever be brought as far forward
+   * as directly after the currently playing track.
+   * @param fromIndex Index of the track being dragged
+   * @param toIndex Desired destination index
+   */
+  public moveQueueItem(fromIndex: number, toIndex: number) {
+    if (!this.state.hasQueue) return;
+
+    const minIndex = this.state.queueIndex + 1;
+
+    // Can't move the currently playing track (or anything at/behind it).
+    if (fromIndex <= this.state.queueIndex || fromIndex >= this.state.currentQueue.length) return;
+
+    const queue = [...this.state.currentQueue];
+
+    let target = Math.max(minIndex, toIndex);
+    target = Math.min(target, queue.length - 1);
+
+    if (fromIndex === target) return;
+
+    const [moved] = queue.splice(fromIndex, 1);
+    queue.splice(target, 0, moved);
+
+    // queueIndex itself never shifts here since both fromIndex and target
+    // are strictly after it — the currently playing track's position and
+    // identity are unaffected.
+    this.updateState({ currentQueue: queue });
+  }
+
+  /**
    * Toggle Shuffle
    */
   public toggleShuffle() {
@@ -187,6 +288,56 @@ export class AudioEngine {
     this.updateState({ repeatMode: nextMode });
   }
 
+  // ------------------------------ Listening Activity Logging ------------------------------
+
+  /**
+   * Logs the start of a new listen. Fire-and-forget: playback shouldn't wait on this.
+   * Stores the created activity_id so we can patch in the real duration later.
+   */
+  private startActivity(trackId: number) {
+    fetch(`${this.apiBaseUrl}/api/activity`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ track_id: trackId }),
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        this.currentActivityId = data?.activity_id ?? null;
+      })
+      .catch((error) => {
+        console.error('[AudioEngine] Failed to log listen start:', error);
+        this.currentActivityId = null;
+      });
+  }
+
+  /**
+   * Pushes the elapsed playback time to the currently tracked activity row, without
+   * clearing it (used for pause, so resuming keeps updating the same listen).
+   */
+  private updateActivityDuration() {
+    if (this.currentActivityId === null) return;
+
+    const activityId = this.currentActivityId;
+    const durationPlayed = Math.round(this.audio.currentTime || 0);
+
+    fetch(`${this.apiBaseUrl}/api/activity/${activityId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ duration_played: durationPlayed }),
+    }).catch((error) => {
+      console.error('[AudioEngine] Failed to update listen duration:', error);
+    });
+  }
+
+  /**
+   * Finalizes the currently tracked listen (final duration push) and clears it, so the
+   * next track started gets its own fresh activity row.
+   */
+  private finalizeActivity() {
+    this.updateActivityDuration();
+    this.currentActivityId = null;
+  }
+
   // ------------------------------ Playback Logic ------------------------------
 
   /**
@@ -194,6 +345,7 @@ export class AudioEngine {
    */
   public pause() {
     if (this.audio) {
+      this.updateActivityDuration();
       this.audio.pause();
       this.updateState({ isPlaying: false });
     }
@@ -207,6 +359,9 @@ export class AudioEngine {
 
     private async playNextAt(targetIndex: number) {
     if (!this.state.hasQueue || !this.state.currentQueue.length) return;
+
+    // Whatever was previously loaded is done (switching/skipping) - log its final duration.
+    this.finalizeActivity();
 
     let currentIndex = targetIndex;
 
@@ -265,6 +420,7 @@ export class AudioEngine {
       });
       
       this.updateMediaSession(track);
+      this.startActivity(track.track_id); // log this listen
 
     } catch (error) {
       console.error('[AudioEngine] Play error:', error);
@@ -300,6 +456,11 @@ export class AudioEngine {
     await this.playNextAt(nextIndex);
   }
 
+  public async playTrackAt(index: number) {
+   // Helper to set queueIndex and play
+   this.updateState({ queueIndex: index });
+   await this.playNext(); // This will read new state and play
+  }
 
   /**
    * Play Previous
@@ -446,6 +607,7 @@ export class AudioEngine {
     // Track ended - Handle Queue Logic Here
     this.audio.addEventListener('ended', async () => {
       if (!this.state.hasQueue) {
+         this.finalizeActivity();
          this.updateState({ currentTrackId: null, isPlaying: false });
          return;
       }
@@ -461,6 +623,7 @@ export class AudioEngine {
           nextIndex = 0; // Repeat all
         } else {
            // No repeat, just stop
+           this.finalizeActivity();
            this.updateState({ currentTrackId: null, isPlaying: false });
            return;
         }
@@ -481,6 +644,7 @@ export class AudioEngine {
    * Stop Audio
    */
   public destroy() {
+    this.finalizeActivity();
     this.audio.pause();
     this.audio.src = '';
     AudioEngine.instance = null;

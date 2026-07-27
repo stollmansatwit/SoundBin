@@ -59,7 +59,6 @@ export function PlayButton({ trackId, albumId, artistId, index,  className = "" 
           files: rawTrack.files ? [{ storage_path_url: rawTrack.files[0]?.storage_path_url }] : undefined,
           albumSequence: rawTrack.albumSequence?.[0]?.sequence_number ? [{ sequence_number: rawTrack.albumSequence[0]?.sequence_number }] : [{ sequence_number: 0 }]
         }));
-
         setQueue(albumTracks, index);
         togglePlay()
       } catch (error) {

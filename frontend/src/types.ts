@@ -32,6 +32,29 @@ export type TrackData = {
 }
 
 /** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *  Listening Activity Types
+ */
+export type RecentListen = {
+  activity_id: number;
+  played_at: string;
+  duration_played: number | null;
+  track_id: number;
+  title: string;
+  duration?: number;
+  cover_art_url?: string | null;
+  album_id: number | null;
+  album_title?: string | null;
+};
+
+export type TopTrack = {
+  track_id: number;
+  title: string;
+  album_title?: string | null;
+  cover_art_url?: string | null;
+  play_count: number;
+};
+
+/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  Artist Types
  */
 export type Artist = {
@@ -51,6 +74,7 @@ export type Playlist = {
   description?: string;
   source_type: string
   date_created: any;
+  cover_art_url?: string;
 }
 
 export type PlaylistItem = {
@@ -90,9 +114,13 @@ export interface AudioEngineState extends AudioState {
 // Type for the context/provider to expose
 export type AudioContextType = AudioEngineState & {
   setQueue: (tracks: Track[], startIndex?: number) => void;
+  addToQueue: (tracks: Track[]) => void;
   toggleShuffle: () => void;
   toggleRepeat: () => void;
   playNext: () => Promise<void>; // Play from current queue index or next if ended
+  removeFromQueue: (index: number) => void;
+  moveQueueItem: (fromIndex: number, toIndex: number) => void;
+  playTrackAt: (index: number) => Promise<void>;
   playPrevious: () => void;
   pause: () => void;
   togglePlay: () => void;

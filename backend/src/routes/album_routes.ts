@@ -89,6 +89,84 @@ router.get('/album-artist', async (req: Request, res: Response) => {
 });
 
 
+/**
+ * Fetches a single album by id (full row)
+ */
+router.get('/album/:id', async (req: Request, res: Response) => {
+  try {
+    const albumId = Number(req.params.id);
+    if (isNaN(albumId)) return res.status(400).json({ error: "Invalid Album ID" });
+
+    const album = await prisma.album.findUnique({ where: { album_id: albumId } });
+    if (!album) return res.status(404).json({ error: "Album not found" });
+    res.json(album);
+  } catch (error) {
+    console.error("Error fetching album:", error);
+    res.status(500).json({ error: "Failed to fetch album" });
+  }
+});
+
+/**
+ * Edits the basics of an album: title and/or artist (by name — an
+ * existing artist with that name is reused, otherwise a new one is
+ * created).
+ */
+router.patch('/albums/:id', async (req: Request, res: Response) => {
+  try {
+    const albumId = Number(req.params.id);
+    if (isNaN(albumId)) return res.status(400).json({ error: "Invalid Album ID" });
+
+    const { title, artistName } = req.body;
+    const data: Record<string, unknown> = {};
+
+    if (typeof title === 'string' && title.trim()) {
+      data.title = title.trim();
+    }
+
+    if (typeof artistName === 'string' && artistName.trim()) {
+      let artist = await prisma.artist.findFirst({ where: { name: artistName.trim() } });
+      if (!artist) {
+        artist = await prisma.artist.create({ data: { name: artistName.trim() } });
+      }
+      data.artist_id = artist.artist_id;
+    }
+
+    const album = await prisma.album.update({
+      where: { album_id: albumId },
+      data,
+    });
+
+    res.json(album);
+  } catch (error) {
+    console.error("Error updating album:", error);
+    res.status(500).json({ error: "Failed to update album" });
+  }
+});
+
+/**
+ * Deletes an album. Refuses if the album still has tracks attached —
+ * albums should only be deleted once they're empty, so this is a
+ * server-side guard in addition to the frontend only exposing the
+ * option when the track count is zero.
+ */
+router.delete('/albums/:id', async (req: Request, res: Response) => {
+  try {
+    const albumId = Number(req.params.id);
+    if (isNaN(albumId)) return res.status(400).json({ error: "Invalid Album ID" });
+
+    const trackCount = await prisma.track.count({ where: { album_id: albumId } });
+    if (trackCount > 0) {
+      return res.status(400).json({ error: "Cannot delete an album that still has tracks" });
+    }
+
+    await prisma.album.delete({ where: { album_id: albumId } });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting album:", error);
+    res.status(500).json({ error: "Failed to delete album" });
+  }
+});
+
 router.get('/album-title', async (req: Request, res: Response) => {
   const {albumID} = req.query;
   if (!albumID) return res.status(400).json({error: "Album ID is required"});

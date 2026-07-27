@@ -182,6 +182,53 @@ router.get('/stats/listening-time', async (_req: Request, res: Response) => {
   }
 });
 
+/**
+ * @param get `/api/stats/top-tracks`
+ * @description Returns the most-played tracks by listen count, for a succinct "top tracks" view
+ * @queryParam `limit` - max number of tracks to return (default 5, max 20)
+ */
+router.get('/stats/top-tracks', async (req: Request, res: Response) => {
+  try {
+    const limit = Math.min(Number(req.query.limit) || 5, 20);
+
+    const grouped = await prisma.activity.groupBy({
+      by: ['track_id'],
+      where: { track_id: { not: null } },
+      _count: { activity_id: true },
+      orderBy: { _count: { activity_id: 'desc' } },
+      take: limit,
+    });
+
+    const trackIds = grouped
+      .map((row) => row.track_id)
+      .filter((id): id is number => id !== null);
+
+    const tracks = await prisma.track.findMany({
+      where: { track_id: { in: trackIds } },
+      include: { album: true },
+    });
+    const trackById = new Map(tracks.map((track) => [track.track_id, track]));
+
+    const topTracks = grouped
+      .filter((row) => row.track_id !== null)
+      .map((row) => {
+        const track = trackById.get(row.track_id as number);
+        return {
+          track_id: row.track_id,
+          title: track?.title ?? 'Unknown track',
+          album_title: track?.album?.title ?? null,
+          cover_art_url: track?.cover_art_url ?? track?.album?.cover_art_url ?? null,
+          play_count: row._count.activity_id,
+        };
+      });
+
+    res.json(topTracks);
+  } catch (error) {
+    console.error('Error fetching top tracks:', error);
+    res.status(500).json({ error: 'Failed to fetch top tracks' });
+  }
+});
+
 router.get('/stats/date-uploaded', async (_req: Request, res: Response) => {
   try {
     const rows = await prisma.trackFile.groupBy({

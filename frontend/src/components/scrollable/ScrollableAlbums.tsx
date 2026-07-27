@@ -65,6 +65,7 @@ export function ScrollableAlbums() {
           <AlbumPopUp
             album={selectedAlbum}
             onClose={() => setSelectedAlbum(null)}
+            onDeleted={() => setAlbums((prev) => prev.filter((a) => a.album_id !== selectedAlbum.album_id))}
           />
         )}
     </>

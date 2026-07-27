@@ -10,6 +10,7 @@ import User from './pages/User.tsx';
 import { Columns } from './pages/Columns.tsx';
 
 import { AudioProvider } from './context/AudioContext';
+import { PopupProvider } from './context/PopupContext';
 import Login from './pages/Login.tsx';
 import Welcome from './pages/Welcome.tsx';
 import RegisterUser from './pages/RegisterUser.tsx';
@@ -50,8 +51,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     {/* 3. Wrap RouterProvider with AudioProvider */}
     <AudioProvider getTrackUrl={getTrackAudioUrl}>
-      <RouterProvider router={router} />
-      
+      <PopupProvider>
+        <RouterProvider router={router} />
+      </PopupProvider>
     </AudioProvider>
   </StrictMode>,
 )

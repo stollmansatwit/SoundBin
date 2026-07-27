@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { ScrollableArtistAlbums } from '../scrollable/artist/ScrollableArtistAlbums';
 import { ScrollableArtistTracks} from '../scrollable/artist/ScrollableArtistTracks';
-import type { Artist, Album, Track, Playlist, PlaylistItem } from "../../types";
+import { ScrollableArtistPlaylist } from '../scrollable/artist/ScrollableArtistPlaylist';
+import { ScrollableArtistListenedTo } from '../scrollable/artist/ScrollableArtistListenedTo';
+import type { Artist, Album, Track } from "../../types";
 
 interface Props {
   artist: Artist;
@@ -10,10 +12,6 @@ interface Props {
 
 
 const DEFAULT_IMAGE = "/defaultAlbum.png"; 
-
-// Placeholder types for the future components to avoid errors in this file
-// These components will be imported later
-declare const ScrollableArtistPlaylists: React.FC<{ artistId: number }>;
 
 export default function ArtistPopUp({ artist, onClose }: Props) {
   const [albums, setAlbums] = useState<Album[]>([]);
@@ -62,12 +60,11 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
         }
 
         // Fetch playlist appearances count
-        // This is often a complex query. Assuming an endpoint exists for now.
-       // const playlistsRes = await fetch(`http://localhost:3000/api/artist-playlist-appearances?artistID=${artist.artist_id}`);
-        //if (playlistsRes.ok) {
-         // const playlists: PlaylistItem[] = await playlistsRes.json();
-          //setStats(prev => ({ ...prev, playlistAppearances: playlists.length }));
-       // }
+        const playlistsRes = await fetch(`${apiBaseUrl}/api/artist-playlists?artistID=${artist.artist_id}`);
+        if (playlistsRes.ok) {
+          const playlists: unknown[] = await playlistsRes.json();
+          setStats(prev => ({ ...prev, playlistAppearances: playlists.length }));
+        }
       } catch (error) {
         console.error("Failed to fetch artist stats:", error);
         // Fallback for demo purposes so the UI doesn't break if API is down
@@ -195,27 +192,13 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
           {/* Playlists */}
           <div className="mb-8">
             <h2 className="text-xl font-bold text-white mb-4">Featured In Playlists</h2>
-            {/* Replace with actual component later */}
-            {/* <ScrollableArtistPlaylists artistId={artist.artist_id} /> */}
-            <div className="bg-gray-800/50 p-4 rounded-lg text-gray-500 italic">
-              Playlists section placeholder (component ScrollableArtistPlaylists will go here)
-            </div>
+            <ScrollableArtistPlaylist artistId={artist.artist_id} />
           </div>
 
           {/* Recently Listened to */}
           <div className="mb-8">
             <h2 className="text-xl font-bold text-white mb-4">Recently Listened To</h2>
-            <div className="bg-gray-800/50 p-4 rounded-lg text-gray-500 italic">
-              Recently Listened section placeholder
-            </div>
-          </div>
-
-          {/* Featured On */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-white mb-4">Featured On</h2>
-            <div className="bg-gray-800/50 p-4 rounded-lg text-gray-500 italic">
-              Featured On section placeholder
-            </div>
+            <ScrollableArtistListenedTo artistId={artist.artist_id} />
           </div>
 
         </div>

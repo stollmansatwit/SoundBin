@@ -12,3 +12,7 @@
 - song name in playlist / album can be clicked on to bring to song
 - metadata editor (edit button component on songs/albums/artists/playlists with useEffect calling backend apis for editing database)
 - 
+
+API used
+- Deezer
+- MusicBrainz

@@ -1,17 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PlayButton } from "../buttons/PlayButton";
-import { type Album } from "../../types";
-import { type Track } from "../../types";
+import { PlayAlbum } from "../buttons/PlayAlbum";
+import { TrackOptionsMenu } from "../buttons/TrackOptionsMenu";
+import type { Album, Track } from "../../types";
 
 interface Props {
   album: Album;
   onClose: () => void;
+  /** Called when the album is deleted from the options menu, in addition to onClose. */
+  onDeleted?: () => void;
 }
 
-export default function AlbumPopUp({ album, onClose }: Props) {
+export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
   const [songs, setSongs] = useState<Track[]>([]);
   const [loadingTracks, setLoadingTracks] = useState(true);
   const [artistName, setArtistName] = useState<string>("");
+
+  // Handle closing when clicking outside the modal content
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
@@ -42,6 +48,21 @@ export default function AlbumPopUp({ album, onClose }: Props) {
     }
   }, [album?.album_id]);
 
+  // Escape key to close
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  // Handle click on overlay to close
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (overlayRef.current && e.target === overlayRef.current) {
+      onClose();
+    }
+  };
 
   // Helper Functions
   const formatDuration = (seconds: number) => {
@@ -82,28 +103,29 @@ export default function AlbumPopUp({ album, onClose }: Props) {
 
   // Construct the display string: "12 songs • 01:30:00" or "12 songs • 01:30:00 • 2024"
   const infoBar = (
-    <div className="text-sm text-gray-500 mb-6 border-b border-gray-700 pb-4">
+    <div className="text-sm text-gray-300 mb-6 border-b border-gray-700 pb-4">
       {songs.length} songs &nbsp;•&nbsp; {totalDuration} {displayYear ? `   •   ${displayYear}` : ''}
     </div>
   );
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      onClose();
-    }
-  });
 
   const coverSrc = getCoverImage(album.cover_art_url);
   // still needs updates but good starter
   return (
 
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4"
+      ref={overlayRef}
+      onClick={handleOverlayClick}
+    >
       <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-4xl w-full relative shadow-2xl overflow-hidden">
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white bg-red-600 px-4 py-1 rounded-md hover:bg-red-700 transition-colors z-10"
+          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10"
         >
-          Close
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
 
         <div className="flex flex-col md:flex-row">
@@ -116,14 +138,21 @@ export default function AlbumPopUp({ album, onClose }: Props) {
               className="w-64 h-64 aspect-square object-cover rounded-lg shadow-2xl border-2 border-gray-600 mb-4"
             />
             <h2 className="text-2xl font-bold text-white text-center">{album.title}</h2>
+            <PlayAlbum 
+              tracks={songs} 
+              album={album}
+              artistName={artistName}
+              onDeleted={() => { onDeleted?.(); onClose(); }}
+            />
+
           </div>
 
           {/* Right Side: Tracklist */}
           <div className="p-8 w-full md:w-2/3 bg-transparent relative z-0 overflow-hidden">
 
-            {/* Blurred background layer */}
+            {/* Blurred background layer (the album art itself) */}
             <div
-              className="absolute inset-0 -z-10"
+              className="absolute inset-0 -z-20"
               style={{
                 backgroundImage: `url(${coverSrc})`,
                 backgroundSize: "cover",
@@ -132,8 +161,11 @@ export default function AlbumPopUp({ album, onClose }: Props) {
                 transform: "scale(1.8)", // hides blurred edges from bleeding outside the container
               }}
             />
+            {/* Dark scrim + extra blur on top of the art so text stays readable */}
+            <div className="absolute inset-0 -z-10 bg-black/55 backdrop-blur-sm" />
+
             <h3 className="text-3xl font-bold text-white mb-1">{album.title}</h3>
-            <p className="text-lg text-gray-400 mb-1">{artistName || "Loading Artist..."}</p>
+            <p className="text-lg text-gray-300 mb-1">{artistName || "Loading Artist..."}</p>
 
             {/* Info Bar: [# songs - duration - year (optional)] */}
             {infoBar}
@@ -144,10 +176,10 @@ export default function AlbumPopUp({ album, onClose }: Props) {
                   <li key="loading" className="text-white opacity-50 italic">Loading tracks...</li>
                 ) : songs.length > 0 ? (
                   songs.map((song) => (
-                    <li key={song.track_id} className="flex items-center justify-between py-3 border-b border-gray-800 last:border-none hover:bg-white/5 px-2 rounded transition-colors">
+                    <li key={song.track_id} className="flex items-center justify-between py-3 border-b border-gray-700/60 last:border-none hover:bg-white/10 px-2 rounded transition-colors">
                       {/* Left side: Track Number and Title */}
                       <div className="flex items-center gap-4">
-                        <span className="text-gray-500 text-sm w-6">
+                        <span className="text-gray-300 text-sm w-6">
                           {song.albumSequence?.[0]?.sequence_number || songs.indexOf(song) + 1}
                         </span>
                         <span className="text-white font-medium">
@@ -156,7 +188,7 @@ export default function AlbumPopUp({ album, onClose }: Props) {
 
                       {/* Right side: Duration and Play Button */}
                       <div className="flex items-center gap-4">
-                        <span className="text-gray-400 text-sm">
+                        <span className="text-gray-300 text-sm">
                           {formatDuration(song.duration)}
                         </span>
                         <PlayButton
@@ -165,6 +197,12 @@ export default function AlbumPopUp({ album, onClose }: Props) {
                           artistId={album.artist_id}
                           index={songs.indexOf(song)}
                         />
+                        <TrackOptionsMenu
+                          track={song}
+                          artistId={album.artist_id}
+                          artistName={artistName}
+                          albumTitle={album.title}
+                        />
 
                       </div>
 
@@ -172,7 +210,7 @@ export default function AlbumPopUp({ album, onClose }: Props) {
 
                   ))
                 ) : (
-                  <li key="empty" className="text-gray-500">No tracks found.</li>
+                  <li key="empty" className="text-gray-300">No tracks found.</li>
                 )}
               </ul>
             </div>

@@ -15,6 +15,7 @@ import artistRoutes from './routes/artist_routes'
 import trackRoutes from './routes/track_routes'
 import statsRoutes from './routes/stats_routes'
 import playlistRoutes from './routes/playlist_routes'
+import activityRoutes from './routes/activity_routes'
 
 
 
@@ -117,6 +118,7 @@ app.use('/api', artistRoutes);
 app.use('/api', trackRoutes);
 app.use('/api', statsRoutes);
 app.use('/api', playlistRoutes);
+app.use('/api', activityRoutes);
 
 
 
@@ -168,22 +170,6 @@ app.get('/api/search', async (req: Request, res: Response) => {
 });
 
 
-
-app.get('/api/tracks', async (req: Request, res: Response) => {
-  try {
-    const tracks = await prisma.track.findMany({
-      select: {
-        track_id: true,
-        title: true,
-      },
-    });
-
-    res.json(tracks);
-  } catch (error) {
-    console.error("Error fetching tracks:", error);
-    res.status(500).json({ error: "Failed to fetch tracks" });
-  }
-});
 
 
 app.post('/api/auth/register', async (req: Request, res: Response) => {

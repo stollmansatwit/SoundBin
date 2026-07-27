@@ -178,9 +178,13 @@ export function SearchBar() {
       {selectedTrack && selectedAlbum && (
         <SongPopUp
           track={selectedTrack}
-          album_id={selectedAlbum.album_id}
-          onClose={closePopUp}
-        />
+          onClose={() => {
+            setSelectedTrack(null);
+            setSelectedAlbum(null)
+          }
+          }
+          album_id={selectedAlbum.album_id} />
+
       )}
       {selectedAlbum && !selectedTrack && (
         <AlbumPopUp

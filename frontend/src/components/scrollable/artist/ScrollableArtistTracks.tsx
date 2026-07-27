@@ -28,7 +28,7 @@ export function ScrollableArtistTracks({ tracks }: TrackListProps) {
   return (
      <>
       {/* Container handles the scrolling and spacing between items via gap */}
-      <div className="relative w-full overflow-x-auto whitespace-nowrap pb-6 pl-6 scrollbar-thumb-black">
+      <div className="relative w-full overflow-x-auto whitespace-nowrap pb-6 pl-6 scrollbar-thumb-black shadow-lg">
         <div className="inline-flex gap-6 px-2">
 
           {tracks.map((song) => (
