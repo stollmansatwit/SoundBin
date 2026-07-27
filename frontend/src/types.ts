@@ -32,6 +32,29 @@ export type TrackData = {
 }
 
 /** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *  Listening Activity Types
+ */
+export type RecentListen = {
+  activity_id: number;
+  played_at: string;
+  duration_played: number | null;
+  track_id: number;
+  title: string;
+  duration?: number;
+  cover_art_url?: string | null;
+  album_id: number | null;
+  album_title?: string | null;
+};
+
+export type TopTrack = {
+  track_id: number;
+  title: string;
+  album_title?: string | null;
+  cover_art_url?: string | null;
+  play_count: number;
+};
+
+/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  Artist Types
  */
 export type Artist = {
