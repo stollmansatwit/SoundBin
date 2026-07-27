@@ -40,7 +40,7 @@ export function ScrollablePlaylists() {
 
   return (
     <>
-      <p className="text-center text-lg font-bold sticky text-white">Albums</p>
+      <p className="text-center text-lg font-bold sticky text-white">Playlists</p>
       <div className="relative flex items-center scrollbar-thumb-black scrollbar-auto scrollbar ease-in duration-75 shadow-lg">
         <li className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth p-1">
           <div id="slider"></div>

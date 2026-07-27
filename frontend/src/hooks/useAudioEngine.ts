@@ -42,6 +42,7 @@ export function useAudioEngine(options: AudioEngineOptions): AudioContextType {
     togglePlay: () => engineRef.current.togglePlay(),
     seek: (time: number) => engineRef.current.seek(time),
     removeFromQueue: (index) => engineRef.current.removeFromQueue(index),
+    moveQueueItem: (fromIndex, toIndex) => engineRef.current.moveQueueItem(fromIndex, toIndex),
     playTrackAt: (index) => engineRef.current.playTrackAt(index),
   };
 }

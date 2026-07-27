@@ -96,6 +96,7 @@ export type AudioContextType = AudioEngineState & {
   toggleRepeat: () => void;
   playNext: () => Promise<void>; // Play from current queue index or next if ended
   removeFromQueue: (index: number) => void;
+  moveQueueItem: (fromIndex: number, toIndex: number) => void;
   playTrackAt: (index: number) => Promise<void>;
   playPrevious: () => void;
   pause: () => void;

@@ -145,10 +145,11 @@ export class AudioEngine {
   }
 
   /**
-   * Append tracks to the end of the current queue without interrupting
-   * whatever is currently playing. If nothing is queued yet, this
-   * behaves like starting a fresh queue at index 0 (but does not
-   * auto-play — callers can togglePlay() themselves if desired).
+   * Insert tracks so they play next — directly after whatever is
+   * currently playing — rather than appending to the end of the queue.
+   * If nothing is queued yet, this behaves like starting a fresh queue
+   * at index 0 (but does not auto-play — callers can togglePlay()
+   * themselves if desired).
    * @param tracks
    */
   public addToQueue(tracks: Track[]) {
@@ -163,8 +164,12 @@ export class AudioEngine {
       return;
     }
 
+    const insertAt = this.state.queueIndex + 1;
+    const newQueue = [...this.state.currentQueue];
+    newQueue.splice(insertAt, 0, ...tracks);
+
     this.updateState({
-      currentQueue: [...this.state.currentQueue, ...tracks],
+      currentQueue: newQueue,
     });
   }
 
@@ -199,6 +204,39 @@ export class AudioEngine {
       queueIndex: newIndex,
       hasQueue: newQueue.length > 0
     });
+  }
+
+  /**
+   * Reorder an upcoming track within the queue (drag & drop support).
+   * Only tracks that come after the currently playing track may be moved,
+   * and a track can never be dragged above the "next song" slot
+   * (i.e. queueIndex + 1) — it can only ever be brought as far forward
+   * as directly after the currently playing track.
+   * @param fromIndex Index of the track being dragged
+   * @param toIndex Desired destination index
+   */
+  public moveQueueItem(fromIndex: number, toIndex: number) {
+    if (!this.state.hasQueue) return;
+
+    const minIndex = this.state.queueIndex + 1;
+
+    // Can't move the currently playing track (or anything at/behind it).
+    if (fromIndex <= this.state.queueIndex || fromIndex >= this.state.currentQueue.length) return;
+
+    const queue = [...this.state.currentQueue];
+
+    let target = Math.max(minIndex, toIndex);
+    target = Math.min(target, queue.length - 1);
+
+    if (fromIndex === target) return;
+
+    const [moved] = queue.splice(fromIndex, 1);
+    queue.splice(target, 0, moved);
+
+    // queueIndex itself never shifts here since both fromIndex and target
+    // are strictly after it — the currently playing track's position and
+    // identity are unaffected.
+    this.updateState({ currentQueue: queue });
   }
 
   /**
