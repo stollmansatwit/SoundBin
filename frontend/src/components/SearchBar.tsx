@@ -11,6 +11,7 @@ type SearchResult = {
 
 export function SearchBar() {
   const [albums, setAlbums] = useState<Album[]>([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
   const [name, setName] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searched, setSearched] = useState(false);
@@ -75,6 +76,24 @@ export function SearchBar() {
       .finally(() => {
 
       });
+
+    
+    fetch(`${apiBaseUrl}/api/tracks`)
+      .then((response) => {
+        if (!response.ok) {
+          console.log(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data: Track[]) => {
+        setTracks(data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch tracks:", error);
+      })
+      .finally(() => {
+
+      });
   }, []);
 
   const handleClick = (r: SearchResult) => {
@@ -89,19 +108,24 @@ export function SearchBar() {
       return;
     }
     else if (r.type === 'song') {
-      const fullTrack: Track = {
-        title: r.name,
-        track_id: 0,
-        duration: 0,
-        album_id: 0
-      };
-      const fullAlbum = albums.find((a) => a.album_id === Number(r.id));
-      if (fullAlbum) {
-        setSelectedAlbum(fullAlbum);
-      } else {
-        console.warn(`Album with id ${r.id} not found in loaded albums`, r);
+      // r.id is the TRACK's id here, not an album id — resolve the real
+      // track first, then use ITS album_id to find the matching album.
+      const fullTrack = tracks.find((t) => t.track_id === Number(r.id));
+
+      if (!fullTrack) {
+        console.warn(`Track with id ${r.id} not found in loaded tracks`, r);
+        return;
       }
+
+      const fullAlbum = albums.find((a) => a.album_id === fullTrack.album_id);
+
+      if (!fullAlbum) {
+        console.warn(`Album with id ${fullTrack.album_id} not found for track`, fullTrack);
+        return;
+      }
+
       setSelectedTrack(fullTrack);
+      setSelectedAlbum(fullAlbum);
       return;
     }
     console.log("Clicked on search result:", r);
@@ -119,6 +143,7 @@ export function SearchBar() {
     setSelectedTrack(null);
     //setSelectedArtist(null);
   }
+
 
   return (
     <div key={reloadKey}>
@@ -153,18 +178,14 @@ export function SearchBar() {
       {selectedTrack && selectedAlbum && (
         <SongPopUp
           track={selectedTrack}
-          onClose={() => {
-            setSelectedTrack(null);
-            setSelectedAlbum(null)
-          }
-          }
-          album={selectedAlbum} />
-
+          album_id={selectedAlbum.album_id}
+          onClose={closePopUp}
+        />
       )}
       {selectedAlbum && !selectedTrack && (
         <AlbumPopUp
           album={selectedAlbum}
-          onClose={() => setSelectedAlbum(null)} />
+          onClose={closePopUp} />
       )}
 
 
@@ -177,4 +198,3 @@ export function SearchBar() {
     </div>
   );
 }
-

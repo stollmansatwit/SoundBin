@@ -24,7 +24,7 @@ export default function Login() {
     // Authentication logic here (e.g., call an API to verify credentials)
 
 
-    
+
 
     async function handleSubmit(event: React.ChangeEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -33,37 +33,36 @@ export default function Login() {
         const username = formData.get('username') as string;
         const password = formData.get('password') as string;
 
-        console.log("Username:", username);
-        console.log("Password:", password);
 
         // Check if the user is already authenticated
-        const isAuthenticated = localStorage.getItem('isAuthenticated');
-        if (isAuthenticated) {
-            navigate('/home'); // Navigate to the App.tsx page if already authenticated
-        }
-        else {
-            fetch('http://localhost:3000/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password }),
-            })
-                .then(response => {
-                    if (response.ok) {
-                        localStorage.setItem('isAuthenticated', 'true'); // Store authentication status
-                        navigate('/home'); // Navigate to the App.tsx page after successful authentication
-                        console.log(response);
-                    } else {
-                        setError('Authentication failed');
-                        console.error('Authentication failed');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error during authentication:', error);
+        const token = localStorage.getItem('token');
+        if (token) {
+            navigate('/home');
+        } else {
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
                 });
-        }
 
+                const data = await response.json();
+                console.log("Response data:", data);
+
+                
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    navigate('/home');
+                } else {
+                    setError(data.error || 'Authentication failed');
+                    console.error('Authentication failed');
+                }
+            } catch (error) {
+                console.error('Error during authentication:', error);
+                setError('Something went wrong. Please try again.');
+            }
+        }
 
 
 

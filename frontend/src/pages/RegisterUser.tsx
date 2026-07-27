@@ -28,9 +28,6 @@ export default function RegisterUser() {
         const username = formData.get('username') as string;
         const password = formData.get('password') as string;
 
-        console.log("Username:", username);
-        console.log("Password:", password);
-
         // Registration logic here (e.g., call an API to register user)
         fetch('http://localhost:3000/api/auth/register', {
             method: 'POST',

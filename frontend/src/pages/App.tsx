@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollableAlbums } from '../components/scrollable/ScrollableAlbums';
 import { ScrollableArtists } from '../components/scrollable/ScrollableArtists';
 import { ScrollableTracks } from '../components/scrollable/ScrollableTracks';
@@ -14,6 +14,7 @@ import { PlaybackControlBar } from '../components/playback/PlaybackControlBar';
 
 
 export default function App() {
+
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
 
@@ -23,6 +24,25 @@ export default function App() {
 
   //const getTrackUrl = 
 
+  const playerWrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = playerWrapperRef.current;
+    if (!el) return;
+
+    const updateHeight = () => {
+      // bottom-4 = 1rem gap below the player, plus its own height
+      const height = el.offsetHeight + 100;
+      document.documentElement.style.setProperty('--player-offset', `${height}px`);
+    };
+
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
 
@@ -37,10 +57,15 @@ export default function App() {
       <ScrollableArtists />
       <ScrollableTracks />
       {showUpload && (
-        <UploadButton onClose={() => setShowUpload(false)}/>
+        <UploadButton onClose={() => setShowUpload(false)} />
       )}
-      <div className={`fixed bottom-4 z-40 w-[calc(100%-2rem)] max-w-3xl mx-auto ${getLeftPosition()}`}>
+      <div style={{ paddingBottom: 'var(--player-offset)' }} >
+      <div
+        ref={playerWrapperRef}
+        className={`fixed bottom-4 z-40 w-[calc(100%-2rem)] max-w-3xl mx-auto ${getLeftPosition()}`}
+      >
         <PlaybackControlBar />
+      </div>
       </div>
     </div>
 

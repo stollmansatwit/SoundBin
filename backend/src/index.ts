@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
@@ -223,17 +223,50 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
 });
 
 
+// middleware/auth.ts
+
+import jwt from 'jsonwebtoken';
+
+export interface AuthRequest extends Request {
+  userId?: number;
+}
+
+export function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+  if (!token) {
+    return res.status(401).json({ error: "No token provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: number };
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: "Invalid or expired token" });
+  }
+}
 
 
 // login endpoint needs to compare hashed password from the database with the password provided by the user. 
 // Use bcrypt to compare the hashed password with a hashed version of the plain text password.
+
+
 app.post('/api/auth/login', async (req: Request, res: Response) => {
   const { username, password } = req.body;
+
+  if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: "Username and password are required" });
+  }
+
   try {
     const user = await prisma.user.findUnique({
       select: {
+        user_id: true,
         username: true,
-        password_hash: true, // Assuming the password is stored as a hashed value in the database
+        password_hash: true,
+        is_active: true,
       },
       where: { username },
     });
@@ -241,20 +274,61 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
-    
+
+    if (!user.is_active) {
+      return res.status(403).json({ error: "Account is inactive" });
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    // If we reach here, the user is authenticated
-    res.json({ message: "Login successful" });
+    const token = jwt.sign(
+      { userId: user.user_id, username: user.username },
+      process.env.JWT_SECRET as string,
+      { expiresIn: '1h' }
+    );
+
+    // Optionally update last_login
+    await prisma.user.update({
+      where: { user_id: user.user_id },
+      data: { last_login: new Date() },
+    });
+
+    res.json({ message: "Login successful", token });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ error: "Login failed" });
   }
 });
 
+
+
+// get /api/user endpoint to return the user info based on the token provided in the Authorization header
+app.get('/api/user', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { user_id: req.userId },
+      select: {
+        user_id: true,
+        username: true,
+        display_name: true,
+        is_active: true,
+        last_login: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    res.status(500).json({ error: "Failed to fetch user info" });
+  }
+});
 
 // Server startup
 app.listen(port, () => {

@@ -57,7 +57,6 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
     }
   }, []);
 
-
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-gray-700 shadow-2xl">

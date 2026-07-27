@@ -5,7 +5,9 @@
 
 import { Link } from "react-router-dom";
 
+
 export default function Welcome() {
+    
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-orange-400 to-gray-500">
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
