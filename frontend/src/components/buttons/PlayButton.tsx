@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import { useAudio } from "../../context/AudioContext";
 import type { Track } from "../../types"
+import { API_BASE_URL } from '../../config';
 
 interface PlayButtonProps {
   trackId: number;
@@ -24,7 +25,6 @@ export function PlayButton({ trackId, albumId, artistId, index,  className = "" 
 
   
   const handleClick = async () => {
-    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
       // If currently playing this track, just toggle play/pause (instant)
     if (isPlaying && currentTrackId === trackId) {
       togglePlay();
@@ -39,14 +39,14 @@ export function PlayButton({ trackId, albumId, artistId, index,  className = "" 
         if (!artistId) return;
         let artistName = "Unknown Artist";
         try{
-          const response = await fetch (`${apiBaseUrl}/api/artist-name?id=${artistId}`);
+          const response = await fetch (`${API_BASE_URL}/api/artist-name?id=${artistId}`);
           if (!response.ok) throw new Error(`Failed to fetch artist name: ${response.statusText}`);
           const rawArtistName = await response.json();
           artistName = rawArtistName.name || "Unknown Artist";
         } catch (error) {
           console.error("[PlayButton] Error fetching artist name:", error);
         }
-        const response = await fetch(`${apiBaseUrl}/api/album-track-list?id=${albumId}`);
+        const response = await fetch(`${API_BASE_URL}/api/album-track-list?id=${albumId}`);
         if (!response.ok) throw new Error(`Failed to fetch album tracks: ${response.statusText}`);
         const albumTracksRaw = await response.json()
         const albumTracks: Track[] = albumTracksRaw.map((rawTrack: any) => ({
@@ -71,7 +71,7 @@ export function PlayButton({ trackId, albumId, artistId, index,  className = "" 
       if (!artistId) return;
       let artistName = "Unknown Artist";
       try{
-        const response = await fetch (`${apiBaseUrl}/api/artist-name?id=${artistId}`);
+        const response = await fetch (`${API_BASE_URL}/api/artist-name?id=${artistId}`);
         if (!response.ok) throw new Error(`Failed to fetch artist name: ${response.statusText}`);
         const rawArtistName = await response.json();
         artistName = rawArtistName.name || "Unknown Artist";
@@ -80,7 +80,7 @@ export function PlayButton({ trackId, albumId, artistId, index,  className = "" 
       }
       if (!trackId) return;
       try{
-        const response = await fetch (`${apiBaseUrl}/api/tracks/${trackId}`);
+        const response = await fetch (`${API_BASE_URL}/api/tracks/${trackId}`);
         if (!response.ok) throw new Error(`Failed to fetch track: ${response.statusText}`);
         const rawData = await response.json();
         const trackData: Track = {

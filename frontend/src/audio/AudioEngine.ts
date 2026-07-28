@@ -1,5 +1,6 @@
 import type { AudioState, RepeatMode, AudioEngineState, AudioContextType, AudioEngineOptions} from "../types";
 import type { Track } from '../types';
+import { API_BASE_URL } from '../config';
 
 
 type StateListener = (state: AudioState) => void;
@@ -14,7 +15,12 @@ export class AudioEngine {
   // Listen-tracking: id of the in-progress Activity row for whatever is currently loaded,
   // so we can PATCH in the real duration_played once it stops/switches/ends.
   private currentActivityId: number | null = null;
-  private readonly apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
+  private readonly apiBaseUrl: string = API_BASE_URL;
+
+  // Incremented on every load. playNextAt() awaits twice (URL resolution, then
+  // play()), so a fast Next-Next can leave an older load finishing after a
+  // newer one; the stale load must not write state. See playNextAt().
+  private loadToken = 0;
 
   // Singleton pattern ensures only one instance exists across the app
   private static instance: AudioEngine | null = null;
@@ -385,6 +391,9 @@ export class AudioEngine {
     const track = this.state.currentQueue[currentIndex];
     if (!track) return;
 
+    // Claim this load. Any load started after this one invalidates it.
+    const token = ++this.loadToken;
+
     try {
       let url: string | null = null;
       if (track.files && track.files.length > 0) {
@@ -402,11 +411,17 @@ export class AudioEngine {
           return;
       }
 
+      // A newer load started while we were resolving the URL — drop this one.
+      if (token !== this.loadToken) return;
+
       // ALWAYS set src when switching tracks or starting new. 
       // This ensures we don't accidentally resume an old buffered chunk from a different song if logic was flawed.
       this.audio.src = url;
       
       await this.audio.play();
+
+      // Superseded while play() was starting — the newer load owns the state now.
+      if (token !== this.loadToken) return;
 
       // Update state to reflect what we just started playing
       this.updateState({
@@ -423,6 +438,11 @@ export class AudioEngine {
       this.startActivity(track.track_id); // log this listen
 
     } catch (error) {
+      // Changing audio.src mid-play rejects the pending play() with an
+      // AbortError. That's expected when a newer load took over, so don't
+      // surface it as an error or stomp on the newer load's state.
+      if (token !== this.loadToken) return;
+
       console.error('[AudioEngine] Play error:', error);
       this.updateState({
         error: 'Failed to play audio',
@@ -456,10 +476,17 @@ export class AudioEngine {
     await this.playNextAt(nextIndex);
   }
 
+  /**
+   * Plays a specific position in the queue (e.g. clicking a row in QueueList).
+   *
+   * Goes straight to playNextAt. Routing through playNext() would play
+   * `index + 1`, because playNext() advances *relative* to queueIndex — so
+   * setting queueIndex to `index` first and then calling it skipped a track.
+   * @param index Position in currentQueue
+   */
   public async playTrackAt(index: number) {
-   // Helper to set queueIndex and play
-   this.updateState({ queueIndex: index });
-   await this.playNext(); // This will read new state and play
+    if (index < 0 || index >= this.state.currentQueue.length) return;
+    await this.playNextAt(index);
   }
 
   /**
@@ -483,56 +510,53 @@ export class AudioEngine {
    * @returns 
    */
   public togglePlay() {
+    // 1. Something is playing → pause it.
     if (this.state.isPlaying && this.state.currentTrackId !== null) {
       this.pause();
-    } else { // user wants play or unpause
-      if(!this.state.hasQueue || !this.state.currentQueue.length) {
-        console.warn("No queue to play");
-        return;
-      }
-      let indexToPlay = this.state.queueIndex;
-
-      if (indexToPlay >= this.state.currentQueue.length) {
-         if (this.state.repeatMode === 'off') {
-          return; // Nothing left to play
-        } else if (this.state.repeatMode === 'all') {
-          indexToPlay = 0;
-        } else {
-          // Should be handled by ended event usually, but safe guard
-          this.updateState({ currentTrackId: null, isPlaying: false });
-          return;
-        }
-      }
-      
-      if (this.state.isPlaying) {
-        this.pause();
-      } else {
-        if (!this.audio.src) {
-          this.playNextAt(indexToPlay);
-        }
-        const currentTargetTrack = this.state.currentQueue[indexToPlay];
-        const isSameTrack = currentTargetTrack && this.state.currentTrackId === currentTargetTrack.track_id;
-
-        if (isSameTrack && this.audio.src) {
-          // Resume!
-          try {
-            this.audio.play();
-            this.updateState({ isPlaying: true });
-          } catch (error) {
-            console.error('[AudioEngine] Resume error:', error);
-            this.updateState({
-              error: 'Failed to resume audio',
-              isPlaying: false
-            });
-          }
-        } else {
-          // Switch Track / Start New
-          this.playNextAt(indexToPlay);
-        }
-      }
-     
-      
+      return;
     }
+
+    if (!this.state.hasQueue || !this.state.currentQueue.length) {
+      console.warn("No queue to play");
+      return;
+    }
+
+    let indexToPlay = this.state.queueIndex;
+
+    if (indexToPlay < 0) {
+      indexToPlay = 0;
+    } else if (indexToPlay >= this.state.currentQueue.length) {
+      // We've run off the end of the queue.
+      if (this.state.repeatMode === 'all') {
+        indexToPlay = 0;
+      } else {
+        return; // Nothing left to play.
+      }
+    }
+
+    const targetTrack = this.state.currentQueue[indexToPlay];
+    if (!targetTrack) return;
+
+    const isSameTrack = this.state.currentTrackId === targetTrack.track_id;
+
+    // 2. The paused track is still loaded → resume it where it left off.
+    //    audio.play() is a promise, so the old try/catch never caught a
+    //    rejection here; handle it on the promise instead.
+    if (isSameTrack && this.audio.src && !this.audio.ended) {
+      this.audio.play()
+        .then(() => this.updateState({ isPlaying: true }))
+        .catch((error) => {
+          console.error('[AudioEngine] Resume error:', error);
+          this.updateState({
+            error: 'Failed to resume audio',
+            isPlaying: false
+          });
+        });
+      return;
+    }
+
+    // 3. Otherwise load and start the target track.
+    void this.playNextAt(indexToPlay);
   }
 
   /**
@@ -612,31 +636,33 @@ export class AudioEngine {
          return;
       }
 
-      let nextIndex = this.state.queueIndex + 1;
-      
-      // Check Repeat One (repeat the same track)
+      // Repeat-one: replay the same index. playNextAt reloads the source and
+      // opens a fresh Activity row, so each repeat is counted as its own listen.
       if (this.state.repeatMode === 'one') {
-        nextIndex = this.state.queueIndex;
-      } else if (nextIndex >= this.state.currentQueue.length) {
-        // End of queue
-        if (this.state.repeatMode === 'all') {
-          nextIndex = 0; // Repeat all
-        } else {
-           // No repeat, just stop
-           this.finalizeActivity();
-           this.updateState({ currentTrackId: null, isPlaying: false });
-           return;
-        }
+        await this.playNextAt(this.state.queueIndex);
+        return;
       }
 
-      // Update index and play next
-      await this.playNext(); // playNext will use the updated state from updateState? 
-      // Note: This is tricky because playNext reads state. 
-      // We need to update queueIndex BEFORE calling playNext if we changed it.
-      
-      // Let's refine: directly manipulate index then call internal play logic
-      this.updateState({ queueIndex: nextIndex });
-      await this.playNext();
+      const nextIndex = this.state.queueIndex + 1;
+
+      if (nextIndex >= this.state.currentQueue.length) {
+        if (this.state.repeatMode === 'all') {
+          await this.playNextAt(0);
+          return;
+        }
+        // End of queue with repeat off — stop here.
+        this.finalizeActivity();
+        this.updateState({ currentTrackId: null, isPlaying: false });
+        return;
+      }
+
+      // Resolve the destination once, then play it once.
+      //
+      // The previous version called playNext() (which advances *relative* to
+      // queueIndex), then set queueIndex to the value it had already computed
+      // and called playNext() a second time — so every track that finished
+      // naturally advanced the queue by two.
+      await this.playNextAt(nextIndex);
     });
   }
 

@@ -1,8 +1,8 @@
 import type React from "react";
 import { useState } from "react";
 import type { Playlist } from "../../types";
+import { API_BASE_URL } from '../../config';
 
-const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
 interface Props {
   playlist: Playlist;
@@ -18,7 +18,7 @@ export default function EditPlaylistModal({ playlist, onClose, onSaved }: Props)
   const [error, setError] = useState<string | null>(null);
 
   const currentCover = playlist.cover_art_url
-    ? `${apiBaseUrl}/assets/${playlist.cover_art_url.split('/').pop()}`
+    ? `${API_BASE_URL}/assets/${playlist.cover_art_url.split('/').pop()}`
     : "/defaultAlbum.png";
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +39,7 @@ export default function EditPlaylistModal({ playlist, onClose, onSaved }: Props)
       if (imageFile) {
         const formData = new FormData();
         formData.append("image", imageFile);
-        const uploadRes = await fetch(`${apiBaseUrl}/api/upload-image`, {
+        const uploadRes = await fetch(`${API_BASE_URL}/api/upload-image`, {
           method: "POST",
           body: formData,
         });
@@ -49,7 +49,7 @@ export default function EditPlaylistModal({ playlist, onClose, onSaved }: Props)
         }
       }
 
-      const res = await fetch(`${apiBaseUrl}/api/playlists/${playlist.playlist_id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/playlists/${playlist.playlist_id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, ...(cover_art_url ? { cover_art_url } : {}) }),

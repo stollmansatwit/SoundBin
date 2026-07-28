@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { PlayButton } from "../buttons/PlayButton";
 import { TrackOptionsMenu } from "../buttons/TrackOptionsMenu";
 import {type Album, type Track} from "../../types";
+import { API_BASE_URL } from '../../config';
 
 interface Props {
   album_id: number;
@@ -18,20 +19,19 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
   // Handle closing when clicking outside the modal content
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
 
   const getCoverImage = (path?: string) => {
     if (!path) return "/defaultAlbum.png";
     const file = path.split("/").pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   const coverSrc = getCoverImage(track.cover_art_url);
 
   useEffect(() => {
 
-    fetch(`${apiBaseUrl}/api/tracks/${track.track_id}`)
+    fetch(`${API_BASE_URL}/api/tracks/${track.track_id}`)
       .then((res) => res.json())
       .then((data: Track) => {
         setSong(data || null);
@@ -42,7 +42,7 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
 
       // Fetch artist name if artist_id exists
     if (track.track_id) {
-      fetch(`${apiBaseUrl}/api/track-artist?trackID=${track.track_id}`)
+      fetch(`${API_BASE_URL}/api/track-artist?trackID=${track.track_id}`)
         .then((res) => res.json())
         .then((data: any) => {
           setArtistName(data.contributors[0].artist.name || "Unknown Artist");
@@ -50,7 +50,7 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
         })
         .catch(err => console.error("Failed to fetch artist:", err));
 
-      fetch(`${apiBaseUrl}/api/album-title?albumID=${album_id}`)
+      fetch(`${API_BASE_URL}/api/album-title?albumID=${album_id}`)
         .then((res) => res.json())
         .then((data: Album) => {
           setAlbumName(data.title);

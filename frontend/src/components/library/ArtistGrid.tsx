@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Album } from '../../types';
+import { API_BASE_URL } from '../../config';
 
-const API_BASE_URL = "http://localhost:3000";
 
 type CombinedItem = {
   artist_id: number;

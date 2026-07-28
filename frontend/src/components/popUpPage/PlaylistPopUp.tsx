@@ -3,6 +3,7 @@ import { PlayPlaylist } from "../buttons/PlayPlaylist";
 import { TrackOptionsMenu } from "../buttons/TrackOptionsMenu";
 import { useAudio } from "../../context/AudioContext";
 import type { Playlist, Track } from "../../types";
+import { API_BASE_URL } from '../../config';
 
 interface Props {
   playlist: Playlist;
@@ -25,7 +26,6 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
   // Handle closing when clicking outside the modal content
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
   useEffect(() => {
     setCurrentPlaylist(playlist);
@@ -35,7 +35,7 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
     if (!currentPlaylist?.playlist_id) return;
     setLoadingTracks(true);
 
-    fetch(`${apiBaseUrl}/api/playlist-tracks?id=${currentPlaylist.playlist_id}`)
+    fetch(`${API_BASE_URL}/api/playlist-tracks?id=${currentPlaylist.playlist_id}`)
       .then((res) => res.json())
       .then((data: Track[] = []) => {
         setSongs(data);
@@ -46,7 +46,7 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
         // different artist/album.
         Promise.all(
           data.map((track) =>
-            fetch(`${apiBaseUrl}/api/track-artist?trackID=${track.track_id}`)
+            fetch(`${API_BASE_URL}/api/track-artist?trackID=${track.track_id}`)
               .then((res) => (res.ok ? res.json() : null))
               .then((artistData) => {
                 const contributor = artistData?.contributors?.[0]?.artist;
@@ -124,7 +124,7 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
   const getCoverImage = (path?: string) => {
     if (!path || path == "" || path == null) { return DEFAULT_IMAGE; }
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   const coverSrc = getCoverImage(currentPlaylist.cover_art_url);

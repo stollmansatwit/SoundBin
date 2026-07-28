@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import SongPopUp from '../../popUpPage/SongPopUp';
 import type { RecentListen, Track } from '../../../types';
+import { API_BASE_URL } from '../../../config';
 
 const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets once better image found
 const MAX_SONG_NAME_LENGTH = 13;
@@ -34,13 +35,12 @@ export function ScrollableArtistListenedTo({ artistId }: ArtistListenedToProps) 
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<RecentListen | null>(null);
 
-  const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
   useEffect(() => {
     if (!artistId) return;
 
     setLoading(true);
-    fetch(`${apiBaseUrl}/api/artist-recent-listens?artistID=${artistId}`)
+    fetch(`${API_BASE_URL}/api/artist-recent-listens?artistID=${artistId}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
@@ -61,7 +61,7 @@ export function ScrollableArtistListenedTo({ artistId }: ArtistListenedToProps) 
   const getCoverImage = (path?: string | null) => {
     if (!path) { return DEFAULT_IMAGE; }
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   if (loading) {

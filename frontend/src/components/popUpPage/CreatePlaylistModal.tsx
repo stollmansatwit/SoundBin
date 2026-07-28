@@ -1,8 +1,8 @@
 import type React from "react";
 import { useState } from "react";
 import type { Playlist, Track } from "../../types";
+import { API_BASE_URL } from '../../config';
 
-const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 const DEFAULT_IMAGE = "/defaultAlbum.png";
 
 interface Props {
@@ -34,7 +34,7 @@ export default function CreatePlaylistModal({ onClose, onCreated, fallbackCoverT
   };
 
   const fallbackPreview = fallbackCoverTrack?.cover_art_url
-    ? `${apiBaseUrl}/assets/${fallbackCoverTrack.cover_art_url.split('/').pop()}`
+    ? `${API_BASE_URL}/assets/${fallbackCoverTrack.cover_art_url.split('/').pop()}`
     : DEFAULT_IMAGE;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,7 +50,7 @@ export default function CreatePlaylistModal({ onClose, onCreated, fallbackCoverT
       if (imageFile) {
         const formData = new FormData();
         formData.append("image", imageFile);
-        const uploadRes = await fetch(`${apiBaseUrl}/api/upload-image`, {
+        const uploadRes = await fetch(`${API_BASE_URL}/api/upload-image`, {
           method: "POST",
           body: formData,
         });
@@ -64,7 +64,7 @@ export default function CreatePlaylistModal({ onClose, onCreated, fallbackCoverT
       }
       // else: leave null, popups already fall back to DEFAULT_IMAGE when rendering.
 
-      const res = await fetch(`${apiBaseUrl}/api/playlists`, {
+      const res = await fetch(`${API_BASE_URL}/api/playlists`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim(), cover_art_url }),

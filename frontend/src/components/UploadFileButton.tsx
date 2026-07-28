@@ -5,6 +5,7 @@
  * @version 0.1
  */
 import React from 'react';
+import { API_BASE_URL } from '../config';
 // type AlbumArt = {
 //     url: string,
 // };
@@ -38,7 +39,7 @@ export function UploadButton({ onClose }: UploadButtonProps) {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/upload', {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
         body: formData,
       });

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PlaylistPopUp from "../../popUpPage/PlaylistPopUp";
 import type { Playlist } from "../../../types";
+import { API_BASE_URL } from '../../../config';
 
 const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets once better image found
 
@@ -13,13 +14,12 @@ export function ScrollableArtistPlaylist({ artistId }: ArtistPlaylistsProps) {
   const [loading, setLoading] = useState(true);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
 
-  const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
   useEffect(() => {
     if (!artistId) return;
 
     setLoading(true);
-    fetch(`${apiBaseUrl}/api/artist-playlists?artistID=${artistId}`)
+    fetch(`${API_BASE_URL}/api/artist-playlists?artistID=${artistId}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
@@ -40,7 +40,7 @@ export function ScrollableArtistPlaylist({ artistId }: ArtistPlaylistsProps) {
   const getCoverImage = (path?: string) => {
     if (!path || path == "" || path == null) { return DEFAULT_IMAGE; }
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   if (loading) {

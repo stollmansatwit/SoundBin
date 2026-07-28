@@ -3,6 +3,7 @@ import { PlayButton } from "../buttons/PlayButton";
 import { PlayAlbum } from "../buttons/PlayAlbum";
 import { TrackOptionsMenu } from "../buttons/TrackOptionsMenu";
 import type { Album, Track } from "../../types";
+import { API_BASE_URL } from '../../config';
 
 interface Props {
   album: Album;
@@ -19,12 +20,11 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
   // Handle closing when clicking outside the modal content
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
   useEffect(() => {
     if (!album?.album_id) return;
     setLoadingTracks(true);
-    fetch(`${apiBaseUrl}/api/album-track-list?id=${album.album_id}`)
+    fetch(`${API_BASE_URL}/api/album-track-list?id=${album.album_id}`)
       .then((res) => res.json())
       .then((data: Track[] = []) => {
 
@@ -38,7 +38,7 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
 
     // Fetch artist name if artist_id exists
     if (album.artist_id) {
-      fetch(`${apiBaseUrl}/api/artist-name?id=${album.artist_id}`)
+      fetch(`${API_BASE_URL}/api/artist-name?id=${album.artist_id}`)
         .then((res) => res.json())
         .then((data: any) => {
           // Assuming the response is { name: "Artist Name" } or similar
@@ -83,7 +83,7 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
       return "/defaultAlbum.png";
     }
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   const getYear = (date: any) => {

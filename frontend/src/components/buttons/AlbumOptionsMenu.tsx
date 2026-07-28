@@ -6,8 +6,8 @@ import AddToPlaylistPopup from "../popUpPage/AddToPlaylistPopup";
 import EditAlbumModal from "../popUpPage/EditAlbumModal";
 import ConfirmDialog from "../popUpPage/ConfirmDialog";
 import type { Album, Track } from "../../types";
+import { API_BASE_URL } from '../../config';
 
-const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
 interface Props {
   album: Album;
@@ -45,7 +45,7 @@ export function AlbumOptionsMenu({ album, tracks, artistName, className, onDelet
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`${apiBaseUrl}/api/albums/${album.album_id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE_URL}/api/albums/${album.album_id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete album");
       setShowDeleteConfirm(false);
       onDeleted?.();

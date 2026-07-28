@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import AlbumPopUp from "../../popUpPage/AlbumPopUp";
 import type { Album } from "../../../types";
+import { API_BASE_URL } from '../../../config';
 
 const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets once better image found\
 
@@ -13,7 +14,6 @@ export function ScrollableArtistAlbums({ albums }: AlbumListProps) {
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
 
 
-  const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
   const getCoverImage = (path?: string) => {
     if (!path || path == "" || path == null) {
@@ -21,7 +21,7 @@ export function ScrollableArtistAlbums({ albums }: AlbumListProps) {
     }
 
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   const displayAlbum = Array.isArray(albums) ? albums : [];

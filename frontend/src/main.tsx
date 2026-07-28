@@ -15,6 +15,7 @@ import Login from './pages/Login.tsx';
 import Welcome from './pages/Welcome.tsx';
 import RegisterUser from './pages/RegisterUser.tsx';
 import { ProtectedRoute } from './components/login/ProtectedRoute.tsx';
+import { API_BASE_URL } from './config';
 
 const router = createBrowserRouter([
   { path: '/', element: <Welcome /> },
@@ -36,11 +37,10 @@ const router = createBrowserRouter([
 
 
 const getTrackAudioUrl = async (storage_path_url: string): Promise<string | null> => {
-  const apiBaseUrl = 'http://localhost:3000'; 
  
   try {
     const publicPath = storage_path_url.replace('/app/uploads/','');
-    return `${apiBaseUrl}/${publicPath}`;
+    return `${API_BASE_URL}/${publicPath}`;
   } catch (error) {
     console.error('Error resolving track URL:', error);
     return null;

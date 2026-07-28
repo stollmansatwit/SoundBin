@@ -4,6 +4,7 @@ import { ScrollableArtistTracks} from '../scrollable/artist/ScrollableArtistTrac
 import { ScrollableArtistPlaylist } from '../scrollable/artist/ScrollableArtistPlaylist';
 import { ScrollableArtistListenedTo } from '../scrollable/artist/ScrollableArtistListenedTo';
 import type { Artist, Album, Track } from "../../types";
+import { API_BASE_URL } from '../../config';
 
 interface Props {
   artist: Artist;
@@ -28,7 +29,6 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
 
-  const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
   useEffect(() => {
     if (!artist?.artist_id) return;
@@ -43,7 +43,7 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
         setLoading(true);
         
         // Fetch albums count
-        const albumsRes = await fetch(`${apiBaseUrl}/api/artist-albums?artistID=${artist.artist_id}`);
+        const albumsRes = await fetch(`${API_BASE_URL}/api/artist-albums?artistID=${artist.artist_id}`);
         if (albumsRes.ok) {
           const albumsJSON: Album[] = await albumsRes.json();
           console.log("ARITST ALBUMS", JSON.stringify(albumsJSON));
@@ -52,7 +52,7 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
         }
 
         // Fetch tracks count (this might be a direct endpoint or derived from albums)
-        const tracksRes = await fetch(`${apiBaseUrl}/api/artist-tracks?artistID=${artist.artist_id}`);
+        const tracksRes = await fetch(`${API_BASE_URL}/api/artist-tracks?artistID=${artist.artist_id}`);
         if (tracksRes.ok) {
           const tracksJSON: Track[] = await tracksRes.json();
           setTracks(tracksJSON)
@@ -60,7 +60,7 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
         }
 
         // Fetch playlist appearances count
-        const playlistsRes = await fetch(`${apiBaseUrl}/api/artist-playlists?artistID=${artist.artist_id}`);
+        const playlistsRes = await fetch(`${API_BASE_URL}/api/artist-playlists?artistID=${artist.artist_id}`);
         if (playlistsRes.ok) {
           const playlists: unknown[] = await playlistsRes.json();
           setStats(prev => ({ ...prev, playlistAppearances: playlists.length }));
@@ -102,7 +102,7 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
     }
 
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   const statsList = [

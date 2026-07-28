@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import AlbumPopUp from "../popUpPage/AlbumPopUp"
 import { type Album } from "../../types"
+import { API_BASE_URL } from '../../config';
 
 
 
@@ -13,9 +14,8 @@ export function AlbumGrid() {
 
   // useEffect to call backend api/album-path
   useEffect(() => {
-    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
-    fetch(`${apiBaseUrl}/api/album-path`)
+    fetch(`${API_BASE_URL}/api/album-path`)
       .then((response) => {
         if (!response.ok) {
           console.log(`Request failed with status ${response.status}`);
@@ -34,13 +34,12 @@ export function AlbumGrid() {
   }, []);
 
   const getCoverImage = (path?: string) => {
-    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
     if (!path || path == "" || path == null) {
       return DEFAULT_IMAGE;
     }
 
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
 

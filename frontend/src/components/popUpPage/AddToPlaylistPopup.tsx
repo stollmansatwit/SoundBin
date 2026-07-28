@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import CreatePlaylistModal from "./CreatePlaylistModal";
 import type { Playlist, Track } from "../../types";
+import { API_BASE_URL } from '../../config';
 
-const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 const DEFAULT_IMAGE = "/defaultAlbum.png";
 
 interface Props {
@@ -23,7 +23,7 @@ export default function AddToPlaylistPopup({ trackIds, fallbackCoverTrack, onClo
   const getCoverImage = (path?: string) => {
     if (!path) return DEFAULT_IMAGE;
     const file = path.split("/").pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   // Depend on the *contents* of trackIds, not the array reference — some
@@ -38,7 +38,7 @@ export default function AddToPlaylistPopup({ trackIds, fallbackCoverTrack, onClo
     const load = async () => {
       setLoading(true);
       try {
-        const playlistsRes = await fetch(`${apiBaseUrl}/api/playlists`);
+        const playlistsRes = await fetch(`${API_BASE_URL}/api/playlists`);
         const playlistsData: Playlist[] = playlistsRes.ok ? await playlistsRes.json() : [];
         setPlaylists(playlistsData);
 
@@ -46,7 +46,7 @@ export default function AddToPlaylistPopup({ trackIds, fallbackCoverTrack, onClo
         // only if it already contains every track we're about to add.
         const membershipLists = await Promise.all(
           trackIds.map((trackId) =>
-            fetch(`${apiBaseUrl}/api/track-playlists?trackID=${trackId}`)
+            fetch(`${API_BASE_URL}/api/track-playlists?trackID=${trackId}`)
               .then((res) => (res.ok ? res.json() : []))
               .catch(() => [] as number[])
           )
@@ -80,7 +80,7 @@ export default function AddToPlaylistPopup({ trackIds, fallbackCoverTrack, onClo
       if (isSelected) {
         await Promise.all(
           trackIds.map((track_id) =>
-            fetch(`${apiBaseUrl}/api/playlist-items`, {
+            fetch(`${API_BASE_URL}/api/playlist-items`, {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ playlist_id: playlist.playlist_id, track_id }),
@@ -95,7 +95,7 @@ export default function AddToPlaylistPopup({ trackIds, fallbackCoverTrack, onClo
       } else {
         await Promise.all(
           trackIds.map((track_id) =>
-            fetch(`${apiBaseUrl}/api/playlist-items`, {
+            fetch(`${API_BASE_URL}/api/playlist-items`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ playlist_id: playlist.playlist_id, track_id }),
@@ -118,7 +118,7 @@ export default function AddToPlaylistPopup({ trackIds, fallbackCoverTrack, onClo
     try {
       await Promise.all(
         trackIds.map((track_id) =>
-          fetch(`${apiBaseUrl}/api/playlist-items`, {
+          fetch(`${API_BASE_URL}/api/playlist-items`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ playlist_id: playlist.playlist_id, track_id }),

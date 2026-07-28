@@ -3,8 +3,9 @@
 // After authentication, routes to App.tsx page. If authentication fails, displays an error message and allow retries
 
 //import bcrypt from "bcryptjs";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
+import { API_BASE_URL } from '../config';
 /*
 Steps:
 1. Create a form with input fields for username and password.
@@ -18,6 +19,8 @@ Steps:
 export default function Login() {
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
+    const location = useLocation();
+    const infoMessage = (location.state as { message?: string } | null)?.message;
 
 
 
@@ -40,7 +43,7 @@ export default function Login() {
             navigate('/home');
         } else {
             try {
-                const response = await fetch('http://localhost:3000/api/auth/login', {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password }),
@@ -71,6 +74,11 @@ export default function Login() {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-400 to-gray-500">
             <h1 className="text-4xl font-bold text-white mb-8">Login</h1>
+            {infoMessage && (
+                <p className="mb-4 max-w-sm text-center text-sm font-semibold text-white bg-green-600/80 rounded-md px-4 py-2">
+                    {infoMessage}
+                </p>
+            )}
             <form className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm"
                 onSubmit={(e) => {
                     e.preventDefault();

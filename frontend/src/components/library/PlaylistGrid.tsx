@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import PlaylistPopUp from "../popUpPage/PlaylistPopUp"
 import { type Playlist } from "../../types"
+import { API_BASE_URL } from '../../config';
 
 const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets once better image found
 
@@ -9,10 +10,9 @@ export function PlaylistGrid() {
   const [loading, setLoading] = useState(true);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
 
-  const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
   useEffect(() => {
-    fetch(`${apiBaseUrl}/api/playlists`)
+    fetch(`${API_BASE_URL}/api/playlists`)
       .then((response) => {
         if (!response.ok) {
           console.log(`Request failed with status ${response.status}`);
@@ -35,7 +35,7 @@ export function PlaylistGrid() {
       return DEFAULT_IMAGE;
     }
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   if (loading) {

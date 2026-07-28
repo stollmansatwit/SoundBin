@@ -5,8 +5,8 @@ import { usePopups } from "../../context/PopupContext";
 import AddToPlaylistPopup from "../popUpPage/AddToPlaylistPopup";
 import EditTrackModal from "../popUpPage/EditTrackModal";
 import type { Track } from "../../types";
+import { API_BASE_URL } from '../../config';
 
-const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
 interface Props {
   track: Track;
@@ -28,7 +28,7 @@ export function TrackOptionsMenu({ track, artistId, artistName, albumTitle, clas
 
   const fetchFullTrack = async (): Promise<Track> => {
     try {
-      const res = await fetch(`${apiBaseUrl}/api/tracks/${track.track_id}`);
+      const res = await fetch(`${API_BASE_URL}/api/tracks/${track.track_id}`);
       if (!res.ok) throw new Error("Failed to fetch track");
       return await res.json();
     } catch (error) {
@@ -43,7 +43,7 @@ export function TrackOptionsMenu({ track, artistId, artistName, albumTitle, clas
     let artist = resolvedArtistName;
     if (!artist) {
       try {
-        const res = await fetch(`${apiBaseUrl}/api/track-artist?trackID=${track.track_id}`);
+        const res = await fetch(`${API_BASE_URL}/api/track-artist?trackID=${track.track_id}`);
         if (res.ok) {
           const data = await res.json();
           const contributor = data?.contributors?.[0]?.artist;
@@ -65,7 +65,7 @@ export function TrackOptionsMenu({ track, artistId, artistName, albumTitle, clas
     let id = resolvedArtistId;
     if (!id) {
       try {
-        const res = await fetch(`${apiBaseUrl}/api/track-artist?trackID=${track.track_id}`);
+        const res = await fetch(`${API_BASE_URL}/api/track-artist?trackID=${track.track_id}`);
         if (res.ok) {
           const data = await res.json();
           id = data?.contributors?.[0]?.artist?.artist_id ?? null;
@@ -84,7 +84,7 @@ export function TrackOptionsMenu({ track, artistId, artistName, albumTitle, clas
   const handleOpenEdit = async () => {
     if (!resolvedArtistName) {
       try {
-        const res = await fetch(`${apiBaseUrl}/api/track-artist?trackID=${track.track_id}`);
+        const res = await fetch(`${API_BASE_URL}/api/track-artist?trackID=${track.track_id}`);
         if (res.ok) {
           const data = await res.json();
           const contributor = data?.contributors?.[0]?.artist;
@@ -99,7 +99,7 @@ export function TrackOptionsMenu({ track, artistId, artistName, albumTitle, clas
     }
     if (!resolvedAlbumTitle && track.album_id) {
       try {
-        const res = await fetch(`${apiBaseUrl}/api/album-title?albumID=${track.album_id}`);
+        const res = await fetch(`${API_BASE_URL}/api/album-title?albumID=${track.album_id}`);
         if (res.ok) {
           const data = await res.json();
           if (data?.title) setResolvedAlbumTitle(data.title);

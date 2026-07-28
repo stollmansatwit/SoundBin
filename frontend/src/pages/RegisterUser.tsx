@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from '../config';
 
 /*
 Steps:
@@ -29,18 +30,27 @@ export default function RegisterUser() {
         const password = formData.get('password') as string;
 
         // Registration logic here (e.g., call an API to register user)
-        fetch('http://localhost:3000/api/auth/register', {
+        fetch(`${API_BASE_URL}/api/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ username, password }),
         })
-            .then(response => {
+            .then(async response => {
+                const data = await response.json().catch(() => ({}));
+
                 if (response.ok) {
-                    navigate('/login'); // Navigate to the Login.tsx page after successful registration
+                    // Navigate to the Login.tsx page after successful registration.
+                    // If this account still needs admin approval, pass that along so
+                    // the login page can show a helpful message.
+                    navigate('/login', {
+                        state: data.requiresApproval
+                            ? { message: 'Registration successful! An admin must approve your account before you can log in.' }
+                            : undefined,
+                    });
                 } else {
-                    setError('Registration failed');
+                    setError(data.error || 'Registration failed');
                     console.error('Registration failed');
                 }
             })

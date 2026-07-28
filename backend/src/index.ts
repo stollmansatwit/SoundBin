@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
@@ -16,16 +16,19 @@ import trackRoutes from './routes/track_routes'
 import statsRoutes from './routes/stats_routes'
 import playlistRoutes from './routes/playlist_routes'
 import activityRoutes from './routes/activity_routes'
+import userRoutes from './routes/user_routes'
 
-
+import jwt from 'jsonwebtoken';
+import { requireAuth, type AuthRequest } from './middleware/auth';
 
 import { prisma } from "./lib/database";
+import { PORT, ALLOWED_ORIGINS, ALLOWED_METHODS } from "./config";
 import './services/watcher'
 
 const app = express();
 export { app }
 
-const port = Number(process.env.PORT);
+const port = PORT;
 
 type ColumnRow = {
   table_name: string;
@@ -35,8 +38,8 @@ type ColumnRow = {
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: ['http://127.0.0.1:5173', 'http://localhost:5173'], 
-              methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+app.use(cors({ origin: ALLOWED_ORIGINS,
+              methods: ALLOWED_METHODS,
               allowedHeaders: ['Content-Type', 'Authorization'],
               credentials: true}));
 
@@ -46,7 +49,10 @@ app.use('/songs', express.static(path.join(process.cwd(), 'uploads', 'songs'), {
   etag: false,
   lastModified: false,
   setHeaders: (res, filePath) => {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+    // No Access-Control-Allow-Origin here on purpose. The cors() middleware
+    // above already ran and set it from ALLOWED_ORIGINS; setting it again
+    // overwrote that with a hardcoded localhost:5173 and broke audio playback
+    // on any other origin.
 
     if (filePath.endsWith('.mp3')) res.setHeader('Content-Type', 'audio/mpeg');
     if (filePath.endsWith('.flac')) res.setHeader('Content-Type', 'audio/flac');
@@ -119,6 +125,7 @@ app.use('/api', trackRoutes);
 app.use('/api', statsRoutes);
 app.use('/api', playlistRoutes);
 app.use('/api', activityRoutes);
+app.use('/api', userRoutes);
 
 
 
@@ -192,47 +199,34 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+    // The very first person to register becomes an admin and is auto-approved.
+    // Everyone after that is created unapproved and must wait for an admin to approve them.
+    const existingUserCount = await prisma.user.count();
+    const isFirstUser = existingUserCount === 0;
+
     // Create new user
     const newUser = await prisma.user.create({
       data: {
         username: username,
         password_hash: hashedPassword,
         display_name: username, // Default display name to username
+        is_admin: isFirstUser,
+        is_approved: isFirstUser,
       },
     });
 
-    res.status(201).json({ message: "User registered successfully", userId: newUser.user_id });
+    res.status(201).json({
+      message: isFirstUser
+        ? "User registered successfully as the first admin"
+        : "User registered successfully. An admin must approve your account before you can log in.",
+      userId: newUser.user_id,
+      requiresApproval: !isFirstUser,
+    });
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).json({ error: "Registration failed" });
   }
 });
-
-
-// middleware/auth.ts
-
-import jwt from 'jsonwebtoken';
-
-export interface AuthRequest extends Request {
-  userId?: number;
-}
-
-export function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-
-  if (!token) {
-    return res.status(401).json({ error: "No token provided" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: number };
-    req.userId = decoded.userId;
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: "Invalid or expired token" });
-  }
-}
 
 
 // login endpoint needs to compare hashed password from the database with the password provided by the user. 
@@ -253,6 +247,7 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
         username: true,
         password_hash: true,
         is_active: true,
+        is_approved: true,
       },
       where: { username },
     });
@@ -263,6 +258,10 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
 
     if (!user.is_active) {
       return res.status(403).json({ error: "Account is inactive" });
+    }
+
+    if (!user.is_approved) {
+      return res.status(403).json({ error: "Your account is awaiting admin approval" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
@@ -301,6 +300,9 @@ app.get('/api/user', requireAuth, async (req: AuthRequest, res: Response) => {
         username: true,
         display_name: true,
         is_active: true,
+        is_admin: true,
+        is_approved: true,
+        register_date: true,
         last_login: true,
       },
     });
@@ -319,6 +321,7 @@ app.get('/api/user', requireAuth, async (req: AuthRequest, res: Response) => {
 // Server startup
 app.listen(port, () => {
   console.log(`🎵 SoundBin backend listening on port ${port}`);
+  console.log(`   Accepting browser requests from: ${ALLOWED_ORIGINS.join(', ')}`);
 });
 
 // Graceful shutdown

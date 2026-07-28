@@ -14,6 +14,7 @@ import {
 } from 'chart.js';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import type { TopTrack } from '../types';
+import { API_BASE_URL } from '../config';
 
 ChartJS.register(
   ArcElement,
@@ -143,12 +144,11 @@ export default function Stats() {
   const [uploadSeries, setUploadSeries] = useState<SeriesPoint[]>([]);
   const [topTracks, setTopTracks] = useState<TopTrack[]>([]);
 
-  const apiBaseUrl = 'http://localhost:3000'; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
   const getCoverImage = (path?: string | null) => {
     if (!path) return '/defaultAlbum.png';
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   const openNav = () => {
@@ -161,7 +161,7 @@ export default function Stats() {
 
   useEffect(() => {
     const fetchJson = async <T,>(path: string): Promise<T> => {
-      const response = await fetch(`${apiBaseUrl}${path}`);
+      const response = await fetch(`${API_BASE_URL}${path}`);
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status} for ${path}`);
       }

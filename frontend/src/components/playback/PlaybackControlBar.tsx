@@ -3,6 +3,7 @@ import { useAudio } from '../../context/AudioContext';
 import { PlaybarOptionsMenu } from '../buttons/PlaybarOptionsMenu';
 import { QueuePopover } from './QueuePopover';
 import { QueueList } from './QueueList';
+import { API_BASE_URL } from '../../config';
 
 interface PlaybackControlBarProps {
   className?: string;
@@ -55,19 +56,23 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
     Next: () => <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" /></svg>,
     ChevronDown: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>,
     ChevronUp: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>,
-    ShuffleOn: () => <svg className= "text-green-500" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M16 3h5v5"></path>
-      <path d="M4 20L21 3"></path>
-      <path d="M21 16v5h-5"></path>
-      <path d="M15 15l6 6"></path>
-      <path d="M4 4l5 5"></path>
+    // NOTE: these two need both a viewBox and explicit w/h classes. Without
+    // them an <svg> is a replaced element with no intrinsic size, so it falls
+    // back to the CSS default of 300x150 — which is what was blowing out the
+    // left-hand side of the transport row and pushing the controls off centre.
+    ShuffleOn: () => <svg className="w-5 h-5 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 3h5v5" />
+      <path d="M4 20L21 3" />
+      <path d="M21 16v5h-5" />
+      <path d="M15 15l6 6" />
+      <path d="M4 4l5 5" />
     </svg>,
-    ShuffleOff: () => <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M16 3h5v5"></path>
-      <path d="M4 20L21 3"></path>
-      <path d="M21 16v5h-5"></path>
-      <path d="M15 15l6 6"></path>
-      <path d="M4 4l5 5"></path>
+    ShuffleOff: () => <svg className="w-5 h-5 text-gray-400 hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 3h5v5" />
+      <path d="M4 20L21 3" />
+      <path d="M21 16v5h-5" />
+      <path d="M15 15l6 6" />
+      <path d="M4 4l5 5" />
     </svg>,
     RepeatAll: () => <svg className="w-5 h-5 text-gray-400 hover:text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" /></svg>,
     RepeatOne: () => <div className="relative w-5 h-5 text-green-500"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" /></svg><span className="absolute top-0 right-0 text-[8px] font-bold leading-none">1</span></div>,
@@ -94,14 +99,13 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
    * @returns 
    */
   const getCoverImage = (path?: string) => {
-    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
     const DEFAULT_IMAGE = "/defaultAlbum.png";
     if (!path || path == "" || path == null) {
       return DEFAULT_IMAGE;
     }
 
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   /**
@@ -175,10 +179,17 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
                 </div>
               </div>
 
-              {/* Main Transport Controls */}
-              <div className="flex items-center justify-between mt-2">
-                <button onClick={getShuffleIcon === Icons.ShuffleOn ? toggleShuffle : toggleShuffle}
-                  className="hover:scale-105 transition-transform"
+              {/* Main Transport Controls.
+
+                  A 3-column grid rather than `justify-between`: the two outer
+                  columns are locked to the same width (1fr), so the Prev/Play/
+                  Next group sits dead centre under the progress bar no matter
+                  how wide the shuffle and repeat icons happen to be. With
+                  justify-between, any difference between those two icons
+                  shifted the whole group sideways. */}
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center mt-2">
+                <button onClick={toggleShuffle}
+                  className="justify-self-start hover:scale-105 transition-transform"
                   title={shuffleMode ? "Disable Shuffle" : "Enable Shuffle"}>
                   {getShuffleIcon()}
                 </button>
@@ -200,7 +211,9 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
                   </button>
                 </div>
 
-                <button onClick={toggleRepeat} className="hover:scale-105 transition-transform" title="Toggle Repeat">
+                <button onClick={toggleRepeat}
+                  className="justify-self-end hover:scale-105 transition-transform"
+                  title="Toggle Repeat">
                   {getRepeatIcon()}
                 </button>
               </div>

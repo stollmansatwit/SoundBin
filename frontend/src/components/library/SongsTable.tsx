@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { type Track, type Album } from "../../types";
 import SongPopUp from "../popUpPage/SongPopUp";
+import { API_BASE_URL } from '../../config';
 
-const API_BASE_URL = "http://localhost:3000"; // Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`
 
 type CombinedItem = {
   track: Track;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import SongPopUp from '../popUpPage/SongPopUp';
 import { type RecentListen, type Track } from '../../types';
+import { API_BASE_URL } from '../../config';
 
 const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets once better image found
 const MAX_SONG_NAME_LENGTH = 13;
@@ -32,9 +33,8 @@ export function RecentListenTable() {
   const [selectedItem, setSelectedItem] = useState<RecentListen | null>(null);
 
   useEffect(() => {
-    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
-    fetch(`${apiBaseUrl}/api/activity/recent?limit=15`)
+    fetch(`${API_BASE_URL}/api/activity/recent?limit=15`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Recent listens request failed with status ${response.status}`);
@@ -53,13 +53,12 @@ export function RecentListenTable() {
   }, []);
 
   const getCoverImage = (path?: string | null) => {
-    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
     if (!path) {
       return DEFAULT_IMAGE;
     }
 
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   if (loading) {

@@ -1,8 +1,8 @@
 import { OptionsMenu } from "./OptionsMenu";
 import { usePopups } from "../../context/PopupContext";
 import type { Track } from "../../types";
+import { API_BASE_URL } from '../../config';
 
-const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
 interface Props {
   track: Track;
@@ -25,7 +25,7 @@ export function QueueItemOptionsMenu({ track, onRemove, className, buttonClassNa
 
   const handleGoToArtist = async () => {
     try {
-      const res = await fetch(`${apiBaseUrl}/api/track-artist?trackID=${track.track_id}`);
+      const res = await fetch(`${API_BASE_URL}/api/track-artist?trackID=${track.track_id}`);
       if (res.ok) {
         const data = await res.json();
         const artistId = data?.contributors?.[0]?.artist?.artist_id;

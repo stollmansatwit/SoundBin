@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import ArtistPopUp from "../popUpPage/ArtistPopUp";
 import type { Artist } from "../../types";
+import { API_BASE_URL } from '../../config';
 
 const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets once better image found
 
@@ -11,11 +12,10 @@ export function ScrollableArtists() {
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
 
 
-  const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
   
 
   useEffect(() => {
-    fetch(`${apiBaseUrl}/api/artist-path`)
+    fetch(`${API_BASE_URL}/api/artist-path`)
       .then((response) => {
         if (!response.ok) {
           console.log(`Request failed with status ${response.status}`);
@@ -39,7 +39,7 @@ export function ScrollableArtists() {
     }
 
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   const displayArtists = Array.isArray(artists) ? artists : [];

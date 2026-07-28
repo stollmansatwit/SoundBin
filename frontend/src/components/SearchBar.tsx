@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import SongPopUp from "./popUpPage/SongPopUp";
 import AlbumPopUp from "./popUpPage/AlbumPopUp";
 import { type Album, type Track } from "../types";
+import { API_BASE_URL } from '../config';
 
 type SearchResult = {
   type: string;
@@ -32,9 +33,8 @@ export function SearchBar() {
 
 
 
-    const apiBaseUrl = "http://localhost:3000";
     try {
-      const res = await fetch(`${apiBaseUrl}/api/search?q=${encodeURIComponent(name)}`);
+      const res = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(name)}`);
       if (!res.ok) {
         console.error(`Request failed with status ${res.status}`);
         return;
@@ -58,9 +58,8 @@ export function SearchBar() {
   };
 
   useEffect(() => {
-    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
-    fetch(`${apiBaseUrl}/api/album-path`)
+    fetch(`${API_BASE_URL}/api/album-path`)
       .then((response) => {
         if (!response.ok) {
           console.log(`Request failed with status ${response.status}`);
@@ -78,7 +77,7 @@ export function SearchBar() {
       });
 
     
-    fetch(`${apiBaseUrl}/api/tracks`)
+    fetch(`${API_BASE_URL}/api/tracks`)
       .then((response) => {
         if (!response.ok) {
           console.log(`Request failed with status ${response.status}`);

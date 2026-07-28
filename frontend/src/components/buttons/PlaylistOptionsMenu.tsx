@@ -4,8 +4,8 @@ import { useAudio } from "../../context/AudioContext";
 import EditPlaylistModal from "../popUpPage/EditPlaylistModal";
 import ConfirmDialog from "../popUpPage/ConfirmDialog";
 import type { Playlist, Track } from "../../types";
+import { API_BASE_URL } from '../../config';
 
-const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
 interface Props {
   playlist: Playlist;
@@ -32,7 +32,7 @@ export function PlaylistOptionsMenu({ playlist, tracks, onPlaylistUpdated, onDel
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`${apiBaseUrl}/api/playlists/${playlist.playlist_id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE_URL}/api/playlists/${playlist.playlist_id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete playlist");
       setShowDeleteConfirm(false);
       onDeleted?.();

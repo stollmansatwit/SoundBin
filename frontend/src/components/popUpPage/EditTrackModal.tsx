@@ -1,8 +1,8 @@
 import type React from "react";
 import { useState } from "react";
 import type { Track } from "../../types";
+import { API_BASE_URL } from '../../config';
 
-const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
 interface Props {
   track: Track;
@@ -26,7 +26,7 @@ export default function EditTrackModal({ track, initialArtistName = "", initialA
     setError(null);
 
     try {
-      const res = await fetch(`${apiBaseUrl}/api/tracks/${track.track_id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/tracks/${track.track_id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, artistName, albumTitle }),

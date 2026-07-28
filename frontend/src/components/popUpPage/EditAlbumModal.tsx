@@ -1,8 +1,8 @@
 import type React from "react";
 import { useState } from "react";
 import type { Album } from "../../types";
+import { API_BASE_URL } from '../../config';
 
-const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
 interface Props {
   album: Album;
@@ -24,7 +24,7 @@ export default function EditAlbumModal({ album, initialArtistName = "", onClose,
     setError(null);
 
     try {
-      const res = await fetch(`${apiBaseUrl}/api/albums/${album.album_id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/albums/${album.album_id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, artistName }),

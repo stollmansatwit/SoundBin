@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
+import { API_BASE_URL } from '../config';
 export function HealthCheck() {
     const [healthStatus, setHealthStatus] = useState<{ ok: boolean; db: string } | null>(null);
 
     useEffect(() => {
         const checkHealth = async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/health');
+                const response = await fetch(`${API_BASE_URL}/api/health`);
                 const data = await response.json();
                 setHealthStatus(data);
             } catch (error) {
