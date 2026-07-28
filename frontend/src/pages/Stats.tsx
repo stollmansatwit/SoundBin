@@ -275,13 +275,37 @@ export default function Stats() {
     <div className={`min-h-screen bg-linear-to-t from-orange-200 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
       <Header />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
-
+       
       <main className="relative">
         <div className="px-6 pt-6 pb-12 xl:pr-88">
           <div className="mb-6">
             <h1 className="text-3xl font-black tracking-tight text-white">Stats Dashboard</h1>
             <p className="mt-2 text-sm text-white/80">Track listening activity, library shape, and long-term trends.</p>
           </div>
+
+          <aside className="px-6 pb-8 xl:absolute xl:right-6 xl:top-22 xl:z-20 xl:w-80 xl:px-0 xl:pb-0 pt-6">
+          <div className="rounded-3xl border border-white/20 bg-white/15 p-5 text-white shadow-2xl backdrop-blur-md">
+            <div className="mb-4">
+              <p className="text-xs uppercase tracking-[0.25em] text-white/70">Library Summary</p>
+              <h2 className="mt-2 text-2xl font-black">At a glance</h2>
+            </div>
+
+            <div className="space-y-3">
+              <div className="rounded-2xl bg-black/20 px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.2em] text-white/60">Songs</p>
+                <p className="mt-1 text-2xl font-black">{counts?.numSongs ?? 0}</p>
+              </div>
+              <div className="rounded-2xl bg-black/20 px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.2em] text-white/60">Albums</p>
+                <p className="mt-1 text-2xl font-black">{counts?.numAlbums ?? 0}</p>
+              </div>
+              <div className="rounded-2xl bg-black/20 px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.2em] text-white/60">Playlists</p>
+                <p className="mt-1 text-2xl font-black">{counts?.numPlaylists ?? 0}</p>
+              </div>
+            </div>
+          </div>
+        </aside>
 
           <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <div className="rounded-3xl border border-white/20 bg-slate-950/35 p-5 shadow-2xl backdrop-blur-md xl:col-span-2">
@@ -399,29 +423,7 @@ export default function Stats() {
           </section>
         </div>
 
-        <aside className="px-6 pb-8 xl:absolute xl:right-6 xl:top-28 xl:z-20 xl:w-80 xl:px-0 xl:pb-0">
-          <div className="rounded-3xl border border-white/20 bg-white/15 p-5 text-white shadow-2xl backdrop-blur-md">
-            <div className="mb-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-white/70">Library Summary</p>
-              <h2 className="mt-2 text-2xl font-black">At a glance</h2>
-            </div>
-
-            <div className="space-y-3">
-              <div className="rounded-2xl bg-black/20 px-4 py-3">
-                <p className="text-xs uppercase tracking-[0.2em] text-white/60">Songs</p>
-                <p className="mt-1 text-2xl font-black">{counts?.numSongs ?? 0}</p>
-              </div>
-              <div className="rounded-2xl bg-black/20 px-4 py-3">
-                <p className="text-xs uppercase tracking-[0.2em] text-white/60">Albums</p>
-                <p className="mt-1 text-2xl font-black">{counts?.numAlbums ?? 0}</p>
-              </div>
-              <div className="rounded-2xl bg-black/20 px-4 py-3">
-                <p className="text-xs uppercase tracking-[0.2em] text-white/60">Playlists</p>
-                <p className="mt-1 text-2xl font-black">{counts?.numPlaylists ?? 0}</p>
-              </div>
-            </div>
-          </div>
-        </aside>
+       
       </main>
     </div>
   );

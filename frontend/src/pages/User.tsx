@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {NavBar} from '../components/NavBar'
 import { Header } from '../components/Header'
+import { authFetch } from '../utils/api';
 
 type User = {
   username: string;
@@ -26,7 +27,7 @@ export default function User() {
       const apiBaseUrl = 'http://localhost:3000/api/user';
   
       const fetchJson = async <T,>(path: string): Promise<T> => {
-        const response = await fetch(`${apiBaseUrl}${path}`);
+        const response = await authFetch(`${apiBaseUrl}${path}`);
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status} for ${path}`);
         }
@@ -55,6 +56,7 @@ export default function User() {
             <p className="text-gray-300">Display Name: {user.display_name}</p>
             <p className="text-gray-300">Is Active: {user.is_active ? 'Yes' : 'No'}</p>
             <p className="text-gray-300">Last Login: {user.last_login ? user.last_login.toLocaleString() : 'Never'}</p>
+            
           </div>
         )}
       </div>

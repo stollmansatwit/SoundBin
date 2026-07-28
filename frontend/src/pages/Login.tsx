@@ -3,8 +3,8 @@
 // After authentication, routes to App.tsx page. If authentication fails, displays an error message and allow retries
 
 //import bcrypt from "bcryptjs";
-import { Link, useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 /*
 Steps:
 1. Create a form with input fields for username and password.
@@ -64,31 +64,6 @@ export default function Login() {
             }
         }
 
-
-
-
-
-
-        // try {
-        //     const response = await fetch('/api/login', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({ username, password }),
-        //     });
-
-        //     if (response.ok) {
-        //         navigate('/home');
-        //     } else {
-        //         setError('Authentication failed');
-        //         console.error('Authentication failed');
-        //     }
-        // } catch (error) {
-        //     console.error('Error during authentication:', error);
-        // }
-
-        // Implement authentication logic here
     }
 
 
