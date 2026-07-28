@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import SongPopUp from "./popUpPage/SongPopUp";
 import AlbumPopUp from "./popUpPage/AlbumPopUp";
 import { type Album, type Track } from "../types";
-import { API_BASE_URL } from '../config';
+import { type Album, type Track, type Artist, type Playlist } from "../types";
+import ArtistPopUp from "./popUpPage/ArtistPopUp";
+import PlaylistPopUp from "./popUpPage/PlaylistPopUp";
 
 type SearchResult = {
   type: string;
@@ -13,12 +15,16 @@ type SearchResult = {
 export function SearchBar() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [tracks, setTracks] = useState<Track[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [name, setName] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searched, setSearched] = useState(false);
   const [reloadKey, setReloadKey] = useState(0)
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
 
 
 
@@ -93,6 +99,40 @@ export function SearchBar() {
       .finally(() => {
 
       });
+
+    fetch(`${apiBaseUrl}/api/artist-path`)
+      .then((response) => {
+        if (!response.ok) {
+          console.log(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data: Artist[]) => {
+        setArtists(data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch artists:", error);
+      })
+      .finally(() => {
+
+      });
+
+    fetch(`${apiBaseUrl}/api/playlists`)
+      .then((response) => {
+        if (!response.ok) {
+          console.log(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data: Playlist[]) => {
+        setPlaylists(data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch playlists:", error);
+      })
+      .finally(() => {
+
+      });
   }, []);
 
   const handleClick = (r: SearchResult) => {
@@ -122,12 +162,33 @@ export function SearchBar() {
         console.warn(`Album with id ${fullTrack.album_id} not found for track`, fullTrack);
         return;
       }
-
+      
       setSelectedTrack(fullTrack);
       setSelectedAlbum(fullAlbum);
       return;
     }
-    console.log("Clicked on search result:", r);
+    else if (r.type === 'artist'){
+      const fullArtist = artists.find((t) => t.artist_id === Number(r.id));
+      if (!fullArtist) {
+        console.warn(`Artist with id ${r.id} not found in loaded artists`, r);
+        return;
+      }
+      setSelectedArtist(fullArtist)
+      return
+    }
+    else if (r.type === 'playlist'){
+      const fullPlaylist = playlists.find((t) => t.playlist_id === Number(r.id));
+      if (!fullPlaylist) {
+        console.warn(`Playlist with id ${r.id} not found in loaded playlists`, r);
+        return;
+      }
+      setSelectedPlaylist(fullPlaylist)
+      return
+    }
+    else {
+      console.warn(`Unknown search result type: ${r.type}`, r);
+    }
+    //console.log("Clicked on search result:", r);
   };
 
   const handleHighlight = (text: string, query: string) => {
@@ -140,7 +201,8 @@ export function SearchBar() {
   const closePopUp = () => {
     setSelectedAlbum(null);
     setSelectedTrack(null);
-    //setSelectedArtist(null);
+    setSelectedArtist(null);
+    setSelectedPlaylist(null);
   }
 
 
@@ -178,8 +240,7 @@ export function SearchBar() {
         <SongPopUp
           track={selectedTrack}
           onClose={() => {
-            setSelectedTrack(null);
-            setSelectedAlbum(null)
+            closePopUp();
           }
           }
           album_id={selectedAlbum.album_id} />
@@ -189,6 +250,20 @@ export function SearchBar() {
         <AlbumPopUp
           album={selectedAlbum}
           onClose={closePopUp} />
+      )}
+
+      {selectedArtist && !selectedTrack &&(
+        <ArtistPopUp
+        artist = {selectedArtist}
+        onClose = {closePopUp}/>
+
+      )}
+
+      {selectedPlaylist && !selectedTrack &&(
+        <PlaylistPopUp
+        playlist = {selectedPlaylist}
+        onClose = {closePopUp}/>
+
       )}
 
 

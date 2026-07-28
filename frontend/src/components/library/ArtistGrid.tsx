@@ -92,7 +92,7 @@ export function ArtistGrid() {
       {combinedItems.map((item) => (
         <button
           key={item.artist_id}
-          className="group flex flex-col items-center text-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 focus-visible:outline-offset-2"
+          className="group flex flex-col items-center text-center rounded-lg p-2 border-2 border-gray-200 hover:border-orange-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 focus-visible:outline-offset-2" 
         >
           <p className="mt-2 truncate text-sm font-bold text-gray-900">{item.artistName}</p>
           <p className="text-xs font-normal text-gray-500">{item.albumCount} album</p>
