@@ -1,0 +1,72 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    container_name: soundbin-db
+    environment:
+      POSTGRES_USER: soundbin
+      POSTGRES_PASSWORD: soundbin_dev
+      POSTGRES_DB: soundbin
+    ports:
+      - "5433:5432"
+    volumes:
+
+      - postgresql:/var/lib/postgresql/data
+      # - ./data/db-data:/var/lib/postgresql/data - for while not in developments aka actually being used
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U soundbin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    env_file:
+      - ./backend/.env
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: soundbin-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
+    environment:
+      DATABASE_URL: "postgresql://soundbin:soundbin_dev@db:5432/soundbin?schema=public"
+      PORT: ${BACKEND_PORT:-3000}
+      # Browser origins allowed to call the API. Overrides backend/.env.
+      FRONTEND_ORIGINS: "http://localhost:${FRONTEND_PORT:-5173},http://127.0.0.1:${FRONTEND_PORT:-5173}"
+      CHOKIDAR_USEPOLLING: true
+      CHOKIDAR_INTERVAL: 100
+    command: sh -c "npx prisma migrate deploy && npm run dev" 
+    # runs migration as part of the containers startup command
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./backend/uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: soundbin-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-5173}:${FRONTEND_PORT:-5173}"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      # Read by vite.config.ts for the dev server port.
+      PORT: ${FRONTEND_PORT:-5173}
+      # Baked into the browser bundle as the API location. Must be reachable
+      # from the *browser*, so localhost (the host machine), not "backend".
+      VITE_API_URL: "http://localhost:${BACKEND_PORT:-3000}"
+    command: npm run dev -- --host
+
+ 
+volumes: # remove for real use
+  postgresql:
