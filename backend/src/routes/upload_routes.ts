@@ -10,6 +10,8 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import { ingestTrackFile } from '../services/ingest';
 
+const NUM_FILES = 200;
+
 // Extend Request locally so fileFilter can record rejected files without `any`-casting everywhere.
 interface UploadRequest extends Request {
   rejectedFiles?: string[];
@@ -64,7 +66,7 @@ const upload = multer({
   },
   limits: {
     fileSize: 100 * 1024 * 1024, // 100MB per file
-    files: 20, // matches the .array() cap below
+    files: NUM_FILES, // matches the .array() cap below
   },
 });
 
@@ -79,7 +81,7 @@ fired the instant multer finished saving, before the watcher had (async,
 on its own multi-second timer) actually indexed anything.
 */
 router.post('/upload', (req: UploadRequest, res: Response) => {
-  upload.array('songFiles', 20)(req, res, async (err: unknown) => {
+  upload.array('songFiles', NUM_FILES)(req, res, async (err: unknown) => {
     if (err) {
       const message = err instanceof multer.MulterError ? err.message : 'Upload failed';
       return res.status(400).json({ message });
