@@ -39,11 +39,11 @@ export function NavBar({ isOpen, openNav, closeNav }: NavBarProps) {
             {isOpen ? '×' : '☰'}
           </button>
           <div className={`flex flex-col gap-4 transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'} [&>a]:text-lg`}>
-            <Link to="/home" onClick={closeNav}>Home</Link>
-            <Link to="/user" onClick={closeNav}>User</Link>
-            <Link to="/library" onClick={closeNav}>Library</Link>
-            <Link to="/stats" onClick={closeNav}>Stats</Link>
-            <Link to = "/login" onClick={()=>logout(navigate)}>Log out</Link>
+            <Link className = "hover:animate-pulse" to="/home" onClick={closeNav}>Home</Link>
+            <Link className = "hover:animate-pulse" to="/user" onClick={closeNav}>User</Link>
+            <Link className = "hover:animate-pulse" to="/library" onClick={closeNav}>Library</Link>
+            <Link className = "hover:animate-pulse" to="/stats" onClick={closeNav}>Stats</Link>
+            <Link className = "hover:text-black hover:animate-pulse" to = "/login" onClick={()=>logout(navigate)}>Log out</Link>
           </div>
         </div>
       </nav>
