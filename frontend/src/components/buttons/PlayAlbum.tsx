@@ -54,13 +54,26 @@ export function PlayAlbum({ tracks, album, artistName, onDeleted}: PlayAlbumProp
         {/* Shuffle Toggle */}
         <button
           onClick={handleShuffleClick}
-          className={`p-2 rounded-full transition-colors ${shuffleMode ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+          className="group p-2 rounded-full transition-colors"
           aria-label="Toggle Shuffle"
+          aria-pressed={shuffleMode}
           title={shuffleMode ? "Turn off shuffle" : "Turn on shuffle"}
         >
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-             {/* Shuffle Icon Path */}
-             <path d="M19.76 3c-.34 0-.65.14-.88.38l-7.87 7.88a2.24 2.24 0 0 0 .13 3.16l5.55 5.55c1.56 1.56 4.09 1.56 5.65 0a4 4 0 0 0 0-5.65l-2.1-2.1a.75.75 0 0 0-1.06 1.06l2.1 2.1a2.5 2.5 0 1 1-3.54 3.54l-5.55-5.55a.75.75 0 0 1-.04-1.04l7.88-7.88a.75.75 0 0 1 1.06 1.06l-2.1 2.1c-.29.29-.77.29-1.06 0a.75.75 0 0 1 0-1.06l2.1-2.1A4 4 0 0 0 13.76 3H11v-2h2.76c1.1 0 2.16.44 2.94 1.22a4 4 0 0 1 2.95-1.22zM5.24 21c.34 0 .65-.14.88-.38l7.87-7.88a2.24 2.24 0 0 0-.13-3.16L8.21 4.03a4 4 0 0 0-5.65 0 4 4 0 0 0 0 5.65l2.1 2.1a.75.75 0 0 0 1.06-1.06l-2.1-2.1a2.5 2.5 0 1 1 3.54-3.54l5.55 5.55a.75.75 0 0 1 .04 1.04l-7.88 7.88a.75.75 0 0 1-1.06-1.06l2.1-2.1c.29-.29.77-.29 1.06 0a.75.75 0 0 1 0 1.06l-2.1 2.1A4 4 0 0 1 10.24 19H8v2h2.24z" />
+          <svg
+            className={`w-5 h-5 ${shuffleMode ? 'text-blue-500' : 'text-gray-400 group-hover:text-white'}`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M16 3h5v5" />
+            <path d="M4 20L21 3" />
+            <path d="M21 16v5h-5" />
+            <path d="M15 15l6 6" />
+            <path d="M4 4l5 5" />
           </svg>
         </button>
 
