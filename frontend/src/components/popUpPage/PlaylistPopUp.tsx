@@ -139,7 +139,7 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
   return (
 
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4"
       ref={overlayRef}
       onClick={handleOverlayClick}
     >
@@ -157,13 +157,13 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
         <div className="flex flex-col md:flex-row">
 
           {/* Left Side: Artwork & Info */}
-          <div className="p-8 bg-gradient-to-b from-gray-800 to-gray-900 flex flex-col items-center justify-center border-r border-gray-700 w-full md:w-1/3 ">
+          <div className="p-4 sm:p-6 md:p-8 bg-gradient-to-b from-gray-800 to-gray-900 flex flex-col items-center justify-center border-r border-gray-700 w-full md:w-1/3 ">
             <img
               src={coverSrc}
               alt={currentPlaylist.name}
-              className="w-64 h-64 aspect-square object-cover rounded-lg shadow-2xl border-2 border-gray-600 mb-4"
+              className="w-40 h-40 sm:w-48 sm:h-48 md:w-64 md:h-64 aspect-square object-cover rounded-lg shadow-2xl border-2 border-gray-600 mb-4"
             />
-            <h2 className="text-2xl font-bold text-white text-center">{currentPlaylist.name}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-white text-center">{currentPlaylist.name}</h2>
             <PlayPlaylist
               playlist={currentPlaylist}
               tracks={songsWithArtist}
@@ -173,7 +173,7 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
           </div>
 
           {/* Right Side: Tracklist */}
-          <div className="p-8 w-full md:w-2/3 bg-transparent relative z-0 overflow-hidden">
+          <div className="p-4 sm:p-6 md:p-8 w-full md:w-2/3 bg-transparent relative z-0 overflow-hidden">
 
             {/* Blurred background layer (the playlist art itself) */}
             <div
@@ -189,7 +189,7 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
             {/* Dark scrim + extra blur on top of the art so text stays readable */}
             <div className="absolute inset-0 -z-10 bg-black/55 backdrop-blur-sm" />
 
-            <h3 className="text-3xl font-bold text-white mb-1">{currentPlaylist.name}</h3>
+            <h3 className="text-2xl sm:text-3xl font-bold text-white mb-1">{currentPlaylist.name}</h3>
             {currentPlaylist.description && (
               <p className="text-sm text-gray-300 mb-1">{currentPlaylist.description}</p>
             )}
@@ -203,10 +203,10 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
                   <li key="loading" className="text-white opacity-50 italic">Loading tracks...</li>
                 ) : songsWithArtist.length > 0 ? (
                   songsWithArtist.map((song, idx) => (
-                    <li key={song.track_id} className="flex items-center justify-between py-3 border-b border-gray-700/60 last:border-none hover:bg-white/10 px-2 rounded transition-colors">
+                    <li key={song.track_id} className="flex items-center justify-between gap-3 py-3 border-b border-gray-700/60 last:border-none hover:bg-white/10 px-2 rounded transition-colors">
                       {/* Left side: Track Number and Title */}
                       <div className="flex items-center gap-4 min-w-0">
-                        <span className="text-gray-300 text-sm w-6">
+                        <span className="text-gray-300 text-sm w-6 flex-shrink-0">
                           {idx + 1}
                         </span>
                         <div className="min-w-0">
@@ -218,8 +218,8 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
                       </div>
 
                       {/* Right side: Duration and Play Button */}
-                      <div className="flex items-center gap-4 flex-shrink-0">
-                        <span className="text-gray-300 text-sm">
+                      <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                        <span className="hidden sm:inline text-gray-300 text-sm">
                           {formatDuration(song.duration || 0)}
                         </span>
                         <button

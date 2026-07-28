@@ -113,7 +113,7 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
 
   return (
     <div 
-      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4"
       ref={overlayRef}
       onClick={handleOverlayClick}
     >
@@ -157,7 +157,7 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
           </div>
 
           {/* Right: Stats */}
-          <div className="flex-shrink-0 flex gap-8 justify-end items-center min-w-[150px]">
+          <div className="flex-shrink-0 flex w-full md:w-auto gap-8 justify-center md:justify-end items-center md:min-w-[150px]">
             <div className="flex flex-col gap-4 text-right">
               {statsList.map((stat) => (
                 <div key={stat.label} className="flex flex-col items-end md:items-start">

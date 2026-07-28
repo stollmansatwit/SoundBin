@@ -134,7 +134,7 @@ export default function AddToPlaylistPopup({ trackIds, fallbackCoverTrack, onClo
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center overflow-y-auto z-50 p-4" onClick={onClose}>
       <div
         className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-xs shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}

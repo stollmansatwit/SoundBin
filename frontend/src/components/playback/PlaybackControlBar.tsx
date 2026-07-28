@@ -222,13 +222,22 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
       {!isExpanded && (
         <div className="bg-[#18181b] border-t border-white/10 shadow-2xl">
 
+          {/* Mobile progress bar: a slim strip along the very top of the
+              mini player, shown only below sm where there isn't room for
+              the full progress section inline. */}
+          <div className="px-3 pt-2 sm:hidden">
+            <div className="h-0.5 bg-gray-600 rounded-full overflow-hidden cursor-pointer" onClick={handleProgressClick}>
+              <div className="h-full bg-white" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+
           {/* Main Content Row */}
           <div
-            className="p-3 flex items-center gap-4 hover:bg-[#282828] transition-colors"
+            className="p-3 flex items-center gap-2 sm:gap-4 hover:bg-[#282828] transition-colors"
           >
 
             {/* 1. Left Section: Art, Info & Transport */}
-            <div className="flex items-center gap-4 flex-shrink-0">
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink min-w-0">
 
               {/* Art & Info */}
               <div
@@ -243,18 +252,19 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
                   )}
                 </div>
 
-                <div className="min-w-0">
+                <div className="min-w-0 max-w-[28vw] sm:max-w-none">
                   <h4 className="text-white font-semibold truncate text-sm">{title}</h4>
                   <p className="text-gray-400 text-xs truncate">{artist}</p>
                 </div>
               </div>
 
               {/* Vertical Divider */}
-              <div className="h-6 w-px bg-white/10"></div>
+              <div className="hidden sm:block h-6 w-px bg-white/10"></div>
             </div>
 
-            {/* 2. Progress Bar Section (Centered in remaining space) */}
-            <div className="flex-1 flex items-center px-4 max-w-md mx-auto">
+            {/* 2. Progress Bar Section (Centered in remaining space) — hidden
+                on phones in favor of the slim bar above the row */}
+            <div className="hidden sm:flex flex-1 items-center px-4 max-w-md mx-auto">
               <span className="text-[10px] text-gray-400 font-mono w-8 text-right mr-2">{formatTime(currentTime)}</span>
 
               <div className="flex-1 mx-2 group relative cursor-pointer" onClick={handleProgressClick}>
@@ -270,7 +280,7 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
             </div>
 
             {/* 3. Transport Controls (Right of Middle) */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 sm:gap-3 ml-auto sm:ml-0 flex-shrink-0">
               <button onClick={playPrevious} className="text-gray-400 hover:text-white transition-colors p-1">
                 <Icons.Prev />
               </button>
@@ -288,14 +298,18 @@ export function PlaybackControlBar({ className = "" }: PlaybackControlBarProps) 
             </div>
 
             {/* 4. Action Buttons (Far Right) */}
-            <div className="flex items-center gap-3 ml-3 border-l border-white/10 pl-3">
-              <QueuePopover buttonClassName="text-gray-400 hover:text-white transition-colors p-1" />
-              
+            <div className="flex items-center gap-1 sm:gap-3 sm:ml-3 border-l border-white/10 pl-2 sm:pl-3 flex-shrink-0">
+              <span className="hidden md:inline-flex">
+                <QueuePopover buttonClassName="text-gray-400 hover:text-white transition-colors p-1" />
+              </span>
+
               {currentTrackMetadata && (
-                <PlaybarOptionsMenu
-                  track={currentTrackMetadata}
-                  buttonClassName="text-gray-400 hover:text-white transition-colors p-1"
-                />
+                <span className="hidden sm:inline-flex">
+                  <PlaybarOptionsMenu
+                    track={currentTrackMetadata}
+                    buttonClassName="text-gray-400 hover:text-white transition-colors p-1"
+                  />
+                </span>
               )}
               
               {/* Expand/Collapse Button */}

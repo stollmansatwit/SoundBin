@@ -79,7 +79,7 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4"
       ref={overlayRef}
       onClick={handleOverlayClick}
     >
@@ -97,7 +97,7 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
         <div className="absolute inset-0 bg-black/55 backdrop-blur-md" />
 
         {/* Content */}
-        <div className="relative flex flex-col items-center px-8 pt-14 pb-8">
+        <div className="relative flex flex-col items-center px-6 sm:px-8 pt-12 sm:pt-14 pb-6 sm:pb-8">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10"
@@ -110,10 +110,10 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
           <img
             src={coverSrc}
             alt={song ? song.title : "Unkown Track"}
-            className="w-56 h-56 aspect-square object-cover rounded-lg shadow-2xl border-2 border-gray-600 mb-6"
+            className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 aspect-square object-cover rounded-lg shadow-2xl border-2 border-gray-600 mb-6"
           />
 
-          <h2 className="text-2xl font-bold text-white text-center leading-tight">
+          <h2 className="text-xl sm:text-2xl font-bold text-white text-center leading-tight">
             {track.title}
           </h2>
           <p className="text-base text-gray-200 mt-2 text-center">

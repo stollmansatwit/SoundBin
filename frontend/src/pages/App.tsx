@@ -47,15 +47,15 @@ export default function App() {
 
   return (
 
-    <div className={`min-h-screen bg-linear-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
+    <div className={`min-h-screen bg-linear-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 pl-14 ${isNavOpen ? 'sm:pl-32' : 'sm:pl-16'}`}>
       <Upload onOpen={() => setShowUpload(true)} />
       <Header />
       <SearchBar />
       <NavBar isOpen={isNavOpen} openNav={() => setIsNavOpen(true)} closeNav={() => setIsNavOpen(false)} />
       {/* <ScrollablePlaylists /> */}
       <ScrollableAlbums />
-      <RecentListenTable />
       <ScrollableArtists />
+      <RecentListenTable />
       <ScrollableTracks />
       <ScrollablePlaylists />
       {showUpload && (

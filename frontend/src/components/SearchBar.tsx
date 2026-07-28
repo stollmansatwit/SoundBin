@@ -147,22 +147,22 @@ export function SearchBar() {
 
   return (
     <div key={reloadKey}>
-      <form className="flex items-center justify-center p-4" onSubmit={handleSearch}>
+      <form className="flex items-center justify-center gap-2 p-4" onSubmit={handleSearch}>
         <input
           id="search-bar"
           type="text"
-          className="w-1/4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-2xl"
+          className="w-full max-w-xs sm:max-w-sm md:max-w-md p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-2xl"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Search songs, artists, albums..."
         />
-        <input type="submit" value="🔎" className="ml-2 bg-orange-500 border border-gray-300 text-white py-2 px-4 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-2xl" />
+        <input type="submit" value="🔎" className="shrink-0 bg-orange-500 border border-gray-300 text-white py-2 px-4 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-2xl" />
       </form>
 
 
       {results.length > 0 &&
         (
-          <ul className="bg-white/10 max-h-60 overflow-auto p-2 m-4 rounded">
+          <ul className="bg-white/10 max-h-60 overflow-auto p-2 m-4 sm:mx-auto sm:max-w-md rounded">
             {results.map((r) => (
               <li key={`${r.type}-${r.id}`} className="p-2 cursor-pointer hover:bg-white/20" onClick={() => handleClick(r)}>
                 <strong className="pr-2">{r.type}</strong>
@@ -194,7 +194,7 @@ export function SearchBar() {
 
 
       {results.length == 0 && searched && (
-        <ul className="bg-white/10 max-h-60 overflow-auto p-2 m-4 rounded">
+        <ul className="bg-white/10 max-h-60 overflow-auto p-2 m-4 sm:mx-auto sm:max-w-md rounded">
           <li className="p-2 cursor-pointer hover:bg-white/20">
             No results found
           </li>

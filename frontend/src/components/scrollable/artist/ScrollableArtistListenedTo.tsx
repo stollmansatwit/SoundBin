@@ -79,11 +79,11 @@ export function ScrollableArtistListenedTo({ artistId }: ArtistListenedToProps) 
   return (
     <>
       <div className="relative w-full overflow-x-auto whitespace-nowrap pb-6 pl-6 scrollbar-thumb-black shadow-lg">
-        <div className="inline-flex gap-6 px-2">
+        <div className="inline-flex gap-6 lg:gap-8 px-2">
 
           {listens.map((item) => (
             <div
-              className="group relative inline-flex w-[200px] flex-col
+              className="group relative inline-flex w-[200px] lg:w-[240px] xl:w-[260px] flex-col
                          bg-gray-800/40 hover:bg-gray-700/60
                          border border-gray-700/30 hover:border-white/10
                          rounded-lg transition-all duration-200
@@ -102,13 +102,13 @@ export function ScrollableArtistListenedTo({ artistId }: ArtistListenedToProps) 
 
               <div className="p-3 flex items-center gap-3">
                 <img
-                  className='w-12 h-12 object-cover rounded-md shadow-sm bg-gray-900'
+                  className='w-12 h-12 lg:w-14 lg:h-14 object-cover rounded-md shadow-sm bg-gray-900'
                   src={getCoverImage(item.cover_art_url)}
                   alt={item.title}
                 />
 
                 <div className="flex flex-col justify-center min-w-0">
-                  <span className={`text-sm font-medium truncate w-full ${hoveredTrackId === String(item.track_id) ? 'text-white' : 'text-gray-300'} transition-colors`}>
+                  <span className={`text-sm lg:text-base font-medium truncate w-full ${hoveredTrackId === String(item.track_id) ? 'text-white' : 'text-gray-300'} transition-colors`}>
                     {item.title.length > MAX_SONG_NAME_LENGTH && hoveredTrackId !== String(item.track_id)
                       ? `${item.title.slice(0, MAX_SONG_NAME_LENGTH)}...`
                       : item.title}

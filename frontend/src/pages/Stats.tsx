@@ -272,7 +272,7 @@ export default function Stats() {
   }), [uploadSeries]);
 
   return (
-    <div className={`min-h-screen bg-linear-to-t from-orange-200 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
+    <div className={`min-h-screen bg-linear-to-t from-orange-200 to-gray-500 font-bold transition-[padding-left] duration-300 pl-14 ${isNavOpen ? 'sm:pl-32' : 'sm:pl-16'}`}>
       <Header />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
        

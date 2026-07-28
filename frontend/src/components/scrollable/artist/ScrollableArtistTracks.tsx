@@ -29,11 +29,11 @@ export function ScrollableArtistTracks({ tracks }: TrackListProps) {
      <>
       {/* Container handles the scrolling and spacing between items via gap */}
       <div className="relative w-full overflow-x-auto whitespace-nowrap pb-6 pl-6 scrollbar-thumb-black shadow-lg">
-        <div className="inline-flex gap-6 px-2">
+        <div className="inline-flex gap-6 lg:gap-8 px-2">
 
           {tracks.map((song) => (
             <div
-              className="group relative inline-flex w-[200px] flex-col 
+              className="group relative inline-flex w-[200px] lg:w-[240px] xl:w-[260px] flex-col 
                          bg-gray-800/40 hover:bg-gray-700/60 
                          border border-gray-700/30 hover:border-white/10 
                          rounded-lg transition-all duration-200 
@@ -53,14 +53,14 @@ export function ScrollableArtistTracks({ tracks }: TrackListProps) {
               <div className="p-3 flex items-center gap-3">
                 {/* Smaller, rounded image */}
                 <img 
-                  className='w-12 h-12 object-cover rounded-md shadow-sm bg-gray-900' 
+                  className='w-12 h-12 lg:w-14 lg:h-14 object-cover rounded-md shadow-sm bg-gray-900' 
                   src={getCoverImage(song.cover_art_url)} 
                   alt={song.title} 
                 />
                 
                 <div className="flex flex-col justify-center min-w-0">
                    {/* Text truncation handled naturally by CSS */}
-                   <span className={`text-sm font-medium text-gray-100 truncate w-full ${hoveredTrackId === String(song.track_id) ? 'text-white' : 'text-gray-300'} transition-colors`}>
+                   <span className={`text-sm lg:text-base font-medium text-gray-100 truncate w-full ${hoveredTrackId === String(song.track_id) ? 'text-white' : 'text-gray-300'} transition-colors`}>
                     {song.title.length > MAX_SONG_NAME_LENGTH && hoveredTrackId !== String(song.track_id)
                       ? `${song.title.slice(0, MAX_SONG_NAME_LENGTH)}...`
                       : song.title}

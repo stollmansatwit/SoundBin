@@ -24,7 +24,7 @@ export default function ConfirmDialog({
 }: Props) {
   return (
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[70] p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-[70] p-4"
       onClick={onCancel}
     >
       <div

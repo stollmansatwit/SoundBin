@@ -15,11 +15,14 @@ export function HealthCheck() {
         checkHealth();
     }, []);
 
+    const ok = healthStatus?.ok;
     return (
-        <>
-            <div>
-                <h1 className='text-white'>{healthStatus?.ok ?  <div className = 'text-green-200'>Database Connected</div> : <div className = 'text-red-200'>Database Disconnected</div>}</h1>
-            </div>
-        </>
+        <div className='flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap'>
+            <span className={`inline-block h-2 w-2 rounded-full ${ok ? 'bg-green-400' : 'bg-red-400'}`} aria-hidden="true" />
+            <span className={ok ? 'text-green-200' : 'text-red-200'}>
+                <span className='sm:hidden'>{ok ? 'DB OK' : 'DB down'}</span>
+                <span className='hidden sm:inline'>{ok ? 'Database Connected' : 'Database Disconnected'}</span>
+            </span>
+        </div>
     )
 }

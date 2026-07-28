@@ -16,18 +16,27 @@ export function Header() {
 
   return (
     <>
-      <Link to="/home">
-        <h1 className='flex justify-center bg-transparent shadow-lg p-4 text-white'>SoundBin</h1>
-      </Link>
+      <div className='relative flex flex-col items-center gap-2 bg-transparent shadow-lg p-4 sm:grid sm:grid-cols-3 sm:items-center sm:gap-4'>
+        {/* Empty spacer column so the title lands in the true center of the
+            header on desktop, regardless of how wide the actions on the
+            right end up being. */}
+        <div className='hidden sm:block' aria-hidden="true" />
 
-      <div className='absolute right-5 top-4 flex items-center gap-3'>
-        <button
-          onClick={() => setShowCreatePlaylist(true)}
-          className='flex items-center gap-1 rounded-md bg-white/10 hover:bg-white/20 text-white text-sm font-semibold px-3 py-1.5 transition-colors'
-        >
-          <span className='text-lg leading-none'>+</span> New Playlist
-        </button>
-        <HealthCheck />
+        <Link to="/home" className='flex justify-center'>
+          <h1 className='text-white text-xl font-bold sm:text-2xl'>SoundBin</h1>
+        </Link>
+
+        <div className='flex items-center justify-center gap-3 sm:justify-self-end'>
+          <button
+            onClick={() => setShowCreatePlaylist(true)}
+            className='flex items-center gap-1 rounded-md bg-white/10 hover:bg-white/20 text-white text-sm font-semibold px-3 py-1.5 transition-colors'
+            title='New Playlist'
+          >
+            <span className='text-lg leading-none'>+</span>
+            <span className='hidden sm:inline'>New Playlist</span>
+          </button>
+          <HealthCheck />
+        </div>
       </div>
 
       {showCreatePlaylist && (

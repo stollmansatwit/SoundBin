@@ -43,11 +43,11 @@ export function ScrollableArtistAlbums({ albums }: AlbumListProps) {
             <div key={album.album_id} className="inline-block">
               <img
                 onClick={() => setSelectedAlbum(album)}
-                className=" w-40 inline-block p-2 cursor-pointer transition-transform ease-linear duration-[300ms] hover:duration-[2000ms] hover:rotate-[360deg] hover:scale-105 rounded-full"
+                className=" w-40 lg:w-48 xl:w-56 inline-block p-2 cursor-pointer transition-transform ease-linear duration-[300ms] hover:duration-[2000ms] hover:rotate-[360deg] hover:scale-105 rounded-full"
                 src={getCoverImage(album.cover_art_url)}
                 alt={album.title}
               />
-              <p className="text-white text-base font-semibold mb-3 truncate w-40 text-center leading-tight">
+              <p className="text-white text-base lg:text-lg font-semibold mb-3 truncate w-40 lg:w-48 xl:w-56 text-center leading-tight">
                   {album.title}
               </p>
           </div>

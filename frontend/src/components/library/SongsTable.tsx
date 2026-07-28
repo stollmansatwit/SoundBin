@@ -109,13 +109,13 @@ export function SongsTable() {
 
   return (
     <>
-    <div className="max-h-105 overflow-y-auto rounded-lg">
-      <table className="w-full text-left text-sm">
+    <div className="max-h-105 overflow-auto rounded-lg">
+      <table className="w-full min-w-[420px] text-left text-sm">
         <thead className="sticky top-0 bg-white/95 text-xs font-bold uppercase tracking-wide text-gray-500">
           <tr>
             <th className="px-3 py-2">Title</th>
             <th className="px-3 py-2">Artist</th>
-            <th className="px-3 py-2">Album</th>
+            <th className="hidden px-3 py-2 sm:table-cell">Album</th>
             <th className="px-3 py-2 text-right">Duration</th>
           </tr>
         </thead>
@@ -126,9 +126,9 @@ export function SongsTable() {
               className="border-t border-gray-200 hover:bg-white/80"
               onClick={() => setSelectedItem(item)}
             >
-              <td className="px-3 py-2.5 font-bold text-gray-900">{item.track.title}</td>
-              <td className="px-3 py-2.5 font-normal text-gray-600">{item.artistName}</td>
-              <td className="px-3 py-2.5 font-normal text-gray-600">{item.album.title}</td>
+              <td className="px-3 py-2.5 font-bold text-gray-900 max-w-[40vw] truncate sm:max-w-none">{item.track.title}</td>
+              <td className="px-3 py-2.5 font-normal text-gray-600 max-w-[28vw] truncate sm:max-w-none">{item.artistName}</td>
+              <td className="hidden px-3 py-2.5 font-normal text-gray-600 sm:table-cell">{item.album.title}</td>
               <td className="px-3 py-2.5 text-right font-normal text-gray-500">{item.trackDuration}</td>
             </tr>
           ))}

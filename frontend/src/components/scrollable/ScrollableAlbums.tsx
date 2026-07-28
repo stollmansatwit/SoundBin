@@ -54,7 +54,7 @@ export function ScrollableAlbums() {
             <img
               key={album.album_id}
               onClick={() => setSelectedAlbum(album)}
-              className=" w-40 inline-block p-2 cursor-pointer transition-transform ease-linear duration-[300ms] hover:duration-[2000ms] hover:rotate-[360deg] hover:scale-105 rounded-full"
+              className=" w-40 lg:w-48 xl:w-56 inline-block p-2 cursor-pointer transition-transform ease-linear duration-[300ms] hover:duration-[2000ms] hover:rotate-[360deg] hover:scale-105 rounded-full"
               src={getCoverImage(album.cover_art_url)}
               alt={album.title}
             />

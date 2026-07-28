@@ -66,14 +66,14 @@ export function ScrollableArtistPlaylist({ artistId }: ArtistPlaylistsProps) {
               onClick={() => setSelectedPlaylist(playlist)}
               className="inline-block p-2 cursor-pointer transition-transform ease-linear hover:scale-105 flex flex-col items-center"
             >
-              <div className="w-40 h-40 overflow-hidden rounded-lg">
+              <div className="w-40 h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 overflow-hidden rounded-lg">
                 <img
                   className="w-full h-full object-cover cursor-pointer transition-transform ease-linear duration-[300ms]"
                   src={getCoverImage(playlist.cover_art_url)}
                   alt={playlist.name}
                 />
               </div>
-              <p className="text-white text-center mt-2 text-sm truncate max-w-[160px]">
+              <p className="text-white text-center mt-2 text-sm lg:text-base truncate max-w-[160px] lg:max-w-[192px] xl:max-w-[224px]">
                 {playlist.name}
               </p>
             </div>
