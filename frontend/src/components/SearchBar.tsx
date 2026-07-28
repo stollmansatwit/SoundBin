@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import SongPopUp from "./popUpPage/SongPopUp";
 import AlbumPopUp from "./popUpPage/AlbumPopUp";
-import { type Album, type Track } from "../types";
 import { type Album, type Track, type Artist, type Playlist } from "../types";
 import ArtistPopUp from "./popUpPage/ArtistPopUp";
 import PlaylistPopUp from "./popUpPage/PlaylistPopUp";
+import { API_BASE_URL } from "../config";
 
 type SearchResult = {
   type: string;
@@ -100,7 +100,7 @@ export function SearchBar() {
 
       });
 
-    fetch(`${apiBaseUrl}/api/artist-path`)
+    fetch(`${API_BASE_URL}/api/artist-path`)
       .then((response) => {
         if (!response.ok) {
           console.log(`Request failed with status ${response.status}`);
@@ -117,7 +117,7 @@ export function SearchBar() {
 
       });
 
-    fetch(`${apiBaseUrl}/api/playlists`)
+    fetch(`${API_BASE_URL}/api/playlists`)
       .then((response) => {
         if (!response.ok) {
           console.log(`Request failed with status ${response.status}`);
