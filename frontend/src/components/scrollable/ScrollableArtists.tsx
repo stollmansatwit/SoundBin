@@ -54,18 +54,18 @@ export function ScrollableArtists() {
             <div
               key={artist.artist_id}
               onClick={() => setSelectedArtist(artist)}
-              className="inline-flex flex-col items-center mx-2 lg:mx-3 cursor-pointer group transition-all duration-300 hover:scale-105"
+              className="inline-flex flex-col items-center cursor-pointer group transition-all duration-300 hover:scale-105"
             >
               <div className="relative">
                 <img
-                  className="w-40 h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 rounded-full object-cover shadow-lg group-hover:shadow-xl transition-shadow duration-300"
+                  className="w-24 h-24 lg:w-32 lg:h-32 xl:w-32 xl:h-32 object-cover shadow-lg group-hover:shadow-xl transition-shadow duration-300"
                   src={getCoverImage(artist.image_url)}
                   alt={artist.name}
                 />
                 {/* Subtle gradient overlay on hover */}
-                <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
               </div>
-                <p className="text-white text-base lg:text-lg font-semibold mb-3 truncate w-40 lg:w-48 xl:w-56 text-center leading-tight">
+                <p className="text-white text-base lg:text-sm font-semibold mb-3 truncate w-32 lg:w-36 xl:w-40 text-center leading-tight">
                     {artist.name}
                 </p>
             </div>
