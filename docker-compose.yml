@@ -64,7 +64,7 @@ services:
       PORT: ${FRONTEND_PORT:-5173}
       # Baked into the browser bundle as the API location. Must be reachable
       # from the *browser*, so localhost (the host machine), not "backend".
-      VITE_API_URL: "http://localhost:${BACKEND_PORT:-3000}"
+      BACKEND_URL: "http://backend:${BACKEND_PORT:-3000}"
     command: npm run dev -- --host
 
  

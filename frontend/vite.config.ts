@@ -8,12 +8,20 @@ export default defineConfig(({ mode }) => {
   // config below — Vite still only ships VITE_-prefixed values to the browser.
   const env = loadEnv(mode, process.cwd(), '')
 
+  const backendTarget = env.BACKEND_URL || `http://localhost:${env.BACKEND_PORT || 3000}`
+  const proxyToBackend = { target: backendTarget, changeOrigin: true }
+
   return {
     plugins: [react()],
     server: {
       port: Number(env.PORT) || 5173,
       // Listen on all interfaces so the Docker container is reachable from the host.
       host: true,
+      proxy: {
+        '/api': proxyToBackend,
+        '/songs': proxyToBackend,
+        '/assets': proxyToBackend,
+      },
     },
   }
-})
+});

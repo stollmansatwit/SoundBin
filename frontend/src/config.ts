@@ -16,8 +16,8 @@
  *   3. `http://localhost:3000`                    — development fallback
  */
 
-const DEFAULT_HOST = 'http://localhost';
-const DEFAULT_BACKEND_PORT = '3000';
+//const DEFAULT_HOST = 'http://localhost';
+//const DEFAULT_BACKEND_PORT = '3000';
 
 /** Drops any trailing slashes so callers can safely concatenate `/api/...`. */
 const stripTrailingSlash = (value: string): string => value.replace(/\/+$/, '');
@@ -28,10 +28,10 @@ const resolveApiBaseUrl = (): string => {
     return stripTrailingSlash(explicit);
   }
 
-  const host = stripTrailingSlash((import.meta.env.VITE_APPLICATION_URL?.trim() || DEFAULT_HOST));
-  const port = import.meta.env.VITE_BACKEND_PORT?.trim() || DEFAULT_BACKEND_PORT;
-
-  return stripTrailingSlash(`${host}:${port}`);
+  // Same origin. The Vite dev server proxies /api, /songs and /assets to the
+  // backend, so the browser only ever talks to whatever host it loaded the
+  // page from. Works from any device without knowing the server's address.
+  return '';
 };
 
 /**
