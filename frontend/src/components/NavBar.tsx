@@ -1,4 +1,5 @@
-import{ Link } from 'react-router-dom';
+import{ Link, useNavigate } from 'react-router-dom';
+import { logout } from '../utils/api';
 
 type NavBarProps = {
   isOpen: boolean;
@@ -7,6 +8,7 @@ type NavBarProps = {
 };
 
 export function NavBar({ isOpen, openNav, closeNav }: NavBarProps) {
+  const navigate = useNavigate();
   return (
     <>
       {/* Backdrop: only needed on small screens, where the expanded nav
@@ -41,6 +43,7 @@ export function NavBar({ isOpen, openNav, closeNav }: NavBarProps) {
             <Link to="/user" onClick={closeNav}>User</Link>
             <Link to="/library" onClick={closeNav}>Library</Link>
             <Link to="/stats" onClick={closeNav}>Stats</Link>
+            <Link to = "/login" onClick={()=>logout(navigate)}>Log out</Link>
           </div>
         </div>
       </nav>
