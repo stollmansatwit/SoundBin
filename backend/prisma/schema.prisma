@@ -21,6 +21,7 @@ model User {
   register_date DateTime  @default(now()) @db.Timestamptz(0)
   is_active     Boolean   @default(true)
   is_admin      Boolean   @default(false)
+  is_approved   Boolean   @default(false)
   last_login    DateTime? @db.Timestamptz(6)
 
   // back relations
@@ -163,6 +164,7 @@ model Playlist {
   description String?
   source_type String @default("manual") @db.VarChar(100)
   date_created DateTime @default(now()) @db.Timestamptz(3)
+  cover_art_url String?   @db.VarChar(500)
 
 user User? @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 items PlaylistItem[]
@@ -209,12 +211,12 @@ model TrackFile {
   file_id Int @id @default(autoincrement())
   track_id Int
   storage_path_url String @unique @db.VarChar(500)
+  file_hash String? @unique @db.VarChar(64) // nullable only for rows that predate hash-based dedup; always set for new uploads
   bitrate Int @db.SmallInt //KBps
   sample_rate Int
   channels Int @db.SmallInt
   codec String @db.VarChar(20)
   file_mtime DateTime @db.Timestamptz(6)
-  //file_hash String  @db.VarChar(64)
 
   track Track @relation(fields: [track_id], references: [track_id], onDelete: Cascade)
 

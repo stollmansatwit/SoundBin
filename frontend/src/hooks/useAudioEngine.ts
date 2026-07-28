@@ -1,0 +1,48 @@
+import { useState, useEffect, useRef } from 'react';
+import { AudioEngine} from '../audio/AudioEngine';
+import type {AudioEngineState, AudioContextType, AudioEngineOptions} from '../types';
+import type { Track } from '../types';
+
+/**
+ * A thin React hook that bridges the singleton AudioEngine to React state.
+ */
+export function useAudioEngine(options: AudioEngineOptions): AudioContextType {
+  const engineRef = useRef<AudioEngine>(null!); // Non-null assertion because we init immediately if needed
+
+  // Initialize or get existing singleton
+  if (!engineRef.current) {
+    engineRef.current = AudioEngine.getInstance(options);
+  }
+
+  const [state, setState] = useState<AudioEngineState>(engineRef.current.getState());
+
+  useEffect(() => {
+    const engine = engineRef.current;
+    
+    // Subscribe to state changes from the engine
+    const unsubscribe = engine.subscribe((newState) => {
+      setState(newState as AudioEngineState);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Return the full context including state and methods
+  return {
+    ...state,
+    setQueue: (tracks: Track[], startIndex=0) => engineRef.current.setQueue(tracks, startIndex),
+    addToQueue: (tracks: Track[]) => engineRef.current.addToQueue(tracks),
+    toggleShuffle: () => engineRef.current.toggleShuffle(),
+    toggleRepeat: () => engineRef.current.toggleRepeat(),
+    playNext: () => engineRef.current.playNext(),
+    playPrevious: () => engineRef.current.playPrevious(),
+    pause: () => engineRef.current.pause(),
+    togglePlay: () => engineRef.current.togglePlay(),
+    seek: (time: number) => engineRef.current.seek(time),
+    removeFromQueue: (index) => engineRef.current.removeFromQueue(index),
+    moveQueueItem: (fromIndex, toIndex) => engineRef.current.moveQueueItem(fromIndex, toIndex),
+    playTrackAt: (index) => engineRef.current.playTrackAt(index),
+  };
+}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config';
 
 type SchemaTable = {
   tableName: string;
@@ -15,9 +16,7 @@ export function SchemaColumns() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const apiBaseUrl:string = 'http://127.0.0.1:3000';
-
-    fetch(`${apiBaseUrl}/api/schema/columns`)
+    fetch(`${API_BASE_URL}/api/schema/columns`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);

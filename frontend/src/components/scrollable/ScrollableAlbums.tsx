@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from "react";
 
 import AlbumPopUp from "../popUpPage/AlbumPopUp";
-
-type Album = {
-  album_id: string;
-  artist_id: string;
-  title: string;
-  cover_art_url?: string;
-};
+import type { Album } from "../../types";
+import { API_BASE_URL } from '../../config';
 
 const DEFAULT_IMAGE = "/defaultAlbum.png"; // change to an actual path in assets once better image found
 
@@ -16,10 +11,11 @@ export function ScrollableAlbums() {
   const [loading, setLoading] = useState(true);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
 
-  useEffect(() => {
-    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
 
-    fetch(`${apiBaseUrl}/api/album-path`)
+  
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/album-path`)
       .then((response) => {
         if (!response.ok) {
           console.log(`Request failed with status ${response.status}`);
@@ -38,31 +34,17 @@ export function ScrollableAlbums() {
   }, []);
 
   const getCoverImage = (path?: string) => {
-    const apiBaseUrl: string = "http://localhost:3000"; //Replace with `${process.env.APPLICATION_URL}:${process.env.BACKEND_PORT}`;
     if (!path || path == "" || path == null) {
       return DEFAULT_IMAGE;
     }
 
     const file = path.split('/').pop();
-    return `${apiBaseUrl}/assets/${file}`;
+    return `${API_BASE_URL}/assets/${file}`;
   };
 
   const displayAlbum = Array.isArray(albums) ? albums : [];
 
   return (
-    /**
-     * <>
-      <p className='text-center text-lg font-bold sticky text-white'>Albums</p>
-      <div className='relative flex items-center scrollbar-thumb-black scrollbar-auto scrollbar ease-in duration-75 shadow-lg'>
-        <li className='w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth p-1'>
-          <div id='slider'></div>
-          {data.map((item: { img: string | undefined; }) => (
-            <img className=' w-40 inline-block p-2 cursor-pointer transition-transform ease-linear duration-[300ms] hover:duration-[2000ms] hover:rotate-[360deg] hover:scale-105 rounded-full' src={item.img} alt='album cover' />
-          ))}
-        </li>
-      </div>
-    </>
-     */
     <>
       <p className="text-center text-lg font-bold sticky text-white">Albums</p>
       <div className="relative flex items-center scrollbar-thumb-black scrollbar-auto scrollbar ease-in duration-75 shadow-lg">
@@ -72,7 +54,7 @@ export function ScrollableAlbums() {
             <img
               key={album.album_id}
               onClick={() => setSelectedAlbum(album)}
-              className=" w-40 inline-block p-2 cursor-pointer transition-transform ease-linear duration-[300ms] hover:duration-[2000ms] hover:rotate-[360deg] hover:scale-105 rounded-full"
+              className=" w-40 lg:w-48 xl:w-56 inline-block p-2 cursor-pointer transition-transform ease-linear duration-[300ms] hover:duration-[2000ms] hover:rotate-[360deg] hover:scale-105 rounded-full"
               src={getCoverImage(album.cover_art_url)}
               alt={album.title}
             />
@@ -83,6 +65,7 @@ export function ScrollableAlbums() {
           <AlbumPopUp
             album={selectedAlbum}
             onClose={() => setSelectedAlbum(null)}
+            onDeleted={() => setAlbums((prev) => prev.filter((a) => a.album_id !== selectedAlbum.album_id))}
           />
         )}
     </>

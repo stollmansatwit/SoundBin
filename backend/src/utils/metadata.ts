@@ -14,6 +14,22 @@ import { createHash } from 'crypto';
   const BaseDir = process.env.DOCKER_SONG_FILE_LOCATION;
   const targetDir = `${BaseDir}/assets`;
 
+/**
+ * Streams the file and returns a sha256 hash of its contents.
+ * Used to detect byte-identical duplicate uploads regardless of
+ * what filename or path they were saved under, and as a stable
+ * content fingerprint independent of the on-disk filename.
+ */
+export async function hashFile(filePath: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const hash = createHash('sha256');
+    const stream = createReadStream(filePath);
+    stream.on('data', (chunk) => hash.update(chunk));
+    stream.on('end', () => resolve(hash.digest('hex')));
+    stream.on('error', reject);
+  });
+}
+
 
 async function saveCoverArt(picture: any): Promise<string | null> {
   if(!picture?.data) return null;
@@ -32,6 +48,33 @@ async function saveCoverArt(picture: any): Promise<string | null> {
   return outPath;
 }
 
+
+/**
+ * Some files tag a full "Primary ft. Featured" credit as a single string in
+ * one performer/artist field, rather than using separate multi-artist tags.
+ * Taking that whole string literally as "the artist" means every distinct
+ * featuring credit for the same primary artist (e.g. "X ft. A", "X ft. B")
+ * becomes its own separate Artist — and, since album lookup is scoped by
+ * artist, can fragment a single album into several duplicate Album rows too.
+ * This pulls the primary artist out so it stays consistent across a whole
+ * album regardless of who's featured on which track.
+ */
+function splitFeaturedArtists(rawArtist: string): { primary: string; featured: string[] } {
+  if (!rawArtist) return { primary: rawArtist, featured: [] };
+
+  const match = rawArtist.match(/^(.+?)\s*\(?\s*(?:feat\.?|featuring|ft\.?)\s+(.+?)\)?\s*$/i);
+  if (!match) {
+    return { primary: rawArtist.trim(), featured: [] };
+  }
+
+  const primary = match[1].trim();
+  const featured = match[2]
+    .split(/\s*(?:,|&|\band\b)\s*/i)
+    .map((name) => name.trim())
+    .filter(Boolean);
+
+  return { primary, featured };
+}
 
 /**
  * Parses a music file and returns an object containing 
@@ -88,11 +131,32 @@ export async function extractMetadata(filePath: string) {
     // console.log('picture raw:', common.picture);
     // console.log('picture count:', common.picture?.length ?? 0);
 
+    // common.genre / common.artists are already arrays in music-metadata;
+    // previously only the first entry of each was ever used downstream.
+    const genres: string[] = Array.isArray(common?.genre) ? common.genre.filter(Boolean) : (common?.genre ? [common.genre] : []);
+
+    const rawArtist = common?.artist || "Unknown Artist";
+    const { primary: primaryArtist, featured: splitFeatured } = splitFeaturedArtists(rawArtist);
+
+    const taggedArtists: string[] = Array.isArray(common?.artists) ? common.artists.filter(Boolean) : [];
+    // Each tagged artist entry might itself be an unsplit "X ft. Y" combined
+    // credit (not just common.artist) — split those too so a raw composite
+    // string never leaks through as a bogus separate contributor.
+    const expandedTaggedArtists = taggedArtists.flatMap((name) => {
+      const { primary, featured } = splitFeaturedArtists(name);
+      return [primary, ...featured];
+    });
+
+    const artists: string[] = Array.from(
+      new Set([primaryArtist, ...expandedTaggedArtists, ...splitFeatured].filter(Boolean)),
+    );
+
     const info = {
       title: common?.title || "Unknown Title",
-      artist: common?.artist || "Unknown Artist",
+      artist: primaryArtist || "Unknown Artist",
+      artists,
       album: common?.album || "Unknown Album",
-      genre: common?.genre ?? null,
+      genres,
       track: common?.track?.no ?? null,
       date: common?.date ?? null, 
       cover_url: file_path ?? null,
@@ -108,9 +172,10 @@ export async function extractMetadata(filePath: string) {
     return {
       title: info.title,
       artist: info.artist,
+      artists: info.artists,
       album: info.album,
       duration: info.duration,
-      genre: info.genre,
+      genres: info.genres,
       track: info.track,
       cover_url: info.cover_url,
       date: info.date,
@@ -118,7 +183,7 @@ export async function extractMetadata(filePath: string) {
       bitrate: info.bitrate,
       sample_rate: info.sample_rate,
       channels: info.channels
-      // returned to the watcher can use it to create a Prisma record
+      // returned to the ingest service, used to create Prisma records
     };
   } catch (error) {
     console.error(`Error parsing metadata for ${filePath}:`, error);

@@ -1,52 +1,75 @@
-import { useState } from 'react'
-import { ScrollableAlbums } from '../components/scrollable/ScrollableAlbums'
-import { NavBar } from '../components/NavBar'
-import { RecentListenTable } from '../components/scrollable/RecentListenTable'
-import { ScrollablePlaylists } from '../components/scrollable/ScrollablePlaylists'
-import { UploadButton } from '../components/UploadFileButton'
-import { Header } from '../components/Header'
-import { SearchBar } from '../components/SearchBar'
-import { Upload } from '../components/Upload'
+import { useEffect, useRef, useState } from 'react';
+import { ScrollableAlbums } from '../components/scrollable/ScrollableAlbums';
+import { ScrollableArtists } from '../components/scrollable/ScrollableArtists';
+import { ScrollableTracks } from '../components/scrollable/ScrollableTracks';
+import { ScrollablePlaylists } from '../components/scrollable/ScrollablePlaylists';
+import { NavBar } from '../components/NavBar';
+import { RecentListenTable } from '../components/scrollable/RecentListenTable';
+import { UploadButton } from '../components/UploadFileButton';
+import { Header } from '../components/Header';
+import { SearchBar } from '../components/SearchBar';
+import { Upload } from '../components/Upload';
+import { PlaybackControlBar } from '../components/playback/PlaybackControlBar';
+
 
 
 
 export default function App() {
-  const [isNavOpen, setIsNavOpen] = useState(false)
 
-  const openNav = () => {
-    setIsNavOpen(true)
-  }
-
-  const closeNav = () => {
-    setIsNavOpen(false)
-  }
-
+  const [isNavOpen, setIsNavOpen] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
 
-  const openUpload = () => {
-    setShowUpload(true);
+  const getLeftPosition = () => {
+    return isNavOpen ? 'left-[calc(8rem+1rem)]' : 'left-[calc(4rem+1rem)]';
   };
 
-  const closeUpload = () => {
-    setShowUpload(false);
-  };
+  //const getTrackUrl = 
+
+  const playerWrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = playerWrapperRef.current;
+    if (!el) return;
+
+    const updateHeight = () => {
+      // bottom-4 = 1rem gap below the player, plus its own height
+      const height = el.offsetHeight + 100;
+      document.documentElement.style.setProperty('--player-offset', `${height}px`);
+    };
+
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
 
-    <div className={`min-h-screen bg-linear-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
-      <Upload onOpen={openUpload} />
+    <div className={`min-h-screen bg-linear-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 pl-14 ${isNavOpen ? 'sm:pl-32' : 'sm:pl-16'}`}>
+      <Upload onOpen={() => setShowUpload(true)} />
       <Header />
       <SearchBar />
-      <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
-      <ScrollablePlaylists />
+      <NavBar isOpen={isNavOpen} openNav={() => setIsNavOpen(true)} closeNav={() => setIsNavOpen(false)} />
+      {/* <ScrollablePlaylists /> */}
       <ScrollableAlbums />
+      <ScrollableArtists />
       <RecentListenTable />
+      <ScrollableTracks />
+      <ScrollablePlaylists />
       {showUpload && (
-        <UploadButton onClose={closeUpload} />
+        <UploadButton onClose={() => setShowUpload(false)} />
       )}
+      <div style={{ paddingBottom: 'var(--player-offset)' }} >
+      <div
+        ref={playerWrapperRef}
+        className={`fixed bottom-4 z-40 w-[calc(100%-2rem)] max-w-3xl mx-auto ${getLeftPosition()}`}
+      >
+        <PlaybackControlBar />
+      </div>
+      </div>
     </div>
 
   )
 }
-
-

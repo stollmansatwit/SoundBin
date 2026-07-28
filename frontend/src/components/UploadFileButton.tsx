@@ -5,6 +5,7 @@
  * @version 0.1
  */
 import React from 'react';
+import { API_BASE_URL } from '../config';
 // type AlbumArt = {
 //     url: string,
 // };
@@ -28,22 +29,33 @@ export function UploadButton({ onClose }: UploadButtonProps) {
     const formData = new FormData();
     const fileInput = e.currentTarget.elements.namedItem('songFile') as HTMLInputElement;
 
-    if (fileInput.files && fileInput.files[0]) {
-      formData.append('songFile', fileInput.files[0]);
+    if (fileInput.files && fileInput.files.length > 0) {
+      // Append every selected file under the same field name so multer
+      // can collect them all as an array on the backend.
+      Array.from(fileInput.files).forEach((file) => {
+        formData.append('songFiles', file);
+      });
       // able to add other fields here
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/upload', {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
         body: formData,
       });
 
+      const data = await response.json().catch(() => null);
+
       if (response.ok) {
-        alert("Upload successful");
+        alert(data?.message ?? "Upload successful");
+        // The server now waits for indexing to finish before responding,
+        // so there's no need to delay the reload for the watcher to catch up.
+        window.location.reload();
+      } else {
+        alert(data?.message ?? "Upload failed. Please try again.");
       }
     } catch (error) {
-      alert("Upload successful");
+      alert("Upload failed. Please check your connection and try again.");
       console.error("Upload failed", error);
     } finally {
       setUploading(false);
@@ -52,6 +64,11 @@ export function UploadButton({ onClose }: UploadButtonProps) {
 
   }
 
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      onClose();
+    }
+  });
 
 
   return (
@@ -69,14 +86,15 @@ export function UploadButton({ onClose }: UploadButtonProps) {
             htmlFor="songFile"
             className="text-2xl font-bold text-white text-center"
           >
-            Upload a Song
-            <p className="text-xs text-gray-400">Click outside to close the upload screen</p>
+            Upload Songs
+            <p className="text-xs text-gray-400">Select one or more files. Click outside to close the upload screen</p>
           </label>
 
           <input
             id="songFile"
             type="file"
             name="songFile"
+            multiple
             className="block w-full text-sm text-gray-300
             file:mr-4 file:py-2 file:px-4
             file:rounded-md file:border-0

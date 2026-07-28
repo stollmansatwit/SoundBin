@@ -1,93 +1,60 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavBar } from '../components/NavBar'
 import { Header } from '../components/Header'
 import { SearchBar } from '../components/SearchBar'
+import { RecentListenTable } from '../components/scrollable/RecentListenTable'
+import { SongsTable } from '../components/library/SongsTable'
+import { LibraryTabs, type LibrarySection } from '../components/library/LibraryTabs'
+import { AlbumGrid } from '../components/library/AlbumGrid'
+import { ArtistGrid } from '../components/library/ArtistGrid'
+import { PlaylistGrid } from '../components/library/PlaylistGrid'
+import { Upload } from '../components/Upload'
+import { UploadButton } from '../components/UploadFileButton'
+
+
 
 export default function Library() {
   const [isNavOpen, setIsNavOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState<LibrarySection>('albums')
+  const [showUpload, setShowUpload] = useState(false);
 
-  const openNav = () => {
-    setIsNavOpen(true)
-  }
+  const openUpload = () => {
+    setShowUpload(true);
+  };
 
-  const closeNav = () => {
-    setIsNavOpen(false)
-  }
+  const closeUpload = () => {
+    setShowUpload(false);
+  };
 
+
+
+  const openNav = () => setIsNavOpen(true)
+  const closeNav = () => setIsNavOpen(false)
 
   return (
-    <div className={`min-h-screen bg-linear-to-t from-orange-500 to-gray-500 font-bold transition-[padding-left] duration-300 ${isNavOpen ? 'pl-32' : 'pl-16'}`}>
+    <div className={`min-h-screen bg-linear-to-t from-orange-400 to-gray-500 font-bold transition-[padding-left] duration-300 pl-14 ${isNavOpen ? 'sm:pl-32' : 'sm:pl-16'}`}>
+      <Upload onOpen={openUpload} />
       <Header />
       <SearchBar />
       <NavBar isOpen={isNavOpen} openNav={openNav} closeNav={closeNav} />
-      <div className="w-1/3 flex align-center justify-center p-4 float-start">
-        <h2 className="text-2xl font-bold text-white">Recently Played</h2>
-      </div>
-      <div className="w-1/3 flex align-center justify-center p-4 float-start">
-        <h2 className="text-2xl font-bold text-white">All Songs</h2>
-      </div>
-      <div className="w-1/3 flex align-center justify-center p-4 float-start">
-        <h2 className="text-2xl font-bold text-white">All Albums</h2>
-      </div>
 
-      <div className="flex p-4 gap-4 w-1/3 float-start">
-        <table className= "border [&>tr]:border [&>tr]:text-center  text-white flex-1">
-          <tr className = "[&>th]:border">
-            <th>Song</th>
-            <th>Artist</th>
-            <th>Album</th>
-          </tr>
-          <tr className = "[&>td]:border">
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-          </tr>
-          <tr className = "[&>td]:border">
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-          </tr>
-        </table>
-      </div>
-      
-      <div className="flex p-4 gap-4 w-1/3 float-start">
-        <table className= "border [&>tr]:border [&>tr]:text-center  text-white flex-1">
-          <tr className = "[&>th]:border">
-            <th>Song</th>
-            <th>Artist</th>
-            <th>Album</th>
-          </tr>
-          <tr className = "[&>td]:border">
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-          </tr>
-          <tr className = "[&>td]:border">
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-          </tr>
-        </table>
-      </div>
-      <div className="flex p-4 gap-4 w-1/3 float-start">
-        <table className= "border [&>tr]:border [&>tr]:text-center  text-white flex-1">
-          <tr className = "[&>th]:border">
-            <th>Song</th>
-            <th>Artist</th>
-            <th>Album</th>
-          </tr>
-          <tr className = "[&>td]:border">
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-          </tr>
-          <tr className = "[&>td]:border">
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-          </tr>
-        </table>
-      </div>
+      <main className="px-8 pb-16 pt-4">
+        <RecentListenTable />
+
+        <div className="mt-10">
+          <LibraryTabs active={activeSection} onChange={setActiveSection} />
+
+          <div className="rounded-b-2xl rounded-tr-2xl bg-white/20 backdrop-blur-sm p-6 shadow-xl min-h-[420px]">
+            {activeSection === 'albums' && <AlbumGrid />}
+            {activeSection === 'songs' && <SongsTable />}
+            {activeSection === 'artists' && <ArtistGrid />}
+            {activeSection === 'playlists' && <PlaylistGrid />}
+          </div>
+        </div>
+      </main>
+      {showUpload && (
+        <UploadButton onClose={closeUpload} />
+      )}
     </div>
   )
 }

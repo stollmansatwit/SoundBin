@@ -15,4 +15,9 @@ Need to think out several different types of uploadable songs so they can be pro
 - upload bad file should result in error
 
 ## consider adding a check-in / confirm files data is correct when uploading, should definetly be a setting they have to click or open aka shouldn't impeed on normal workflow
+
+# Running on Windows
+Running on other operating systems works but the correct version of node and npm need to be installed
+https://nodejs.org/en/download/
+Make sure Windows has .env file
 >Should be worked on after confirmed normal and edge cases for upload
