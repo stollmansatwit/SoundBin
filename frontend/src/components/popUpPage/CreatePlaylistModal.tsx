@@ -37,7 +37,7 @@ export default function CreatePlaylistModal({ onClose, onCreated, fallbackCoverT
     ? `${API_BASE_URL}/assets/${fallbackCoverTrack.cover_art_url.split('/').pop()}`
     : DEFAULT_IMAGE;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!name.trim() || submitting) return;
 
@@ -78,6 +78,7 @@ export default function CreatePlaylistModal({ onClose, onCreated, fallbackCoverT
       setError("Failed to create playlist. Please try again.");
     } finally {
       setSubmitting(false);
+      window.location.reload(); 
     }
   };
 
