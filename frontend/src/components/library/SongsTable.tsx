@@ -127,7 +127,8 @@ export function SongsTable() {
                 
                 <td className="hidden px-3 py-2.5 font-normal text-gray-600 sm:table-cell">{item.artist.name}</td>
                 <td className="px-3 py-2.5 font-normal text-gray-600 max-w-[28vw] truncate sm:max-w-none">{item.album.title}</td>
-                <td className="px-3 py-2.5 text-right font-normal text-gray-500">{item.track.duration}</td>
+                
+                <td className="px-3 py-2.5 text-right font-normal text-gray-500">{formatDuration(item.track.duration?item.track.duration:0)}</td>
               </tr>
             ))}
           </tbody>
