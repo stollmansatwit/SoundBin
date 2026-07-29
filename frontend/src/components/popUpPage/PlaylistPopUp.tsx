@@ -4,6 +4,7 @@ import { TrackOptionsMenu } from "../buttons/TrackOptionsMenu";
 import { useAudio } from "../../context/AudioContext";
 import type { Playlist, Track } from "../../types";
 import { API_BASE_URL } from '../../config';
+import { createPortal } from "react-dom";
 
 interface Props {
   playlist: Playlist;
@@ -136,7 +137,7 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
     }
   };
 
-  return (
+  return createPortal(
 
     <div
       className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4"
@@ -262,6 +263,7 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

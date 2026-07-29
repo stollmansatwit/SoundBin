@@ -3,6 +3,7 @@ import { PlayButton } from "../buttons/PlayButton";
 import { TrackOptionsMenu } from "../buttons/TrackOptionsMenu";
 import {type Album, type Track} from "../../types";
 import { API_BASE_URL } from '../../config';
+import { createPortal } from "react-dom";
 
 interface Props {
   album_id: number;
@@ -28,7 +29,7 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
   };
 
   const coverSrc = getCoverImage(track.cover_art_url);
-
+  
   useEffect(() => {
 
     fetch(`${API_BASE_URL}/api/tracks/${track.track_id}`)
@@ -77,9 +78,9 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4"
+      className="fixed inset-0 center bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4"
       ref={overlayRef}
       onClick={handleOverlayClick}
     >
@@ -145,6 +146,7 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
 
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

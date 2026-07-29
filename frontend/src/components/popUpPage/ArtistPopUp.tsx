@@ -5,7 +5,7 @@ import { ScrollableArtistPlaylist } from '../scrollable/artist/ScrollableArtistP
 import { ScrollableArtistListenedTo } from '../scrollable/artist/ScrollableArtistListenedTo';
 import type { Artist, Album, Track } from "../../types";
 import { API_BASE_URL } from '../../config';
-
+import { createPortal } from "react-dom";
 interface Props {
   artist: Artist;
   onClose: () => void;
@@ -111,7 +111,7 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
     { label: "In Playlists", value: stats.playlistAppearances },
   ];
 
-  return (
+  return createPortal(
     <div 
       className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4"
       ref={overlayRef}
@@ -203,6 +203,7 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
 
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

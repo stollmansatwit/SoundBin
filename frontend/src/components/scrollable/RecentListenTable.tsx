@@ -111,6 +111,7 @@ export function RecentListenTable() {
             track_id: selectedItem.track_id,
             album_id: selectedItem.album_id ?? 0,
             duration: selectedItem.duration ?? 0,
+            cover_art_url: selectedItem.cover_art_url
           } as Track}
           onClose={() => setSelectedItem(null)}
         />

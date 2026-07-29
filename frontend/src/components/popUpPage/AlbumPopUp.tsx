@@ -4,7 +4,7 @@ import { PlayAlbum } from "../buttons/PlayAlbum";
 import { TrackOptionsMenu } from "../buttons/TrackOptionsMenu";
 import type { Album, Track } from "../../types";
 import { API_BASE_URL } from '../../config';
-
+import { createPortal } from "react-dom";
 interface Props {
   album: Album;
   onClose: () => void;
@@ -99,7 +99,7 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
 
   // Logic to handle optional year & duration in the info bar
   const displayYear = getYear(album.release_date);
-  const totalDuration = formatTotalDuration(songs.reduce((acc, s) => acc + s.duration, 0));
+  const totalDuration = formatTotalDuration(songs.reduce((acc, s) => acc + (s.duration || 0), 0));
 
   // Construct the display string: "12 songs • 01:30:00" or "12 songs • 01:30:00 • 2024"
   const infoBar = (
@@ -110,7 +110,7 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
 
   const coverSrc = getCoverImage(album.cover_art_url);
   // still needs updates but good starter
-  return (
+  return createPortal(
 
     <div
       className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4"
@@ -170,7 +170,7 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
             {/* Info Bar: [# songs - duration - year (optional)] */}
             {infoBar}
 
-            <div className="w-full overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
+            <div className="w-full overflow-y-auto max-h-[200px] sm:max-h-[300px] md:max-h-[400px]">
               <ul className="space-y-1">
                 {loadingTracks ? (
                   <li key="loading" className="text-white opacity-50 italic">Loading tracks...</li>
@@ -189,7 +189,7 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
                       {/* Right side: Duration and Play Button */}
                       <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                         <span className="hidden sm:inline text-gray-300 text-sm">
-                          {formatDuration(song.duration)}
+                          {song.duration && formatDuration(song.duration)}
                         </span>
                         <PlayButton
                           trackId={song.track_id}
@@ -217,6 +217,7 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

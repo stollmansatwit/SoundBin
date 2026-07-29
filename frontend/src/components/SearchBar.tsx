@@ -240,9 +240,7 @@ export function SearchBar() {
         <SongPopUp
           track={selectedTrack}
           onClose={() => {
-            closePopUp();
-          }
-          }
+            closePopUp();}}
           album_id={selectedAlbum.album_id} />
 
       )}
@@ -268,10 +266,8 @@ export function SearchBar() {
 
 
       {results.length == 0 && searched && (
-        <ul className="bg-white/10 max-h-60 overflow-auto p-2 m-4 sm:mx-auto sm:max-w-md rounded">
-          <li className="p-2 cursor-pointer hover:bg-white/20">
-            No results found
-          </li>
+        <ul >
+          {/* empty ul for no results */}
         </ul>)}
     </div>
   );
