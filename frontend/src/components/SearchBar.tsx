@@ -193,6 +193,9 @@ export function SearchBar() {
 
   const handleHighlight = (text: string, query: string) => {
     // This function highlights the search query in the result text by wrapping it in <mark> tags. It uses a regular expression to find all occurrences of the query, ignoring case.
+    if(query.includes("\\")){
+      return text
+    }
     const regex = new RegExp(`(${query})`, 'gi');
     // Note the use of class here instead of className, because this is rendered as HTML and not as JSX
     return text.replace(regex, '<mark class = "bg-white/40 ">$1</mark>');
