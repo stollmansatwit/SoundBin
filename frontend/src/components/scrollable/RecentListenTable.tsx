@@ -79,7 +79,7 @@ export function RecentListenTable() {
 
             {listens.map((item) => (
               <div
-                className="inline-block w-48 lg:w-56 xl:w-64 align-top hover:w-[var(--hover-width)] transition-all duration-300 border border-gray-400 rounded-lg hover:bg-gray-700 cursor-pointer"
+                className="inline-block w-48 lg:w-56 xl:w-64 align-top hover:w-[var(--hover-width)] transition-all duration-300 border bg-gray-700/30 border-gray-400 rounded-lg hover:bg-gray-700 cursor-pointer"
                 style={{
                   "--hover-width": `${(item.title.length * 10 + 160)}px`,
                 } as React.CSSProperties}
@@ -88,7 +88,7 @@ export function RecentListenTable() {
                 onMouseEnter={() => setHoveredTrackId(String(item.track_id))}
                 onMouseLeave={() => setHoveredTrackId(null)}
                 onClick={() => setSelectedItem(item)}>
-                <img className='inline-block justify-center w-10 lg:w-12 m-auto rounded-[16px]' src={getCoverImage(item.cover_art_url)} alt={item.title} />
+                <img className='inline-block w-10 lg:w-16 m-auto rounded-[16px] mt-1 ml-1' src={getCoverImage(item.cover_art_url)} alt={item.title} />
                 <div className="text-white m-4 inline-block align-top">
                   <div>
                     {item.title.length > MAX_SONG_NAME_LENGTH && hoveredTrackId !== String(item.track_id)
