@@ -79,25 +79,55 @@ router.post('/playlists', async (req: Request, res: Response) => {
 });
 
 /**
- * Edits the basics of a playlist (name, description, cover art)
+ * Edits the basics of a playlist (name, description, cover art) and/or
+ * its track sequence.
+ *
+ * `trackOrder`, if provided, is the full list of the playlist's track
+ * ids in the desired order; each item's sequence_number is rewritten to
+ * match its (1-based) position in that list.
  * @param patch `/api/playlists/:id`
+ * @body { name?: string, description?: string | null, cover_art_url?: string | null, trackOrder?: number[] }
  */
 router.patch('/playlists/:id', async (req: Request, res: Response) => {
   try {
     const playlistId = Number(req.params.id);
     if (isNaN(playlistId)) return res.status(400).json({ error: "Invalid playlist ID" });
 
-    const { name, description, cover_art_url } = req.body;
+    const { name, description, cover_art_url, trackOrder } = req.body;
     const data: Record<string, unknown> = {};
     if (typeof name === 'string' && name.trim()) data.name = name.trim();
     if (typeof description === 'string' || description === null) data.description = description;
     if (typeof cover_art_url === 'string' || cover_art_url === null) data.cover_art_url = cover_art_url;
 
-    const playlist = await prisma.playlist.update({
-      where: { playlist_id: playlistId },
-      data,
-    });
+    if (Object.keys(data).length > 0) {
+      await prisma.playlist.update({ where: { playlist_id: playlistId }, data });
+    }
 
+    if (Array.isArray(trackOrder)) {
+      const trackIds = trackOrder.map(Number).filter((id) => !isNaN(id));
+      // Two passes to avoid transiently colliding with the
+      // @@unique([playlist_id, sequence_number]) constraint: first push
+      // every row's sequence number out of the way, then assign the real
+      // order.
+      await prisma.$transaction(
+        trackIds.map((trackId, index) =>
+          prisma.playlistItem.updateMany({
+            where: { playlist_id: playlistId, track_id: trackId },
+            data: { sequence_number: -(index + 1) },
+          })
+        )
+      );
+      await prisma.$transaction(
+        trackIds.map((trackId, index) =>
+          prisma.playlistItem.updateMany({
+            where: { playlist_id: playlistId, track_id: trackId },
+            data: { sequence_number: index + 1 },
+          })
+        )
+      );
+    }
+
+    const playlist = await prisma.playlist.findUnique({ where: { playlist_id: playlistId } });
     res.json(playlist);
   } catch (error) {
     console.error("Error updating playlist:", error);

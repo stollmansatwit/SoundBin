@@ -7,11 +7,13 @@ interface PlayAlbumProps {
   tracks: Track[];
   album: Album;
   artistName?: string;
+  /** Called after the album is edited, with the freshly updated album row. */
+  onAlbumUpdated?: (album: Album) => void;
   /** Called after the album is deleted from the options menu. */
   onDeleted?: () => void;
 }
 
-export function PlayAlbum({ tracks, album, artistName, onDeleted}: PlayAlbumProps) {
+export function PlayAlbum({ tracks, album, artistName, onAlbumUpdated, onDeleted}: PlayAlbumProps) {
   const { shuffleMode, toggleShuffle, setQueue, togglePlay } = useAudio();
 
   const handlePlayAlbum = () => {
@@ -78,7 +80,7 @@ export function PlayAlbum({ tracks, album, artistName, onDeleted}: PlayAlbumProp
         </button>
 
         {/* More Options (...) */}
-        <AlbumOptionsMenu album={album} tracks={tracks} artistName={artistName} onDeleted={onDeleted} />
+        <AlbumOptionsMenu album={album} tracks={tracks} artistName={artistName} onAlbumUpdated={onAlbumUpdated} onDeleted={onDeleted} />
       </div>
     </div>
   );

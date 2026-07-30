@@ -3,7 +3,7 @@ import { OptionsMenu } from "./OptionsMenu";
 import { useAudio } from "../../context/AudioContext";
 import { usePopups } from "../../context/PopupContext";
 import AddToPlaylistPopup from "../popUpPage/AddToPlaylistPopup";
-import EditTrackModal from "../popUpPage/EditTrackModal";
+import EditTrackModal from "../popUpPage/edit/EditTrackModal";
 import type { Track } from "../../types";
 import { API_BASE_URL } from '../../config';
 
@@ -14,9 +14,11 @@ interface Props {
   artistName?: string;
   albumTitle?: string;
   className?: string;
+  /** Called after the track is edited, so the list showing it can refetch. */
+  onTrackUpdated?: () => void;
 }
 
-export function TrackOptionsMenu({ track, artistId, artistName, albumTitle, className }: Props) {
+export function TrackOptionsMenu({ track, artistId, artistName, className, onTrackUpdated }: Props) {
   const { addToQueue } = useAudio();
   const { openAlbum, openArtist } = usePopups();
 
@@ -24,7 +26,6 @@ export function TrackOptionsMenu({ track, artistId, artistName, albumTitle, clas
   const [showEdit, setShowEdit] = useState(false);
   const [resolvedArtistId, setResolvedArtistId] = useState<number | null>(artistId ?? null);
   const [resolvedArtistName, setResolvedArtistName] = useState<string>(artistName ?? "");
-  const [resolvedAlbumTitle, setResolvedAlbumTitle] = useState<string>(albumTitle ?? "");
 
   const fetchFullTrack = async (): Promise<Track> => {
     try {
@@ -81,33 +82,9 @@ export function TrackOptionsMenu({ track, artistId, artistName, albumTitle, clas
     if (track.album_id) openAlbum(track.album_id);
   };
 
-  const handleOpenEdit = async () => {
-    if (!resolvedArtistName) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/track-artist?trackID=${track.track_id}`);
-        if (res.ok) {
-          const data = await res.json();
-          const contributor = data?.contributors?.[0]?.artist;
-          if (contributor) {
-            setResolvedArtistId(contributor.artist_id);
-            setResolvedArtistName(contributor.name);
-          }
-        }
-      } catch (error) {
-        console.error("[TrackOptionsMenu] Failed to resolve artist for edit:", error);
-      }
-    }
-    if (!resolvedAlbumTitle && track.album_id) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/album-title?albumID=${track.album_id}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data?.title) setResolvedAlbumTitle(data.title);
-        }
-      } catch (error) {
-        console.error("[TrackOptionsMenu] Failed to resolve album for edit:", error);
-      }
-    }
+  const handleOpenEdit = () => {
+    // EditTrackModal fetches the track's full details (cover art, release
+    // date, genres, contributors) itself on open.
     setShowEdit(true);
   };
 
@@ -135,10 +112,8 @@ export function TrackOptionsMenu({ track, artistId, artistName, albumTitle, clas
       {showEdit && (
         <EditTrackModal
           track={track}
-          initialArtistName={resolvedArtistName}
-          initialAlbumTitle={resolvedAlbumTitle}
           onClose={() => setShowEdit(false)}
-          onSaved={() => { /* Popups fetch fresh data on open; nothing to refresh in-place here. */ }}
+          onSaved={() => onTrackUpdated?.()}
         />
       )}
     </>

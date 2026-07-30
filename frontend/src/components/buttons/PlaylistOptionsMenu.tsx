@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { OptionsMenu } from "./OptionsMenu";
 import { useAudio } from "../../context/AudioContext";
-import EditPlaylistModal from "../popUpPage/EditPlaylistModal";
+import EditPlaylistModal from "../popUpPage/edit/EditPlaylistModal";
 import ConfirmDialog from "../popUpPage/ConfirmDialog";
 import type { Playlist, Track } from "../../types";
 import { API_BASE_URL } from '../../config';

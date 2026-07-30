@@ -3,7 +3,7 @@ import { OptionsMenu } from "./OptionsMenu";
 import { useAudio } from "../../context/AudioContext";
 import { usePopups } from "../../context/PopupContext";
 import AddToPlaylistPopup from "../popUpPage/AddToPlaylistPopup";
-import EditAlbumModal from "../popUpPage/EditAlbumModal";
+import EditAlbumModal from "../popUpPage/edit/EditAlbumModal";
 import ConfirmDialog from "../popUpPage/ConfirmDialog";
 import type { Album, Track } from "../../types";
 import { API_BASE_URL } from '../../config';
@@ -14,11 +14,13 @@ interface Props {
   tracks: Track[];
   artistName?: string;
   className?: string;
+  /** Called after the album is edited, with the freshly updated album row. */
+  onAlbumUpdated?: (album: Album) => void;
   /** Called after the album is successfully deleted (e.g. to close the popup showing it). */
   onDeleted?: () => void;
 }
 
-export function AlbumOptionsMenu({ album, tracks, artistName, className, onDeleted }: Props) {
+export function AlbumOptionsMenu({ album, tracks, artistName, className, onAlbumUpdated, onDeleted }: Props) {
   const { addToQueue } = useAudio();
   const { openArtist } = usePopups();
 
@@ -84,7 +86,7 @@ export function AlbumOptionsMenu({ album, tracks, artistName, className, onDelet
           album={album}
           initialArtistName={artistName}
           onClose={() => setShowEdit(false)}
-          onSaved={() => { /* Album popup re-fetches its own data each time it opens. */ }}
+          onSaved={(updated) => onAlbumUpdated?.(updated)}
         />
       )}
 

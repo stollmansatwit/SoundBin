@@ -46,7 +46,14 @@ router.get('/tracks/:trackId', async (req: Request, res: Response) => {
         album: {
           select: { title: true } // Optional: if you want album info too
         },
-        albumSequence: true
+        albumSequence: true,
+        genres: {
+          include: { genre: { select: { genre_id: true, name: true } } },
+        },
+        contributors: {
+          where: { role: 'artist' },
+          include: { artist: { select: { artist_id: true, name: true } } },
+        },
       }
     });
 
@@ -63,60 +70,74 @@ router.get('/tracks/:trackId', async (req: Request, res: Response) => {
 
 
 /**
- * Edits the basics of a track: title, contributing artist (by name), and
- * album (by title). An existing artist/album with that name is reused,
- * otherwise a new one is created.
+ * Edits a track: title, cover art, release date, genres, and contributing
+ * artists. `genreIds`/`artistIds` (if provided) fully replace the track's
+ * existing genre/artist associations with the given set — genres and
+ * artists themselves are expected to already exist (created up-front via
+ * `POST /api/genres` / `POST /api/artists` from the "create new" option
+ * in the picker UI) so this endpoint just links the ids.
  * @param patch `/api/tracks/:trackId`
+ * @body { title?: string, cover_art_url?: string, release_date?: string | null,
+ *         genreIds?: number[], artistIds?: number[] }
  */
 router.patch('/tracks/:trackId', async (req: Request, res: Response) => {
   try {
     const trackId = parseInt(req.params.trackId as string);
     if (isNaN(trackId)) return res.status(400).json({ error: "Invalid track ID" });
 
-    const { title, artistName, albumTitle } = req.body;
+    const { title, cover_art_url, release_date, genreIds, artistIds } = req.body;
     const data: Record<string, unknown> = {};
 
     if (typeof title === 'string' && title.trim()) {
       data.title = title.trim();
     }
 
-    if (typeof albumTitle === 'string' && albumTitle.trim()) {
-      let album = await prisma.album.findFirst({ where: { title: albumTitle.trim() } });
-      if (!album) {
-        album = await prisma.album.create({ data: { title: albumTitle.trim() } });
-      }
-      data.album_id = album.album_id;
+    if (typeof cover_art_url === 'string' || cover_art_url === null) {
+      data.cover_art_url = cover_art_url;
+    }
+
+    if (typeof release_date === 'string' || release_date === null) {
+      data.release_date = release_date ? new Date(release_date) : null;
     }
 
     if (Object.keys(data).length > 0) {
       await prisma.track.update({ where: { track_id: trackId }, data });
     }
 
-    if (typeof artistName === 'string' && artistName.trim()) {
-      let artist = await prisma.artist.findFirst({ where: { name: artistName.trim() } });
-      if (!artist) {
-        artist = await prisma.artist.create({ data: { name: artistName.trim() } });
-      }
-
-      const existingContributor = await prisma.trackContributor.findFirst({
-        where: { track_id: trackId, role: 'artist' },
-      });
-
-      if (existingContributor) {
-        await prisma.trackContributor.update({
-          where: { contribution_id: existingContributor.contribution_id },
-          data: { artist_id: artist.artist_id },
+    if (Array.isArray(genreIds)) {
+      const ids = genreIds.map(Number).filter((id) => !isNaN(id));
+      await prisma.trackGenre.deleteMany({ where: { track_id: trackId } });
+      if (ids.length > 0) {
+        await prisma.trackGenre.createMany({
+          data: ids.map((genre_id) => ({ track_id: trackId, genre_id })),
+          skipDuplicates: true,
         });
-      } else {
-        await prisma.trackContributor.create({
-          data: { track_id: trackId, artist_id: artist.artist_id, role: 'artist' },
+      }
+    }
+
+    if (Array.isArray(artistIds)) {
+      const ids = artistIds.map(Number).filter((id) => !isNaN(id));
+      await prisma.trackContributor.deleteMany({ where: { track_id: trackId, role: 'artist' } });
+      if (ids.length > 0) {
+        await prisma.trackContributor.createMany({
+          data: ids.map((artist_id) => ({ track_id: trackId, artist_id, role: 'artist' })),
+          skipDuplicates: true,
         });
       }
     }
 
     const track = await prisma.track.findUnique({
       where: { track_id: trackId },
-      include: { files: true, album: { select: { title: true } }, albumSequence: true },
+      include: {
+        files: true,
+        album: { select: { title: true } },
+        albumSequence: true,
+        genres: { include: { genre: { select: { genre_id: true, name: true } } } },
+        contributors: {
+          where: { role: 'artist' },
+          include: { artist: { select: { artist_id: true, name: true } } },
+        },
+      },
     });
 
     res.json(track);

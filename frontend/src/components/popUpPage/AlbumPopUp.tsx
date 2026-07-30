@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PlayButton } from "../buttons/PlayButton";
 import { PlayAlbum } from "../buttons/PlayAlbum";
 import { TrackOptionsMenu } from "../buttons/TrackOptionsMenu";
@@ -13,6 +13,7 @@ interface Props {
 }
 
 export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
+  const [currentAlbum, setCurrentAlbum] = useState<Album>(album);
   const [songs, setSongs] = useState<Track[]>([]);
   const [loadingTracks, setLoadingTracks] = useState(true);
   const [artistName, setArtistName] = useState<string>("");
@@ -20,33 +21,45 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
   // Handle closing when clicking outside the modal content
   const overlayRef = useRef<HTMLDivElement>(null);
 
-
   useEffect(() => {
-    if (!album?.album_id) return;
+    setCurrentAlbum(album);
+  }, [album]);
+
+  const refreshTracks = useCallback(() => {
+    if (!currentAlbum?.album_id) return;
     setLoadingTracks(true);
-    fetch(`${API_BASE_URL}/api/album-track-list?id=${album.album_id}`)
+    fetch(`${API_BASE_URL}/api/album-track-list?id=${currentAlbum.album_id}`)
       .then((res) => res.json())
       .then((data: Track[] = []) => {
-
         setSongs(data);
         setLoadingTracks(false);
       })
       .catch((err) => {
         console.error("Failed to fetch tracks:", err);
-        setLoadingTracks(false)
+        setLoadingTracks(false);
       });
+  }, [currentAlbum?.album_id]);
 
-    // Fetch artist name if artist_id exists
-    if (album.artist_id) {
-      fetch(`${API_BASE_URL}/api/artist-name?id=${album.artist_id}`)
-        .then((res) => res.json())
-        .then((data: any) => {
-          // Assuming the response is { name: "Artist Name" } or similar
-          setArtistName(data.name || "Unknown Artist");
-        })
-        .catch(err => console.error("Failed to fetch artist:", err));
+  const refreshArtistName = useCallback(() => {
+    if (!currentAlbum?.artist_id) {
+      setArtistName("");
+      return;
     }
-  }, [album?.album_id]);
+    fetch(`${API_BASE_URL}/api/artist-name?id=${currentAlbum.artist_id}`)
+      .then((res) => res.json())
+      .then((data: any) => {
+        setArtistName(data.name || "Unknown Artist");
+      })
+      .catch((err) => console.error("Failed to fetch artist:", err));
+  }, [currentAlbum?.artist_id]);
+
+  useEffect(() => {
+    refreshTracks();
+  }, [refreshTracks]);
+
+  useEffect(() => {
+    refreshArtistName();
+  }, [refreshArtistName]);
 
   // Escape key to close
   useEffect(() => {
@@ -98,7 +111,7 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
   };
 
   // Logic to handle optional year & duration in the info bar
-  const displayYear = getYear(album.release_date);
+  const displayYear = getYear(currentAlbum.release_date);
   const totalDuration = formatTotalDuration(songs.reduce((acc, s) => acc + (s.duration || 0), 0));
 
   // Construct the display string: "12 songs • 01:30:00" or "12 songs • 01:30:00 • 2024"
@@ -108,7 +121,7 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
     </div>
   );
 
-  const coverSrc = getCoverImage(album.cover_art_url);
+  const coverSrc = getCoverImage(currentAlbum.cover_art_url);
   // still needs updates but good starter
   return createPortal(
 
@@ -133,15 +146,19 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
           {/* Left Side: Artwork & Info */}
           <div className="p-4 sm:p-6 md:p-8 bg-gradient-to-b from-gray-800 to-gray-900 flex flex-col items-center justify-center border-r border-gray-700 w-full md:w-1/3 ">
             <img
-              src={getCoverImage(album.cover_art_url)}
-              alt={album.title}
+              src={getCoverImage(currentAlbum.cover_art_url)}
+              alt={currentAlbum.title}
               className="w-40 h-40 sm:w-48 sm:h-48 md:w-64 md:h-64 aspect-square object-cover rounded-lg shadow-2xl border-2 border-gray-600 mb-4"
             />
-            <h2 className="text-xl sm:text-2xl font-bold text-white text-center">{album.title}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-white text-center">{currentAlbum.title}</h2>
             <PlayAlbum 
               tracks={songs} 
-              album={album}
+              album={currentAlbum}
               artistName={artistName}
+              onAlbumUpdated={(updated) => {
+                setCurrentAlbum(updated);
+                refreshTracks();
+              }}
               onDeleted={() => { onDeleted?.(); onClose(); }}
             />
 
@@ -164,7 +181,7 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
             {/* Dark scrim + extra blur on top of the art so text stays readable */}
             <div className="absolute inset-0 -z-10 bg-black/55 backdrop-blur-sm" />
 
-            <h3 className="text-2xl sm:text-3xl font-bold text-white mb-1">{album.title}</h3>
+            <h3 className="text-2xl sm:text-3xl font-bold text-white mb-1">{currentAlbum.title}</h3>
             <p className="text-base sm:text-lg text-gray-300 mb-1">{artistName || "Loading Artist..."}</p>
 
             {/* Info Bar: [# songs - duration - year (optional)] */}
@@ -194,14 +211,15 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
                         <PlayButton
                           trackId={song.track_id}
                           albumId={song.album_id}
-                          artistId={album.artist_id}
+                          artistId={currentAlbum.artist_id}
                           index={songs.indexOf(song)}
                         />
                         <TrackOptionsMenu
                           track={song}
-                          artistId={album.artist_id}
+                          artistId={currentAlbum.artist_id}
                           artistName={artistName}
-                          albumTitle={album.title}
+                          albumTitle={currentAlbum.title}
+                          onTrackUpdated={refreshTracks}
                         />
 
                       </div>

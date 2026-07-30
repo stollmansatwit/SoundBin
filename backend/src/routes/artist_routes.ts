@@ -46,6 +46,80 @@ router.get('/artist/:id', async (req: Request, res: Response) => {
 });
 
 /**
+ * Lists every artist, alphabetically — used to populate the artist
+ * picker in the track/album edit modals.
+ * @param get `/api/artists`
+ */
+router.get('/artists', async (_req: Request, res: Response) => {
+  try {
+    const artists = await prisma.artist.findMany({
+      select: { artist_id: true, name: true, image_url: true },
+      orderBy: { name: 'asc' },
+    });
+    res.json(artists);
+  } catch (error) {
+    console.error("Error fetching artists:", error);
+    res.status(500).json({ error: "Failed to fetch artists" });
+  }
+});
+
+/**
+ * Finds an existing artist by (case-insensitive) name, or creates a new
+ * one — powers the "create a new artist" option in the track/album edit
+ * modals' artist picker.
+ * @param post `/api/artists`
+ * @body { name: string }
+ */
+router.post('/artists', async (req: Request, res: Response) => {
+  try {
+    const { name } = req.body;
+    if (typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ error: "Artist name is required" });
+    }
+    const trimmed = name.trim();
+
+    let artist = await prisma.artist.findFirst({
+      where: { name: { equals: trimmed, mode: 'insensitive' } },
+    });
+    if (!artist) {
+      artist = await prisma.artist.create({ data: { name: trimmed } });
+    }
+
+    res.status(201).json(artist);
+  } catch (error) {
+    console.error("Error creating artist:", error);
+    res.status(500).json({ error: "Failed to create artist" });
+  }
+});
+
+/**
+ * Edits an artist's name and/or image.
+ * @param patch `/api/artists/:id`
+ * @body { name?: string, image_url?: string | null }
+ */
+router.patch('/artists/:id', async (req: Request, res: Response) => {
+  try {
+    const artistId = Number(req.params.id);
+    if (isNaN(artistId)) return res.status(400).json({ error: "Invalid Artist ID" });
+
+    const { name, image_url } = req.body;
+    const data: Record<string, unknown> = {};
+    if (typeof name === 'string' && name.trim()) data.name = name.trim();
+    if (typeof image_url === 'string' || image_url === null) data.image_url = image_url;
+
+    const artist = await prisma.artist.update({
+      where: { artist_id: artistId },
+      data,
+    });
+
+    res.json(artist);
+  } catch (error) {
+    console.error("Error updating artist:", error);
+    res.status(500).json({ error: "Failed to update artist" });
+  }
+});
+
+/**
  * @param get `/api/artist-path`
  * @description uses `/api/artist-path` to fetch cover art from database
  * Sorted by track number, if null then by mtime

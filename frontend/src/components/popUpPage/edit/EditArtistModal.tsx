@@ -1,25 +1,26 @@
 import type React from "react";
 import { useState } from "react";
-import type { Playlist } from "../../types";
-import { API_BASE_URL } from '../../config';
+import type { Artist } from "../../../types";
+import { API_BASE_URL } from '../../../config';
 
+const DEFAULT_IMAGE = "/defaultAlbum.png";
 
 interface Props {
-  playlist: Playlist;
+  artist: Artist;
   onClose: () => void;
-  onSaved: (playlist: Playlist) => void;
+  onSaved: (artist: Artist) => void;
 }
 
-export default function EditPlaylistModal({ playlist, onClose, onSaved }: Props) {
-  const [name, setName] = useState(playlist.name);
+export default function EditArtistModal({ artist, onClose, onSaved }: Props) {
+  const [name, setName] = useState(artist.name);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const currentCover = playlist.cover_art_url
-    ? `${API_BASE_URL}/assets/${playlist.cover_art_url.split('/').pop()}`
-    : "/defaultAlbum.png";
+  const currentImage = artist.image_url
+    ? `${API_BASE_URL}/assets/${artist.image_url.split('/').pop()}`
+    : DEFAULT_IMAGE;
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
@@ -34,7 +35,7 @@ export default function EditPlaylistModal({ playlist, onClose, onSaved }: Props)
     setError(null);
 
     try {
-      let cover_art_url: string | undefined;
+      let image_url: string | undefined;
 
       if (imageFile) {
         const formData = new FormData();
@@ -45,21 +46,21 @@ export default function EditPlaylistModal({ playlist, onClose, onSaved }: Props)
         });
         if (uploadRes.ok) {
           const uploadData = await uploadRes.json();
-          cover_art_url = uploadData.cover_art_url;
+          image_url = uploadData.cover_art_url;
         }
       }
 
-      const res = await fetch(`${API_BASE_URL}/api/playlists/${playlist.playlist_id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/artists/${artist.artist_id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, ...(cover_art_url ? { cover_art_url } : {}) }),
+        body: JSON.stringify({ name, ...(image_url ? { image_url } : {}) }),
       });
-      if (!res.ok) throw new Error("Failed to update playlist");
-      const updated: Playlist = await res.json();
+      if (!res.ok) throw new Error("Failed to update artist");
+      const updated: Artist = await res.json();
       onSaved(updated);
       onClose();
     } catch (err) {
-      console.error("[EditPlaylistModal] Failed to save:", err);
+      console.error("[EditArtistModal] Failed to save:", err);
       setError("Failed to save changes. Please try again.");
     } finally {
       setSubmitting(false);
@@ -82,17 +83,17 @@ export default function EditPlaylistModal({ playlist, onClose, onSaved }: Props)
           </svg>
         </button>
 
-        <h2 className="text-xl font-bold text-white mb-4">Edit Playlist</h2>
+        <h2 className="text-xl font-bold text-white mb-4">Edit Artist</h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex justify-center">
             <label className="cursor-pointer group relative">
               <img
-                src={imagePreview ?? currentCover}
-                alt="Playlist cover preview"
-                className="w-32 h-32 object-cover rounded-lg border-2 border-gray-700 group-hover:opacity-70 transition-opacity"
+                src={imagePreview ?? currentImage}
+                alt="Artist image preview"
+                className="w-32 h-32 object-cover rounded-full border-2 border-gray-700 group-hover:opacity-70 transition-opacity"
               />
-              <div className="absolute inset-0 flex items-center justify-center text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-lg">
+              <div className="absolute inset-0 flex items-center justify-center text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-full">
                 Change image
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
@@ -100,7 +101,7 @@ export default function EditPlaylistModal({ playlist, onClose, onSaved }: Props)
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Playlist name</label>
+            <label className="block text-sm text-gray-400 mb-1">Artist name</label>
             <input
               type="text"
               value={name}

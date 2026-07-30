@@ -3,6 +3,7 @@ import { ScrollableArtistAlbums } from '../scrollable/artist/ScrollableArtistAlb
 import { ScrollableArtistTracks} from '../scrollable/artist/ScrollableArtistTracks';
 import { ScrollableArtistPlaylist } from '../scrollable/artist/ScrollableArtistPlaylist';
 import { ScrollableArtistListenedTo } from '../scrollable/artist/ScrollableArtistListenedTo';
+import { ArtistOptionsMenu } from './edit/ArtistOptionsMenu';
 import type { Artist, Album, Track } from "../../types";
 import { API_BASE_URL } from '../../config';
 import { createPortal } from "react-dom";
@@ -15,6 +16,7 @@ interface Props {
 const DEFAULT_IMAGE = "/defaultAlbum.png"; 
 
 export default function ArtistPopUp({ artist, onClose }: Props) {
+  const [currentArtist, setCurrentArtist] = useState<Artist>(artist);
   const [albums, setAlbums] = useState<Album[]>([]);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [stats, setStats] = useState({
@@ -27,6 +29,10 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
 
   // Handle closing when clicking outside the modal content
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setCurrentArtist(artist);
+  }, [artist]);
 
 
 
@@ -136,21 +142,28 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
           <div className="flex-shrink-0 flex flex-col md:flex-row gap-6 w-full md:w-auto">
             <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden shadow-lg border-2 border-gray-800">
               <img 
-                src={getImageUrl(artist.image_url)} 
-                alt={artist.name} 
+                src={getImageUrl(currentArtist.image_url)} 
+                alt={currentArtist.name} 
                 className="w-full h-full object-cover"
               />
             </div>
             
             <div className="flex flex-col justify-center gap-2">
-              <h1 className="text-4xl md:text-5xl font-bold text-white">
-                {artist.name}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-4xl md:text-5xl font-bold text-white">
+                  {currentArtist.name}
+                </h1>
+                <ArtistOptionsMenu
+                  artist={currentArtist}
+                  onArtistUpdated={setCurrentArtist}
+                  buttonClassName="text-gray-400 hover:text-white"
+                />
+              </div>
               
               {/* Bio */}
-              {artist.bio && (
+              {currentArtist.bio && (
                 <p className="text-gray-400 max-w-xl line-clamp-3 md:line-clamp-none text-sm md:text-base mt-2">
-                  {artist.bio}
+                  {currentArtist.bio}
                 </p>
               )}
             </div>

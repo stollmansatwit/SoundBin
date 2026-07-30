@@ -15,6 +15,7 @@ import artistRoutes from './routes/artist_routes'
 import trackRoutes from './routes/track_routes'
 import statsRoutes from './routes/stats_routes'
 import playlistRoutes from './routes/playlist_routes'
+import genreRoutes from './routes/genre_routes'
 import activityRoutes from './routes/activity_routes'
 import userRoutes from './routes/user_routes'
 
@@ -124,6 +125,7 @@ app.use('/api', artistRoutes);
 app.use('/api', trackRoutes);
 app.use('/api', statsRoutes);
 app.use('/api', playlistRoutes);
+app.use('/api', genreRoutes);
 app.use('/api', activityRoutes);
 app.use('/api', userRoutes);
 

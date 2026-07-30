@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PlayPlaylist } from "../buttons/PlayPlaylist";
 import { TrackOptionsMenu } from "../buttons/TrackOptionsMenu";
+import AddSongPopover from "./edit/AddSongPopover";
 import { useAudio } from "../../context/AudioContext";
 import type { Playlist, Track } from "../../types";
 import { API_BASE_URL } from '../../config';
@@ -32,7 +33,7 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
     setCurrentPlaylist(playlist);
   }, [playlist]);
 
-  useEffect(() => {
+  const refreshTracks = useCallback(() => {
     if (!currentPlaylist?.playlist_id) return;
     setLoadingTracks(true);
 
@@ -67,6 +68,10 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
         setLoadingTracks(false);
       });
   }, [currentPlaylist?.playlist_id]);
+
+  useEffect(() => {
+    refreshTracks();
+  }, [refreshTracks]);
 
   // Helper Functions
   const formatDuration = (seconds: number) => {
@@ -168,9 +173,16 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
             <PlayPlaylist
               playlist={currentPlaylist}
               tracks={songsWithArtist}
-              onPlaylistUpdated={setCurrentPlaylist}
+              onPlaylistUpdated={(updated) => { setCurrentPlaylist(updated); refreshTracks(); }}
               onDeleted={() => { onDeleted?.(); onClose(); }}
             />
+            <div className="mt-3">
+              <AddSongPopover
+                playlistId={currentPlaylist.playlist_id}
+                existingTrackIds={songs.map((s) => s.track_id)}
+                onAdded={refreshTracks}
+              />
+            </div>
           </div>
 
           {/* Right Side: Tracklist */}
@@ -249,6 +261,7 @@ export default function PlaylistPopUp({ playlist, onClose, onDeleted }: Props) {
                           track={song}
                           artistId={trackArtists[song.track_id]?.artist_id}
                           artistName={trackArtists[song.track_id]?.name}
+                          onTrackUpdated={refreshTracks}
                         />
                       </div>
 

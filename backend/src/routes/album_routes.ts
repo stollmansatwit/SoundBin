@@ -107,23 +107,36 @@ router.get('/album/:id', async (req: Request, res: Response) => {
 });
 
 /**
- * Edits the basics of an album: title and/or artist (by name — an
- * existing artist with that name is reused, otherwise a new one is
- * created).
+ * Edits an album: title, cover art, artist (by id — preferred, or by name
+ * for backwards compatibility, in which case an existing artist with
+ * that name is reused or a new one is created), release date, and track
+ * sequence.
+ *
+ * `trackOrder`, if provided, is the full list of the album's track ids
+ * in the desired order; each track's sequence_number is rewritten to
+ * match its (1-based) position in that list.
+ * @body { title?: string, cover_art_url?: string | null, artist_id?: number | null,
+ *         artistName?: string, release_date?: string | null, trackOrder?: number[] }
  */
 router.patch('/albums/:id', async (req: Request, res: Response) => {
   try {
     const albumId = Number(req.params.id);
     if (isNaN(albumId)) return res.status(400).json({ error: "Invalid Album ID" });
 
-    const { title, artistName } = req.body;
+    const { title, artistName, artist_id, release_date, cover_art_url, trackOrder } = req.body;
     const data: Record<string, unknown> = {};
 
     if (typeof title === 'string' && title.trim()) {
       data.title = title.trim();
     }
 
-    if (typeof artistName === 'string' && artistName.trim()) {
+    if (typeof cover_art_url === 'string' || cover_art_url === null) {
+      data.cover_art_url = cover_art_url;
+    }
+
+    if (artist_id === null || typeof artist_id === 'number') {
+      data.artist_id = artist_id;
+    } else if (typeof artistName === 'string' && artistName.trim()) {
       let artist = await prisma.artist.findFirst({ where: { name: artistName.trim() } });
       if (!artist) {
         artist = await prisma.artist.create({ data: { name: artistName.trim() } });
@@ -131,11 +144,50 @@ router.patch('/albums/:id', async (req: Request, res: Response) => {
       data.artist_id = artist.artist_id;
     }
 
-    const album = await prisma.album.update({
-      where: { album_id: albumId },
-      data,
-    });
+    if (typeof release_date === 'string' || release_date === null) {
+      if (typeof release_date === 'string') {
+        const parsed = new Date(release_date);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // allow the whole current day
+        if (isNaN(parsed.getTime())) {
+          return res.status(400).json({ error: "Invalid release date" });
+        }
+        if (parsed.getTime() > today.getTime()) {
+          return res.status(400).json({ error: "Release date cannot be in the future" });
+        }
+      }
+      data.release_date = release_date ? new Date(release_date) : null;
+    }
 
+    if (Object.keys(data).length > 0) {
+      await prisma.album.update({ where: { album_id: albumId }, data });
+    }
+
+    if (Array.isArray(trackOrder)) {
+      const trackIds = trackOrder.map(Number).filter((id) => !isNaN(id));
+      // Two passes to avoid transiently colliding with the
+      // @@unique([album_id, sequence_number]) constraint: first push every
+      // row's sequence number out of the way, then assign the real order.
+      await prisma.$transaction(
+        trackIds.map((trackId, index) =>
+          prisma.albumTrackSequence.upsert({
+            where: { album_id_track_id: { album_id: albumId, track_id: trackId } },
+            update: { sequence_number: -(index + 1) },
+            create: { album_id: albumId, track_id: trackId, sequence_number: -(index + 1) },
+          })
+        )
+      );
+      await prisma.$transaction(
+        trackIds.map((trackId, index) =>
+          prisma.albumTrackSequence.update({
+            where: { album_id_track_id: { album_id: albumId, track_id: trackId } },
+            data: { sequence_number: index + 1 },
+          })
+        )
+      );
+    }
+
+    const album = await prisma.album.findUnique({ where: { album_id: albumId } });
     res.json(album);
   } catch (error) {
     console.error("Error updating album:", error);

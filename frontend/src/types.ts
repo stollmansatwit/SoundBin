@@ -18,10 +18,21 @@ export type Track = {
   album_id: number;
   title: string;
   artist?: string;
+  release_date?: any;
   duration?: number;
   cover_art_url?: string;
   files?: {storage_path_url: string}[];
   albumSequence?: {sequence_number: number}[];
+  genres?: { genre: Genre }[];
+  contributors?: { artist: { artist_id: number; name: string }; role?: string | null }[];
+}
+
+/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *  Genre Types
+ */
+export type Genre = {
+  genre_id: number;
+  name: string;
 }
 
 export type TrackData = {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PlayButton } from "../buttons/PlayButton";
 import { TrackOptionsMenu } from "../buttons/TrackOptionsMenu";
 import {type Album, type Track} from "../../types";
@@ -28,10 +28,9 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
     return `${API_BASE_URL}/assets/${file}`;
   };
 
-  const coverSrc = getCoverImage(track.cover_art_url);
-  
-  useEffect(() => {
+  const coverSrc = getCoverImage((song ?? track).cover_art_url);
 
+  const refreshSong = useCallback(() => {
     fetch(`${API_BASE_URL}/api/tracks/${track.track_id}`)
       .then((res) => res.json())
       .then((data: Track) => {
@@ -60,7 +59,11 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
           console.error('Failed to fetch track:', error)
         });
     }
-  }, []);
+  }, [track.track_id, album_id]);
+
+  useEffect(() => {
+    refreshSong();
+  }, [refreshSong]);
 
   // Escape key to close
   useEffect(() => {
@@ -115,7 +118,7 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
           />
 
           <h2 className="text-xl sm:text-2xl font-bold text-white text-center leading-tight">
-            {track.title}
+            {song ? song.title : track.title}
           </h2>
           <p className="text-base text-gray-200 mt-2 text-center">
             {artistName || "Loading artist…"}
@@ -140,6 +143,7 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
                   artistId={artistId}
                   artistName={artistName}
                   albumTitle={albumName}
+                  onTrackUpdated={refreshSong}
                 />
               </div>
           )}
