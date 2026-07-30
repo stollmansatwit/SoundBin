@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { NavBar } from '../components/NavBar';
 import { Header } from '../components/Header';
+import { PlaybackControlBar } from '../components/playback/PlaybackControlBar';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -425,6 +426,7 @@ export default function Stats() {
 
        
       </main>
+      <PlaybackControlBar />
     </div>
   );
 }

@@ -3,6 +3,8 @@ import { NavBar } from '../components/NavBar'
 import { Header } from '../components/Header'
 import { authFetch } from '../utils/api';
 import { apiUrl } from '../config';
+import { PlaybackControlBar } from '../components/playback/PlaybackControlBar';
+
 
 // User/admin endpoints all live under /api, so bake that in once here.
 const API_ROOT = apiUrl('/api');
@@ -427,6 +429,7 @@ export default function User() {
           </>
         )}
       </div>
+      <PlaybackControlBar />
     </div>
   )
 }

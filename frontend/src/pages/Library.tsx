@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavBar } from '../components/NavBar'
 import { Header } from '../components/Header'
 import { SearchBar } from '../components/SearchBar'
+import { PlaybackControlBar } from '../components/playback/PlaybackControlBar';
 import { RecentListenTable } from '../components/scrollable/RecentListenTable'
 import { SongsTable } from '../components/library/SongsTable'
 import { LibraryTabs, type LibrarySection } from '../components/library/LibraryTabs'
@@ -55,6 +56,7 @@ export default function Library() {
       {showUpload && (
         <UploadButton onClose={closeUpload} />
       )}
+      <PlaybackControlBar />
     </div>
   )
 }
