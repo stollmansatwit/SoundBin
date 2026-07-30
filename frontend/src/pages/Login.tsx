@@ -4,7 +4,7 @@
 
 //import bcrypt from "bcryptjs";
 import { useLocation, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { API_BASE_URL } from '../config';
 /*
 Steps:
@@ -18,15 +18,22 @@ Steps:
 
 export default function Login() {
     const [error, setError] = useState<string | null>(null);
+    const [message, setMessage] = useState<string | null>(null); // message for when user already is signed in
     const navigate = useNavigate();
     const location = useLocation();
     const infoMessage = (location.state as { message?: string } | null)?.message;
 
+    // useEffect hook to check if token already exists on page load
+    useEffect(() => {
+        const token = localStorage.getItem('token')
+        if (token) {
+            setMessage("Already Signed In. Navigating to home page...")
+            setTimeout(() => { navigate('/home') }, 2000)
+        }
 
+    });
 
     // Authentication logic here (e.g., call an API to verify credentials)
-
-
 
 
     async function handleSubmit(event: React.ChangeEvent<HTMLFormElement>) {
@@ -38,36 +45,37 @@ export default function Login() {
 
 
         // Check if the user is already authenticated
-        const token = localStorage.getItem('token');
-        if (token) {
-            navigate('/home');
-        } else {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password }),
-                });
+        // const token = localStorage.getItem('token');
+        // if (token) {
+        //     console.log(token)
+        //     navigate('/home');
+        // } else {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
 
-                const data = await response.json();
-                console.log("Response data:", data);
+            const data = await response.json();
+            console.log("Response data:", data);
 
-                
 
-                if (response.ok) {
-                    localStorage.setItem('token', data.token);
-                    navigate('/home');
-                } else {
-                    setError(data.error || 'Authentication failed');
-                    console.error('Authentication failed');
-                }
-            } catch (error) {
-                console.error('Error during authentication:', error);
-                setError('Something went wrong. Please try again.');
+
+            if (response.ok) {
+                localStorage.setItem('token', data.token);
+                navigate('/home');
+            } else {
+                setError(data.error || 'Authentication failed');
+                console.error('Authentication failed');
             }
+        } catch (error) {
+            console.error('Error during authentication:', error);
+            setError('Something went wrong. Please try again.');
         }
-
     }
+
+
 
 
 
@@ -115,7 +123,15 @@ export default function Login() {
                         Sign In
                     </button>
                 </div>
+                {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
             </form>
+            {message &&
+                <div className="fixed inset-0 flex items-center justify-center bg-white/80">
+                    <div className = "flex flex-col items-center gap-4">
+                    <div className="w-20 h-20 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin"></div>
+                    <strong className="text-xl">{message}</strong>
+                    </div>
+                </div>}
         </div>
     )
 }
