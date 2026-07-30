@@ -58,6 +58,9 @@ app.use('/songs', express.static(path.join(process.cwd(), 'uploads', 'songs'), {
     if (filePath.endsWith('.mp3')) res.setHeader('Content-Type', 'audio/mpeg');
     if (filePath.endsWith('.flac')) res.setHeader('Content-Type', 'audio/flac');
     if (filePath.endsWith('.ogg')) res.setHeader('Content-Type', 'audio/ogg');
+    if (filePath.endsWith('.wav')) res.setHeader('Content-Type', 'audio/wav');
+    if (filePath.endsWith('.aac')) res.setHeader('Content-Type', 'audio/aac');
+    if (filePath.endsWith('.m4a')) res.setHeader('Content-Type', 'audio/mp4');
     
     // Crucial for media streaming: allow ranges
     res.setHeader('Accept-Ranges', 'bytes');

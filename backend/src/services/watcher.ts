@@ -18,7 +18,7 @@ const targetDir = path.join(BaseDirString, 'songs');
 
 const usePolling = process.env.CHOKIDAR_USEPOLLING === 'true' || process.env.NODE_ENV === 'docker';
 
-const AUDIO_EXTENSIONS = ['.mp3', '.wav', '.flac'];
+const AUDIO_EXTENSIONS = ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.m4a'];
 
 function isAudioFile(filePath: string): boolean {
   return AUDIO_EXTENSIONS.includes(path.extname(filePath).toLowerCase());

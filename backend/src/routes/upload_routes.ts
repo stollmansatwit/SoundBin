@@ -17,8 +17,11 @@ interface UploadRequest extends Request {
   rejectedFiles?: string[];
 }
 
-const ALLOWED_EXTENSIONS = new Set(['.mp3', '.flac', '.wav']);
-const ALLOWED_MIME_TYPES = new Set(['audio/mpeg', 'audio/mp3', 'audio/flac', 'audio/x-flac', 'audio/wav', 'audio/x-wav']);
+const ALLOWED_EXTENSIONS = new Set(['.mp3', '.flac', '.wav', '.aac', '.ogg', '.m4a']);
+const ALLOWED_MIME_TYPES = new Set([
+  'audio/mpeg', 'audio/mp3', 'audio/flac', 'audio/x-flac', 'audio/wav', 'audio/x-wav',
+  'audio/aac', 'audio/x-aac', 'audio/ogg', 'application/ogg', 'audio/mp4', 'audio/x-m4a',
+]);
 
 function isAllowedFile(originalName: string, mimetype: string): boolean {
   const ext = path.extname(originalName).toLowerCase();
@@ -93,7 +96,7 @@ router.post('/upload', (req: UploadRequest, res: Response) => {
     if (files.length === 0) {
       return res.status(400).json({
         message: rejected.length > 0
-          ? `No valid files were uploaded. Rejected: ${rejected.join(', ')}. Only mp3, flac, and wav are allowed.`
+          ? `No valid files were uploaded. Rejected: ${rejected.join(', ')}. Only mp3, flac, wav, aac, ogg, and m4a are allowed.`
           : 'No files were uploaded.',
       });
     }

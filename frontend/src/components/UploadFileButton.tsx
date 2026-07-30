@@ -104,7 +104,7 @@ export function UploadButton({ onClose }: UploadButtonProps) {
           />
 
           <p className="text-center text-xs text-gray-400">
-            Supported formats: .mp3, .flac, .wav          
+            Supported formats: .mp3, .flac, .wav, .aac, .ogg, .m4a          
           </p>
 
           <button
