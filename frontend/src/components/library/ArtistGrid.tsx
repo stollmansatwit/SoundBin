@@ -55,9 +55,7 @@ const displayArtists = Array.isArray(artists) ? artists : [];
   return (
     <>
       <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-        {displayArtists.map((artist) => (
-          <div>
-          
+        {displayArtists.map((artist) => (          
           <button
             key={artist.artist_id}
             onClick={() => setSelectedArtist(artist)}
@@ -67,7 +65,6 @@ const displayArtists = Array.isArray(artists) ? artists : [];
             <p className="mt-2 truncate text-sm font-bold text-gray-900">{artist.name}</p>
             {/* <p className="text-xs font-normal text-gray-500">{} album</p> */}
           </button>
-          </div>
         ))}
       </div>
       {selectedArtist && (

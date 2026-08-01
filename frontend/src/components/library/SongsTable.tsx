@@ -1,24 +1,52 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { type Track, type Album, type Artist } from "../../types";
 import SongPopUp from "../popUpPage/SongPopUp";
 import { API_BASE_URL } from '../../config';
 
 
+function WipeRow({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  const rowRef = useRef<HTMLTableRowElement>(null);
+
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el) return;
+    const handleAnimationEnd = () => {
+      el.classList.remove("playing");
+    };
+    el.addEventListener("animationend", handleAnimationEnd);
+    return () => el.removeEventListener("animationend", handleAnimationEnd);
+  }, []);
+
+  return (
+    <tr
+      ref={rowRef}
+      className="wipe border-t border-black hover:bg-white"
+      onClick={onClick}
+    >
+      {children}
+    </tr>
+  );
+}
+
 
 type CombinedItem = {
   track: Track;
   album: Album;
-  artist: Artist;
+  artist: Artist | undefined;
 };
 
 export function SongsTable() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
-  const [selectedTrack, setSelectedTrack] = useState<Track | null> (null);
-  const [loading, setLoading] = useState(true);
-  // const [selectedItem, setSelectedItem] = useState<CombinedItem | null>(null);
-
+  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
+  const lastPos = useRef<{ x: number; y: number } | null>(null);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -41,11 +69,8 @@ export function SongsTable() {
       .catch((error) => {
         console.error("Failed to fetch albums:", error);
       })
-      .finally(() => {
-        setLoading(false)
-      });
 
-    
+
     fetch(`${API_BASE_URL}/api/tracks`)
       .then((response) => {
         if (!response.ok) {
@@ -59,9 +84,6 @@ export function SongsTable() {
       .catch((error) => {
         console.error("Failed to fetch tracks:", error);
       })
-      .finally(() => {
-        setLoading(false)
-      });
 
     fetch(`${API_BASE_URL}/api/artist-path`)
       .then((response) => {
@@ -76,10 +98,7 @@ export function SongsTable() {
       .catch((error) => {
         console.error("Failed to fetch artists:", error);
       })
-      .finally(() => {
-        setLoading(false)
-      });
-    }, []);
+  }, []);
 
 
   // Resolve each track to its album + artist name
@@ -99,42 +118,65 @@ export function SongsTable() {
       .filter((item): item is CombinedItem => item !== null);
   }, [tracks, albums, artists]);
 
-  if (loading) {
-    return <p className="text-center text-white">Loading...</p>;
-  }
 
+
+  const triggerRow = (row: HTMLElement) => {
+    if (row.classList.contains("playing")) return;
+    row.classList.add("playing");
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const curr = { x: e.clientX, y: e.clientY };
+    if (lastPos.current) {
+      const dist = Math.hypot(curr.x - lastPos.current.x, curr.y - lastPos.current.y);
+      const steps = Math.min(Math.max(1, Math.ceil(dist / 8)), 15);
+      for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        const x = lastPos.current.x + (curr.x - lastPos.current.x) * t;
+        const y = lastPos.current.y + (curr.y - lastPos.current.y) * t;
+        const el = document.elementFromPoint(x, y) as HTMLElement | null;
+        const row = el?.closest("tr.wipe") as HTMLElement | null;
+        if (row) triggerRow(row);
+      }
+    }
+    lastPos.current = curr;
+  };
   return (
     <>
-      <div className="max-h-105 overflow-auto rounded-lg">
+      <div className="max-h-120 overflow-auto rounded-lg">
         <table className="w-full min-w-[420px] text-left text-sm">
-          <thead className="sticky top-0 bg-white/95 text-xs font-bold uppercase tracking-wide text-gray-500">
+          <thead className="sticky top-0 bg-white/95 text-xs font-bold uppercase tracking-wide text-gray-500 z-10">
             <tr>
               <th className="px-3 py-2">Title</th>
               <th className="px-3 py-2">Artist</th>
-              <th className="hidden px-3 py-2 sm:table-cell">Album</th>
+              <th className="px-3 py-2 sm:table-cell">Album</th>
               <th className="px-3 py-2 text-right">Duration</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => (lastPos.current = null)}
+          >
             {combinedItems.map((item) => (
-              <tr
-                key={item.track.track_id}
-                className="border-t border-gray-200 hover:bg-white/80"
-                onClick={() => setSelectedTrack(item.track)}
-              >
-                
-                <td className="px-3 py-2.5 font-bold text-gray-900 max-w-[40vw] truncate sm:max-w-none">{item.track.title}</td>
-                
-                <td className="hidden px-3 py-2.5 font-normal text-gray-600 sm:table-cell">{item.artist.name}</td>
-                <td className="px-3 py-2.5 font-normal text-gray-600 max-w-[28vw] truncate sm:max-w-none">{item.album.title}</td>
-                
-                <td className="px-3 py-2.5 text-right font-normal text-gray-500">{formatDuration(item.track.duration?item.track.duration:0)}</td>
-              </tr>
+              <WipeRow key={item.track.track_id} onClick={() => setSelectedTrack(item.track)}>
+                <td className="px-3 py-2.5 font-bold text-gray-900 max-w-[40vw] truncate sm:max-w-none">
+                  {item.track.title}
+                </td>
+                <td className="px-3 py-2.5 font-normal text-gray-600 sm:table-cell">
+                  {item.artist?.name ?? "Unknown"}
+                </td>
+                <td className="px-3 py-2.5 font-normal text-gray-600 max-w-[28vw] truncate sm:max-w-none">
+                  {item.album.title}
+                </td>
+                <td className="px-3 py-2.5 text-right font-normal text-gray-500">
+                  {formatDuration(item.track.duration ? item.track.duration : 0)}
+                </td>
+              </WipeRow>
             ))}
           </tbody>
         </table>
       </div>
-      
+
       {selectedTrack && (
         <SongPopUp
           album_id={selectedTrack.album_id}

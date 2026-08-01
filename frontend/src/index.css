@@ -7,6 +7,34 @@ body {
   background: rgb(141, 141, 141);
 }
 
+tbody {
+  text-align: left;
+  cursor: pointer;
+  .wipe {
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: white;
+    transform: scaleY(0);
+    transform-origin: top;
+    animation-duration: 0.2s;
+    animation-fill-mode: both;
+    z-index: -1;
+    transition: transform 200ms ease-out;
+  }
+  &.playing:after {
+    animation-name: wipe-down;
+  }
+}
+}
+
+@keyframes wipe-down {
+  0% { transform: scaleY(0); }
+  100% { transform: scaleY(1); }
+}
+
 @theme {
   --animate-ping-once: ping 1s cubic-bezier(0.4, 0, 0.6, 1) both;
   --animate-spin-slow: spin 3s linear infinite;
@@ -22,7 +50,8 @@ body {
       transform: scale(1) translateY(0);
     }
   }
-    @keyframes appear {
+
+  @keyframes appear {
     from {
       opacity: 0;
     }
@@ -31,6 +60,9 @@ body {
       opacity: 1;
     }
   }
+
+
+
 
 
   --animate-modal-open: modalOpen 500ms ease-out forwards;
