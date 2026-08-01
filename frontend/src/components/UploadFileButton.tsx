@@ -51,6 +51,8 @@ export function UploadButton({ onClose }: UploadButtonProps) {
         // The server now waits for indexing to finish before responding,
         // so there's no need to delay the reload for the watcher to catch up.
         window.location.reload();
+
+
       } else {
         alert(data?.message ?? "Upload failed. Please try again.");
       }
@@ -64,11 +66,15 @@ export function UploadButton({ onClose }: UploadButtonProps) {
 
   }
 
-  document.addEventListener("keydown", (event) => {
+  React.useEffect(() => {
+  function handleKeyDown(event: KeyboardEvent) {
     if (event.key === "Escape") {
       onClose();
     }
-  });
+  }
+  document.addEventListener("keydown", handleKeyDown);
+  return () => document.removeEventListener("keydown", handleKeyDown);
+}, [onClose]);
 
 
   return (
