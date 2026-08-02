@@ -1,5 +1,8 @@
-// This is your Prisma schema file for SoundBin
-// Prisma version 6.19.3
+/**
+ * @file    Prisma file the defines the database schema for the application.
+ * @author  Ian MacDougall
+ * @version 1.0
+ */
 
 generator client {
   provider = "prisma-client-js"
@@ -46,6 +49,19 @@ model UserFavorite {
   @@map("user_favorites")
 }
 
+model UserTag {
+  tag_id Int  @id @default(autoincrement())
+  track_id Int
+  tag_name String @db.VarChar(50)
+  user_id Int
+
+  track Track @relation(fields: [track_id], references: [track_id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, track_id, tag_name])
+  @@map("user_tags")
+}
+
 // ~~~~~~~~~~ Logging & Analytics ~~~~~~~~~~
 
 // Logging & Analytics model
@@ -65,6 +81,8 @@ model Activity {
 }
 
 // ~~~~~~~~~~ Music Library ~~~~~~~~~~
+
+// Track
 
 model Track{
   track_id Int @id @default(autoincrement())
@@ -90,6 +108,68 @@ model Track{
   @@map("tracks")
 }
 
+model TrackFile {
+  file_id Int @id @default(autoincrement())
+  track_id Int
+  storage_path_url String @unique @db.VarChar(500)
+  file_hash String? @unique @db.VarChar(64) // nullable only for rows that predate hash-based dedup; always set for new uploads
+  bitrate Int @db.SmallInt //KBps
+  sample_rate Int
+  channels Int @db.SmallInt
+  codec String @db.VarChar(20)
+  file_mtime DateTime @db.Timestamptz(6)
+
+  track Track @relation(fields: [track_id], references: [track_id], onDelete: Cascade)
+
+  @@map("track_files")
+}
+
+model Genre {
+  genre_id Int @id @default(autoincrement())
+  name String @unique @db.VarChar(100)
+
+  tracks TrackGenre[]
+
+  @@map("genres")
+}
+
+model TrackGenre {
+  track_id Int
+  genre_id Int
+
+  track Track @relation(fields: [track_id], references: [track_id], onDelete: Cascade)
+  genre Genre @relation(fields: [genre_id], references: [genre_id], onDelete: Cascade)
+
+  @@id([track_id, genre_id])
+  @@map("track_genre")
+}
+
+model Lyrics {
+  track_id Int
+  language String @db.VarChar(10)
+  lyric_test String?
+
+  track Track @relation(fields: [track_id], references: [track_id], onDelete: Cascade)
+
+  @@id([track_id, language])
+  @@map("lyrics_connection")
+}
+
+model TrackContributor {
+  contribution_id Int @id @default(autoincrement())
+  track_id Int
+  artist_id Int
+  role String?  @db.VarChar(100)
+
+  track Track @relation(fields: [track_id], references: [track_id], onDelete: Cascade)
+  artist Artist @relation(fields: [artist_id], references: [artist_id], onDelete: Cascade)
+
+  @@unique([track_id, artist_id, role])
+  @@map("track_contributors")
+}
+
+// Artist
+
 model Artist {
   artist_id Int  @id @default(autoincrement())
   name      String  @db.VarChar(150)
@@ -101,6 +181,8 @@ model Artist {
 
   @@map("artists")
 }
+
+// Album
 
 model Album {
   album_id      Int    @id @default(autoincrement())
@@ -118,32 +200,6 @@ model Album {
   @@map("albums")
 }
 
-model TrackContributor {
-  contribution_id Int @id @default(autoincrement())
-  track_id Int
-  artist_id Int
-  role String?  @db.VarChar(100)
-
-  track Track @relation(fields: [track_id], references: [track_id], onDelete: Cascade)
-  artist Artist @relation(fields: [artist_id], references: [artist_id], onDelete: Cascade)
-
-  @@unique([track_id, artist_id, role])
-  @@map("track_contributors")
-}
-
-model UserTag {
-  tag_id Int  @id @default(autoincrement())
-  track_id Int
-  tag_name String @db.VarChar(50)
-  user_id Int
-
-  track Track @relation(fields: [track_id], references: [track_id], onDelete: Cascade)
-  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-
-  @@unique([user_id, track_id, tag_name])
-  @@map("user_tags")
-}
-
 model AlbumTrackSequence {
   album_id Int
   track_id Int
@@ -156,6 +212,8 @@ model AlbumTrackSequence {
   @@unique([album_id, sequence_number])
   @@map("album_track_sequence")
 }
+
+// Playlist
 
 model Playlist {
   playlist_id Int @id @default(autoincrement())
@@ -183,53 +241,4 @@ model PlaylistItem {
 
   @@unique([playlist_id, sequence_number])
   @@map("playlist_items")
-}
-
-// ~~~~~~~~~~ Content & Streaming Details ~~~~~~~~~~
-
-model Genre {
-  genre_id Int @id @default(autoincrement())
-  name String @unique @db.VarChar(100)
-
-  tracks TrackGenre[]
-
-  @@map("genres")
-}
-
-model TrackGenre {
-  track_id Int
-  genre_id Int
-
-  track Track @relation(fields: [track_id], references: [track_id], onDelete: Cascade)
-  genre Genre @relation(fields: [genre_id], references: [genre_id], onDelete: Cascade)
-
-  @@id([track_id, genre_id])
-  @@map("track_genre")
-}
-
-model TrackFile {
-  file_id Int @id @default(autoincrement())
-  track_id Int
-  storage_path_url String @unique @db.VarChar(500)
-  file_hash String? @unique @db.VarChar(64) // nullable only for rows that predate hash-based dedup; always set for new uploads
-  bitrate Int @db.SmallInt //KBps
-  sample_rate Int
-  channels Int @db.SmallInt
-  codec String @db.VarChar(20)
-  file_mtime DateTime @db.Timestamptz(6)
-
-  track Track @relation(fields: [track_id], references: [track_id], onDelete: Cascade)
-
-  @@map("track_files")
-}
-
-model Lyrics {
-  track_id Int
-  language String @db.VarChar(10)
-  lyric_test String?
-
-  track Track @relation(fields: [track_id], references: [track_id], onDelete: Cascade)
-
-  @@id([track_id, language])
-  @@map("lyrics_connection")
 }
