@@ -1,3 +1,10 @@
+/**
+ * @file    Express routes for track management
+ * @module  TrackRoutes
+ * @author  Ian MacDougall, Sammy Stollman
+ * @version 1.0
+ */
+
 import { Router } from 'express';
 import { Request, Response } from 'express';
 import { prisma } from '../lib/database';
@@ -5,7 +12,8 @@ import { prisma } from '../lib/database';
 const router = Router();
 
 /**
- * @param get `/api/tracks`
+ * GET `/api/tracks`
+ * Fetches a list of all tricks in the library. Exludes file metadata to keep the response lightweight
  */
 router.get('/tracks', async (_req: Request, res: Response) => {
   try {
@@ -28,7 +36,8 @@ router.get('/tracks', async (_req: Request, res: Response) => {
 
 
 /**
- * @param get `/api/tracks/:trackId
+ * GET `/api/tracks/:trackId
+ * Fetches detailed information about a single track, including its files, album, genre and contributing artists
  */
 router.get('/tracks/:trackId', async (req: Request, res: Response) => {
   try {
@@ -70,15 +79,13 @@ router.get('/tracks/:trackId', async (req: Request, res: Response) => {
 
 
 /**
+ * POST `/api/tracks/:trackId`
  * Edits a track: title, cover art, release date, genres, and contributing
  * artists. `genreIds`/`artistIds` (if provided) fully replace the track's
  * existing genre/artist associations with the given set — genres and
  * artists themselves are expected to already exist (created up-front via
  * `POST /api/genres` / `POST /api/artists` from the "create new" option
  * in the picker UI) so this endpoint just links the ids.
- * @param patch `/api/tracks/:trackId`
- * @body { title?: string, cover_art_url?: string, release_date?: string | null,
- *         genreIds?: number[], artistIds?: number[] }
  */
 router.patch('/tracks/:trackId', async (req: Request, res: Response) => {
   try {
@@ -147,6 +154,10 @@ router.patch('/tracks/:trackId', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /api/track-artist?trackID=<number>
+ * Fetches the contributing artists for a specific track
+ */
 router.get('/track-artist', async (req: Request, res: Response) => {
     const {trackID} = req.query;
     if (!trackID) { return res.status(400).json({error: "Track ID is required"});}

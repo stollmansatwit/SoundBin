@@ -1,3 +1,10 @@
+/**
+ * @file    Express routes for album management
+ * @module  AlbumRoutes
+ * @author  Ian MacDougall
+ * @version 1.0
+ */
+
 import { Router } from 'express';
 import { Request, Response } from 'express';
 import { prisma } from '../lib/database';
@@ -5,8 +12,8 @@ import { prisma } from '../lib/database';
 const router = Router();
 
 /**
- * @param get `/api/album-path`
- * @description uses `/api/album-path` to fetch cover art from database
+ * GET `/api/album-path`
+ * Uses `/api/album-path` to fetch cover art from database
  * Sorted by track number, if null then by mtime
  */
 router.get('/album-path', async (_req: Request, res: Response) => {
@@ -30,8 +37,10 @@ router.get('/album-path', async (_req: Request, res: Response) => {
 
 
 /**
- * @param get `/api/album-track-list`
- * @description uses `/api/album-track-list` to fetch songs from database
+ * GET /api/album-track-list?id=<number>
+ * Uses `/api/album-track-list` to fetch songs from database
+ * 
+ * @query id Album ID (required)
  */
 router.get('/album-track-list', async (req: Request, res: Response) => {
   try {
@@ -76,7 +85,10 @@ router.get('/album-track-list', async (req: Request, res: Response) => {
 
 
 /**
+ * GET /api/album-artist?albumID=<number>
  * Finds the album artist
+ * 
+ * @query albumID (required)
  */
 router.get('/album-artist', async (req: Request, res: Response) => {
   const {albumID} = req.query;
@@ -90,6 +102,7 @@ router.get('/album-artist', async (req: Request, res: Response) => {
 
 
 /**
+ * GET /api/album/:id
  * Fetches a single album by id (full row)
  */
 router.get('/album/:id', async (req: Request, res: Response) => {
@@ -107,6 +120,7 @@ router.get('/album/:id', async (req: Request, res: Response) => {
 });
 
 /**
+ * PATCH /api/album/:id
  * Edits an album: title, cover art, artist (by id — preferred, or by name
  * for backwards compatibility, in which case an existing artist with
  * that name is reused or a new one is created), release date, and track
@@ -115,8 +129,6 @@ router.get('/album/:id', async (req: Request, res: Response) => {
  * `trackOrder`, if provided, is the full list of the album's track ids
  * in the desired order; each track's sequence_number is rewritten to
  * match its (1-based) position in that list.
- * @body { title?: string, cover_art_url?: string | null, artist_id?: number | null,
- *         artistName?: string, release_date?: string | null, trackOrder?: number[] }
  */
 router.patch('/albums/:id', async (req: Request, res: Response) => {
   try {
@@ -196,6 +208,7 @@ router.patch('/albums/:id', async (req: Request, res: Response) => {
 });
 
 /**
+ * DELETE /api/albums/:id
  * Deletes an album. Refuses if the album still has tracks attached —
  * albums should only be deleted once they're empty, so this is a
  * server-side guard in addition to the frontend only exposing the

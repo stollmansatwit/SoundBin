@@ -1,9 +1,10 @@
 /**
- * @file Handles the Routes for file uploads
- * @module UploadRoutes
- * @author  Ian Mac
- * @version 0.2
+ * @file    Express routes for upload management
+ * @module  UploadRoutes
+ * @author  Ian MacDougall
+ * @version 1.0
  */
+
 import express, { Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
@@ -36,7 +37,7 @@ never derived from the client-supplied original filename. The original
 name previously had only \r\n stripped from it, which does nothing to
 stop a crafted name like "../../../etc/whatever" from escaping the
 upload directory via multer's path.join(destination, filename). The
-real (human-readable) name isn't needed on disk anyway — the library
+real (human-readable) name isn't needed on disk anyway, the library
 reads title/artist from embedded ID3/Vorbis tags, not the filename.
 */
 const upload = multer({
@@ -76,6 +77,7 @@ const upload = multer({
 const router = express.Router();
 
 /*
+POST /api/upload
 Posts to the route. Saves each valid file to disk, then synchronously
 ingests it (metadata extraction + DB writes) via the same shared service
 the file watcher uses, so the HTTP response reflects what's actually in
@@ -149,6 +151,10 @@ const imageUpload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
 });
 
+/**
+ * POST /api/upload-image
+ * Handles multi-file audio uploads.
+ */
 router.post('/upload-image', (req: Request, res: Response) => {
   imageUpload.single('image')(req, res, async (err: unknown) => {
     if (err) {

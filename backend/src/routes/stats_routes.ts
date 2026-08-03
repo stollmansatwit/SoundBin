@@ -1,8 +1,8 @@
 /**
- * @file Handles the Routes for file uploads
- * @module statsRoutes
+ * @file    Handles the Routes for stats
+ * @module  statsRoutes
  * @author  Sammy Stollman
- * @version 0
+ * @version 1.0
  */
 
 import { Router } from 'express';

@@ -1,3 +1,10 @@
+/**
+ * @file    Express routes for playlist management
+ * @module  PlaylistRoutes
+ * @author  Ian MacDougall
+ * @version 1.0
+ */
+
 import { Router } from 'express';
 import { Request, Response } from 'express';
 import { prisma } from '../lib/database';
@@ -5,8 +12,8 @@ import { prisma } from '../lib/database';
 const router = Router();
 
 /**
+ * GET `/api/playlists`
  * Fetches all playlists to be displayed to user
- * @param get `/api/playlists`
  */
 router.get('/playlists', async (_req: Request, res: Response) => {
   try {
@@ -30,8 +37,8 @@ router.get('/playlists', async (_req: Request, res: Response) => {
 });
 
 /**
+ * GET `/api/playlist/:id`
  * Fetches a single playlist by id
- * @param get `/api/playlist/:id`
  */
 router.get('/playlist/:id', async (req: Request, res: Response) => {
   try {
@@ -51,9 +58,8 @@ router.get('/playlist/:id', async (req: Request, res: Response) => {
 });
 
 /**
+ * POST /api/playlists
  * Creates a new, empty playlist
- * @param post `/api/playlists`
- * @body { name: string, cover_art_url?: string, user_id?: number, description?: string }
  */
 router.post('/playlists', async (req: Request, res: Response) => {
   try {
@@ -79,14 +85,13 @@ router.post('/playlists', async (req: Request, res: Response) => {
 });
 
 /**
+ * PATCH `/api/playlists/:id`
  * Edits the basics of a playlist (name, description, cover art) and/or
  * its track sequence.
  *
  * `trackOrder`, if provided, is the full list of the playlist's track
  * ids in the desired order; each item's sequence_number is rewritten to
  * match its (1-based) position in that list.
- * @param patch `/api/playlists/:id`
- * @body { name?: string, description?: string | null, cover_art_url?: string | null, trackOrder?: number[] }
  */
 router.patch('/playlists/:id', async (req: Request, res: Response) => {
   try {
@@ -136,11 +141,11 @@ router.patch('/playlists/:id', async (req: Request, res: Response) => {
 });
 
 /**
+ * DELETE `/api/playlists/:id`
  * Deletes a playlist. Refuses if the playlist still has tracks in it —
  * playlists should only be deleted once they're empty, so this is a
  * server-side guard in addition to the frontend only exposing the
  * option when the track count is zero.
- * @param delete `/api/playlists/:id`
  */
 router.delete('/playlists/:id', async (req: Request, res: Response) => {
   try {
@@ -161,9 +166,9 @@ router.delete('/playlists/:id', async (req: Request, res: Response) => {
 });
 
 /**
+ * GET `/api/playlist-tracks?id=<number>`
  * Fetches all tracks belonging to a playlist, in order, with enough
  * track data (files, duration, etc.) to be queued for playback.
- * @param get `/api/playlist-tracks?id=`
  */
 router.get('/playlist-tracks', async (req: Request, res: Response) => {
   try {
@@ -199,10 +204,9 @@ router.get('/playlist-tracks', async (req: Request, res: Response) => {
 });
 
 /**
+ * POST `/api/playlist-items`
  * Adds a track to a playlist (appended to the end). No-ops if the track
  * is already in the playlist.
- * @param post `/api/playlist-items`
- * @body { playlist_id: number, track_id: number }
  */
 router.post('/playlist-items', async (req: Request, res: Response) => {
   try {
@@ -242,9 +246,8 @@ router.post('/playlist-items', async (req: Request, res: Response) => {
 });
 
 /**
+ * DELETE `/api/playlist-items`
  * Removes a track from a playlist.
- * @param delete `/api/playlist-items`
- * @body { playlist_id: number, track_id: number }
  */
 router.delete('/playlist-items', async (req: Request, res: Response) => {
   try {
@@ -267,9 +270,9 @@ router.delete('/playlist-items', async (req: Request, res: Response) => {
 });
 
 /**
+ * GET `/api/track-playlists?trackID=<number>`
  * Given a track, returns the ids of every playlist that already
  * contains it — used to pre-check playlists in the "Add to Playlist" UI.
- * @param get `/api/track-playlists?trackID=`
  */
 router.get('/track-playlists', async (req: Request, res: Response) => {
   try {

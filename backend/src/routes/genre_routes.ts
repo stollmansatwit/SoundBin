@@ -1,3 +1,10 @@
+/**
+ * @file    Express routes for genre management
+ * @module  GenreRoutes
+ * @author  Sammy Stollman
+ * @version 1.0
+ */
+
 import { Router } from 'express';
 import { Request, Response } from 'express';
 import { prisma } from '../lib/database';
@@ -5,9 +12,9 @@ import { prisma } from '../lib/database';
 const router = Router();
 
 /**
+ * GET `/api/genres`
  * Lists every genre in the library, alphabetically — used to populate the
  * genre picker in the track edit modal.
- * @param get `/api/genres`
  */
 router.get('/genres', async (_req: Request, res: Response) => {
   try {
@@ -23,11 +30,10 @@ router.get('/genres', async (_req: Request, res: Response) => {
 });
 
 /**
+ * POST `/api/genres`
  * Finds an existing genre by (case-insensitive) name, or creates a new
  * one — powers the "create a new genre" option in the track edit modal's
  * genre picker.
- * @param post `/api/genres`
- * @body { name: string }
  */
 router.post('/genres', async (req: Request, res: Response) => {
   try {

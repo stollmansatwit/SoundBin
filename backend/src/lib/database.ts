@@ -1,4 +1,10 @@
-import "dotenv/config"
+/**
+ * @file Prisma client instance initialized with a PostgreSQL adapter
+ * @module DatabaseClient
+ * @author  Ian MacDougall
+ * @version 1.0
+ */
+
 import { PrismaClient } from "@prisma/client";
 import {PrismaPg } from "@prisma/adapter-pg";
 

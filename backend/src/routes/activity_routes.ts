@@ -1,6 +1,8 @@
 /**
- * @file Handles logging and retrieval of user listening activity
- * @module activityRoutes
+ * @file Express routes for logging and retrieving user listening activity
+ * @module ActivityRoutes
+ * @author Ian MacDougall
+ * @version 1.0
  */
 
 import { Router } from 'express';
@@ -10,13 +12,15 @@ import { getRecentListens } from '../lib/activity';
 
 const router = Router();
 
-// NOTE: SoundBin doesn't have real auth/session wiring yet, so all listens are
-// attributed to a single shared "local listener" account for now. Once login
-// sessions exist, swap this out for the actual authenticated user_id.
 const DEFAULT_USERNAME = 'local_listener';
 
 let cachedDefaultUserId: number | null = null;
 
+/**
+ * Resolves the userID for the default user, creating it if necessary.
+ * 
+ * @returns userID
+ */
 async function getDefaultUserId(): Promise<number> {
   if (cachedDefaultUserId !== null) {
     return cachedDefaultUserId;
@@ -41,8 +45,8 @@ async function getDefaultUserId(): Promise<number> {
 }
 
 /**
- * @param post `/api/activity`
- * @description Logs the start of a track listen. Called when playback of a track begins.
+ * POST `/api/activity`
+ * Logs the start of a track listen. Called when playback of a track begins.
  * Returns the new activity_id so the frontend can later PATCH in the actual duration played.
  */
 router.post('/activity', async (req: Request, res: Response) => {
@@ -72,8 +76,8 @@ router.post('/activity', async (req: Request, res: Response) => {
 });
 
 /**
- * @param patch `/api/activity/:id`
- * @description Updates duration_played for a previously logged listen, e.g. once playback
+ * PATCH `/api/activity/:id`
+ * Updates duration_played for a previously logged listen, e.g. once playback
  * stops, the track is skipped, or the user switches to a different track.
  */
 router.patch('/activity/:id', async (req: Request, res: Response) => {
@@ -98,10 +102,10 @@ router.patch('/activity/:id', async (req: Request, res: Response) => {
 });
 
 /**
- * @param get `/api/activity/recent`
- * @description Returns the most recently listened-to tracks, newest first, deduplicated
+ * GET `/api/activity/recent`
+ * Returns the most recently listened-to tracks, newest first, deduplicated
  * so the same track isn't repeated back to back.
- * @queryParam `limit` - max number of tracks to return (default 12, max 50)
+ * `limit` - max number of tracks to return (default 12, max 50)
  */
 router.get('/activity/recent', async (req: Request, res: Response) => {
   try {

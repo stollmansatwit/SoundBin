@@ -1,3 +1,10 @@
+/**
+ * @file    Express routes for artist management
+ * @module  ArtistRoutes
+ * @author  Ian MacDougall
+ * @version 1.0
+ */
+
 import { Router } from 'express';
 import { Request, Response } from 'express';
 import { prisma } from '../lib/database';
@@ -6,8 +13,8 @@ import { getRecentListens } from '../lib/activity';
 const router = Router();
 
 /**
- * @param get `/api/artist-name`
- * @description uses `/api/artist-name` to fetch name of artist by Artist ID from database
+ * GET /api/artist-name?id=<number>
+ * uses `/api/artist-name` to fetch name of artist by Artist ID from database
  */
 router.get('/artist-name', async (req: Request, res: Response) => {
   try {
@@ -28,8 +35,8 @@ router.get('/artist-name', async (req: Request, res: Response) => {
 
 
 /**
+ * GET /api/artist/:id
  * Fetches a single artist by id (full row)
- * @param get `/api/artist/:id`
  */
 router.get('/artist/:id', async (req: Request, res: Response) => {
   try {
@@ -46,9 +53,9 @@ router.get('/artist/:id', async (req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/artist/:id
  * Lists every artist, alphabetically — used to populate the artist
- * picker in the track/album edit modals.
- * @param get `/api/artists`
+ * picker in the track/album edit modals.x
  */
 router.get('/artists', async (_req: Request, res: Response) => {
   try {
@@ -64,11 +71,10 @@ router.get('/artists', async (_req: Request, res: Response) => {
 });
 
 /**
+ * POST /api/artists
  * Finds an existing artist by (case-insensitive) name, or creates a new
  * one — powers the "create a new artist" option in the track/album edit
  * modals' artist picker.
- * @param post `/api/artists`
- * @body { name: string }
  */
 router.post('/artists', async (req: Request, res: Response) => {
   try {
@@ -93,9 +99,8 @@ router.post('/artists', async (req: Request, res: Response) => {
 });
 
 /**
+ * PATCH /api/artists/:id
  * Edits an artist's name and/or image.
- * @param patch `/api/artists/:id`
- * @body { name?: string, image_url?: string | null }
  */
 router.patch('/artists/:id', async (req: Request, res: Response) => {
   try {
@@ -120,8 +125,8 @@ router.patch('/artists/:id', async (req: Request, res: Response) => {
 });
 
 /**
- * @param get `/api/artist-path`
- * @description uses `/api/artist-path` to fetch cover art from database
+ * GET /api/artist-path
+ * Uses `/api/artist-path` to fetch cover art from database
  * Sorted by track number, if null then by mtime
  */
 router.get('/artist-path', async (_req: Request, res: Response) => {
@@ -145,8 +150,8 @@ router.get('/artist-path', async (_req: Request, res: Response) => {
 
 
 /**
- * @param get `/api/artist-albums`
- * @description uses `/api/artist-albums` to fetch cover art from database
+ * GET /api/artist-albums?artistID=<number>
+ * Uses `/api/artist-albums` to fetch cover art from database
  * Sorted by track number, if null then by mtime
  */
 router.get('/artist-albums', async (req: Request, res: Response) => {
@@ -177,8 +182,8 @@ router.get('/artist-albums', async (req: Request, res: Response) => {
 
 
 /**
- * @param get `/api/artist-tracks`
- * @description uses `/api/artist-tracks` to fetch cover art from database
+ * GET `/api/artist-tracks?artistID=<number>`
+ * Uses `/api/artist-tracks` to fetch cover art from database
  * Sorted by track number, if null then by mtime
  */
 router.get('/artist-tracks', async (req: Request, res: Response) => {
@@ -250,7 +255,7 @@ router.get('/artist-tracks', async (req: Request, res: Response) => {
 
 
 /**
- * @param get `/api/artist-playlists`
+ * GET `/api/artist-playlists?artistID=<number>`
  * @description Playlists that contain at least one track this artist contributed to.
  * Powers the "Featured In Playlists" section on the artist page.
  */
@@ -293,10 +298,10 @@ router.get('/artist-playlists', async (req: Request, res: Response) => {
 });
 
 /**
- * @param get `/api/artist-recent-listens`
- * @description Most recently listened-to tracks (deduplicated by track) for tracks this
+ * GET `/api/artist-recent-listens?artistID=<number>&limit=<number>`
+ *  Most recently listened-to tracks (deduplicated by track) for tracks this
  * artist contributed to. Powers the "Recently Listened To" section on the artist page.
- * @queryParam `limit` - max number of tracks to return (default 12, max 50)
+ * `limit` - max number of tracks to return (default 12, max 50)
  */
 router.get('/artist-recent-listens', async (req: Request, res: Response) => {
   try {

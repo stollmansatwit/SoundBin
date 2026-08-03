@@ -1,3 +1,10 @@
+/**
+ * @file 
+ * @module
+ * @author Sammy Stollman
+ * @version 1.0
+ */
+
 import jwt from 'jsonwebtoken';
 import type { NextFunction, Request, Response } from 'express';
 import { prisma } from '../lib/database';

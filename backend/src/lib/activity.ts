@@ -1,3 +1,10 @@
+/**
+ * @file logic for queriying user listening activity
+ * @module Activity
+ * @author  Ian MacDougall
+ * @version 1.0
+ */
+
 import { Prisma } from '@prisma/client';
 import { prisma } from './database';
 
@@ -16,6 +23,10 @@ export type RecentListenRow = {
 /**
  * Fetches recent listens matching `where`, deduplicated by track (most recent play wins),
  * newest first. Shared by the global "recently listened" list and artist-scoped ones.
+ * 
+ * @param where Prisma filter for additional conditions on the Activity model
+ * @param limit Target number of unique tracks to return
+ * @returns Array containing track and album info, duplicates removed by track_id
  */
 export async function getRecentListens(
   where: Prisma.ActivityWhereInput,

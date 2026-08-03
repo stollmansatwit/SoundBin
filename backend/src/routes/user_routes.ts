@@ -1,3 +1,11 @@
+/**
+ * @file    Express routes for user management
+ * @module  UserRoutes
+ * @author  Sammy Stollman
+ * @version 1.0
+ */
+
+
 import { Router } from 'express';
 import type { Response } from 'express';
 import bcrypt from 'bcryptjs';
@@ -18,8 +26,8 @@ const USER_SAFE_SELECT = {
 } as const;
 
 /**
- * @param patch `/api/user`
- * @description Lets the logged-in user update their own username and/or display name
+ * PATCH `/api/user`
+ * Lets the logged-in user update their own username and/or display name
  */
 router.patch('/user', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
@@ -72,8 +80,8 @@ router.patch('/user', requireAuth, async (req: AuthRequest, res: Response) => {
 });
 
 /**
- * @param patch `/api/user/password`
- * @description Lets the logged-in user change their password, given their current password
+ * PATCh `/api/user/password`
+ * Lets the logged-in user change their password, given their current password
  */
 router.patch('/user/password', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
@@ -112,8 +120,8 @@ router.patch('/user/password', requireAuth, async (req: AuthRequest, res: Respon
 });
 
 /**
- * @param get `/api/admin/users`
- * @description Admin-only: lists every user in the system, including their admin/approval status
+ * GET `/api/admin/users`
+ * Admin-only: lists every user in the system, including their admin/approval status
  */
 router.get('/admin/users', requireAuth, requireAdmin, async (_req: AuthRequest, res: Response) => {
   try {
@@ -130,8 +138,8 @@ router.get('/admin/users', requireAuth, requireAdmin, async (_req: AuthRequest, 
 });
 
 /**
- * @param patch `/api/admin/users/:userId/approve`
- * @description Admin-only: approves a pending registration so that user can log in
+ * PATCH `/api/admin/users/:userId/approve`
+ * Admin-only: approves a pending registration so that user can log in
  */
 router.patch('/admin/users/:userId/approve', requireAuth, requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
@@ -154,8 +162,8 @@ router.patch('/admin/users/:userId/approve', requireAuth, requireAdmin, async (r
 });
 
 /**
- * @param delete `/api/admin/users/:userId`
- * @description Admin-only: rejects (deletes) a pending registration request
+ * DELETE `/api/admin/users/:userId`
+ * Admin-only: rejects (deletes) a pending registration request
  */
 router.delete('/admin/users/:userId', requireAuth, requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
@@ -187,8 +195,8 @@ router.delete('/admin/users/:userId', requireAuth, requireAdmin, async (req: Aut
 });
 
 /**
- * @param patch `/api/admin/users/:userId/admin`
- * @description Admin-only: grants or revokes admin privileges for another user
+ * PATCH `/api/admin/users/:userId/admin`
+ * Admin-only: grants or revokes admin privileges for another user
  */
 router.patch('/admin/users/:userId/admin', requireAuth, requireAdmin, async (req: AuthRequest, res: Response) => {
   try {

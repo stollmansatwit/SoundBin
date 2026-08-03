@@ -4,6 +4,8 @@
  * already have a hash, and skips files that no longer exist on disk.
  *
  * Usage: npx tsx scripts/backfill-file-hashes.ts
+ * @author Ian MacDougall
+ * @version 1.0
  */
 import { prisma } from '../src/lib/database';
 import { hashFile } from '../src/utils/metadata';
