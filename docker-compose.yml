@@ -1,8 +1,15 @@
 services:
+  # ============================================================
+  # Database (PostgreSQL)
+  # ============================================================
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     container_name: soundbin-db
+    # NOTE: these credentials are hardcoded for local development only.
+    # Do not reuse "soundbin_dev" as a password outside of a local dev setup;
+    # a real deployment should pull these from a secrets manager or a
+    # non-committed .env file instead of the compose file itself.
     environment:
       POSTGRES_USER: soundbin
       POSTGRES_PASSWORD: soundbin_dev
@@ -10,15 +17,26 @@ services:
     ports:
       - "5433:5432"
     volumes:
-
-      - postgresql:/var/lib/postgresql/data
-      # - ./data/db-data:/var/lib/postgresql/data - for while not in developments aka actually being used
+      # Named Docker volume (below, under top-level `volumes:`) — data persists
+      # across `docker compose down` but lives inside Docker's storage, not a
+      # folder you can browse directly. Used for local development.
+      # - postgresql:/var/lib/postgresql/data
+      # Alternative: bind-mount to a host folder instead of a named volume,
+      # so the raw Postgres data files are visible/backed-up on the host.
+      # Swap to this (and remove the line above) for a non-dev deployment.
+      - ./data/db-data:/var/lib/postgresql/data
+    # Waits for Postgres to accept connections before starting the backend
+    # (see `depends_on: condition: service_healthy` below). Without this,
+    # the backend can start and try to migrate/connect before the DB is ready.
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U soundbin"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # ============================================================
+  # Backend (API)
+  # ============================================================
   backend:
     env_file:
       - ./backend/.env
@@ -34,6 +52,10 @@ services:
       PORT: ${BACKEND_PORT:-3000}
       # Browser origins allowed to call the API. Overrides backend/.env.
       FRONTEND_ORIGINS: "http://localhost:${FRONTEND_PORT:-5173},http://127.0.0.1:${FRONTEND_PORT:-5173}"
+      # File-watching (used for the library watcher and dev hot-reload) can
+      # silently fail to detect changes to files mounted into a Docker
+      # container on some host filesystems. Polling forces Node to actively
+      # check for changes instead of relying on native filesystem events.
       CHOKIDAR_USEPOLLING: true
       CHOKIDAR_INTERVAL: 100
     command: sh -c "npx prisma migrate deploy && npm run dev" 
@@ -46,6 +68,9 @@ services:
       - /app/node_modules
       - ./backend/uploads:/app/uploads
 
+  # ============================================================
+  # Frontend (Web App)
+  # ============================================================
   frontend:
     build:
       context: ./frontend
@@ -67,6 +92,11 @@ services:
       BACKEND_URL: "http://backend:${BACKEND_PORT:-3000}"
     command: npm run dev -- --host
 
- 
-volumes: # remove for real use
+
+# Declares the named volume referenced by the db service above.
+# This is a dev convenience so `docker compose down` doesn't wipe the
+# database on every restart. For a real deployment, remove this and use
+# the host bind-mount option instead (see the commented-out line under
+# the db service's volumes:) so the data lives in a known, backed-up folder.
+volumes:
   postgresql:

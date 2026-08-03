@@ -10,10 +10,17 @@
  * values below must be `VITE_`-prefixed in `.env` to be picked up.
  *
  * Resolution order:
- *   1. `VITE_API_URL`                            — full URL, wins outright
- *      (this is the name docker-compose.yml already sets for the frontend service)
- *   2. `VITE_APPLICATION_URL` + `VITE_BACKEND_PORT` — assembled host + port
- *   3. `http://localhost:3000`                    — development fallback
+ *   1. `VITE_API_URL`  — full URL, e.g. `http://localhost:3000`. If set,
+ *      all API calls go to this absolute URL.
+ *   2. `''` (same origin) — the Vite dev server proxies /api, /songs and
+ *      /assets to the backend (see vite.config.ts), so the browser only
+ *      ever talks to whatever host it loaded the page from. This is the
+ *      default and works from any device without knowing the server's
+ *      address. Used by docker-compose.yml's frontend service today.
+ *
+ * NOTE: `VITE_APPLICATION_URL` / `VITE_BACKEND_PORT` are NOT currently read
+ * here — remove them if you see them in an old .env file, or wire them up
+ * below if you want a "host + port" alternative to VITE_API_URL.
  */
 
 //const DEFAULT_HOST = 'http://localhost';

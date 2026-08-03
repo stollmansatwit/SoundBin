@@ -6,12 +6,9 @@
  * checking wherever `import.meta.env` is used.
  */
 interface ImportMetaEnv {
-  /** Full backend URL, e.g. `http://localhost:3000`. Overrides the two below. */
+  /** Full backend URL, e.g. `http://localhost:3000`. If unset, API calls
+   *  use the same origin the page was loaded from (see src/config.ts). */
   readonly VITE_API_URL?: string;
-  /** Backend host without a port, e.g. `http://localhost`. */
-  readonly VITE_APPLICATION_URL?: string;
-  /** Port the backend listens on, e.g. `3000`. */
-  readonly VITE_BACKEND_PORT?: string;
 }
 
 interface ImportMeta {
