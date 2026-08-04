@@ -3,36 +3,107 @@ import { type Track, type Album, type Artist } from "../../types";
 import SongPopUp from "../popUpPage/SongPopUp";
 import { API_BASE_URL } from '../../config';
 
+import type { ReactNode, MouseEvent } from "react";
 
-function WipeRow({
-  children,
-  onClick,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-}) {
-  const rowRef = useRef<HTMLTableRowElement>(null);
+interface WipeRowProps {
+  children: ReactNode;
+  onClick?: () => void;
+}
+
+const WIPE_MS = 1000;
+const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
+const NUDGE_PX = 18;
+
+const COLS = "grid-cols-[38%_24%_26%_12%]";
+
+const LERP_FACTOR = 0.1; // higher = snappier, lower = smoother/slower to catch up
+
+import { forwardRef, useImperativeHandle } from "react";
+
+export interface WipeRowHandle {
+  enter: (edge: "top" | "bottom") => void;
+  leave: (edge: "top" | "bottom") => void;
+}
+
+const WipeRow = forwardRef<WipeRowHandle, WipeRowProps>(function WipeRow(
+  { children, onClick },
+  ref
+) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const targetScale = useRef(0);
+  const currentScale = useRef(0);
+  const rafId = useRef<number | null>(null);
+
+  const tick = () => {
+    currentScale.current += (targetScale.current - currentScale.current) * LERP_FACTOR;
+    if (Math.abs(targetScale.current - currentScale.current) < 0.001) {
+      currentScale.current = targetScale.current;
+      rafId.current = null;
+    } else {
+      rafId.current = requestAnimationFrame(tick);
+    }
+    if (overlayRef.current) {
+      overlayRef.current.style.transform = `scaleY(${currentScale.current})`;
+    }
+  };
+
+  const startLoop = () => {
+    if (rafId.current == null) rafId.current = requestAnimationFrame(tick);
+  };
 
   useEffect(() => {
-    const el = rowRef.current;
-    if (!el) return;
-    const handleAnimationEnd = () => {
-      el.classList.remove("playing");
+    return () => {
+      if (rafId.current != null) cancelAnimationFrame(rafId.current);
     };
-    el.addEventListener("animationend", handleAnimationEnd);
-    return () => el.removeEventListener("animationend", handleAnimationEnd);
   }, []);
 
+  const setNudge = (active: boolean) => {
+    const cells = rowRef.current!.querySelectorAll<HTMLDivElement>("[data-cell]");
+    const first = cells[0];
+    const last = cells[cells.length - 1];
+    if (first) first.style.transform = active ? `translateX(${NUDGE_PX}px)` : "translateX(0px)";
+    if (last) last.style.transform = active ? `translateX(-${NUDGE_PX}px)` : "translateX(0px)";
+  };
+
+  const activate = (edge: "top" | "bottom", isEntering: boolean) => {
+    if (overlayRef.current) overlayRef.current.style.transformOrigin = edge;
+    targetScale.current = isEntering ? 1 : 0;
+    startLoop();
+    setNudge(isEntering);
+  };
+
+  useImperativeHandle(ref, () => ({
+    enter: (edge) => activate(edge, true),
+    leave: (edge) => activate(edge, false),
+  }));
+
+  const edgeFromEvent = (e: MouseEvent<HTMLDivElement>) => {
+    const rect = rowRef.current!.getBoundingClientRect();
+    return e.clientY - rect.top < rect.height / 2 ? "top" : "bottom";
+  };
+
   return (
-    <tr
+    <div
       ref={rowRef}
-      className="wipe border-t border-black hover:bg-white"
+      role="row"
+      onMouseEnter={(e) => activate(edgeFromEvent(e), true)}
+      onMouseLeave={(e) => activate(edgeFromEvent(e), false)}
       onClick={onClick}
+      className={`relative isolate grid ${COLS} cursor-pointer border-t border-black *:data-cell:relative *:data-cell:z-10 *:data-cell:transition-transform`}
+      style={{ transitionDuration: `${WIPE_MS}ms`, transitionTimingFunction: EASE }}
     >
+      <div
+        ref={overlayRef}
+        className="absolute inset-0 bg-white pointer-events-none z-0"
+        style={{ transform: "scaleY(0)", transformOrigin: "top" }}
+      />
       {children}
-    </tr>
+    </div>
   );
-}
+});
+
+export default WipeRow;
 
 
 type CombinedItem = {
@@ -46,7 +117,7 @@ export function SongsTable() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
-  const lastPos = useRef<{ x: number; y: number } | null>(null);
+
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -120,61 +191,95 @@ export function SongsTable() {
 
 
 
-  const triggerRow = (row: HTMLElement) => {
-    if (row.classList.contains("playing")) return;
-    row.classList.add("playing");
-  };
+  const rowHandles = useRef<Map<number, WipeRowHandle>>(new Map());
+  const rowEls = useRef<Map<number, HTMLDivElement>>(new Map());
+  const activeRowId = useRef<number | null>(null);
+  const lastMouse = useRef<{ x: number; y: number } | null>(null);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const curr = { x: e.clientX, y: e.clientY };
-    if (lastPos.current) {
-      const dist = Math.hypot(curr.x - lastPos.current.x, curr.y - lastPos.current.y);
-      const steps = Math.min(Math.max(1, Math.ceil(dist / 8)), 15);
-      for (let i = 1; i <= steps; i++) {
-        const t = i / steps;
-        const x = lastPos.current.x + (curr.x - lastPos.current.x) * t;
-        const y = lastPos.current.y + (curr.y - lastPos.current.y) * t;
-        const el = document.elementFromPoint(x, y) as HTMLElement | null;
-        const row = el?.closest("tr.wipe") as HTMLElement | null;
-        if (row) triggerRow(row);
+  const evaluateHover = () => {
+    if (!lastMouse.current) return;
+    const el = document.elementFromPoint(lastMouse.current.x, lastMouse.current.y) as HTMLElement | null;
+    const rowEl = el?.closest<HTMLElement>("[data-row-id]");
+    const newId = rowEl ? Number(rowEl.dataset.rowId) : null;
+    if (newId === activeRowId.current) return;
+
+    if (activeRowId.current != null) {
+      const prevEl = rowEls.current.get(activeRowId.current);
+      const prevHandle = rowHandles.current.get(activeRowId.current);
+      if (prevEl && prevHandle) {
+        const rect = prevEl.getBoundingClientRect();
+        const edge = lastMouse.current.y - rect.top < rect.height / 2 ? "top" : "bottom";
+        prevHandle.leave(edge);
       }
     }
-    lastPos.current = curr;
+    if (newId != null) {
+      const newEl = rowEls.current.get(newId);
+      const newHandle = rowHandles.current.get(newId);
+      if (newEl && newHandle) {
+        const rect = newEl.getBoundingClientRect();
+        const edge = lastMouse.current.y - rect.top < rect.height / 2 ? "top" : "bottom";
+        newHandle.enter(edge);
+      }
+    }
+    activeRowId.current = newId;
+  };
+
+  const handleContainerMouseMove = (e: React.MouseEvent) => {
+    lastMouse.current = { x: e.clientX, y: e.clientY };
   };
   return (
     <>
       <div className="max-h-120 overflow-auto rounded-lg">
-        <table className="w-full min-w-[420px] text-left text-sm">
-          <thead className="sticky top-0 bg-white/95 text-xs font-bold uppercase tracking-wide text-gray-500 z-10">
-            <tr>
-              <th className="px-3 py-2">Title</th>
-              <th className="px-3 py-2">Artist</th>
-              <th className="px-3 py-2 sm:table-cell">Album</th>
-              <th className="px-3 py-2 text-right">Duration</th>
-            </tr>
-          </thead>
-          <tbody
-            onMouseMove={handleMouseMove}
-            onMouseLeave={() => (lastPos.current = null)}
+        <div
+          className="max-h-120 overflow-auto rounded-lg"
+          role="table"
+          onMouseMove={handleContainerMouseMove}
+          onScroll={evaluateHover}
+        >
+          <div
+            role="row"
+            className={`sticky top-0 grid ${COLS} bg-white text-xs font-bold uppercase tracking-wide text-gray-500 z-10`}
           >
+            <div className="px-3 py-2">Title</div>
+            <div className="px-3 py-2">Artist</div>
+            <div className="px-3 py-2">Album</div>
+            <div className="px-3 py-2 text-right">Duration</div>
+          </div>
+
+          <div role="rowgroup">
             {combinedItems.map((item) => (
-              <WipeRow key={item.track.track_id} onClick={() => setSelectedTrack(item.track)}>
-                <td className="px-3 py-2.5 font-bold text-gray-900 max-w-[40vw] truncate sm:max-w-none">
-                  {item.track.title}
-                </td>
-                <td className="px-3 py-2.5 font-normal text-gray-600 sm:table-cell">
-                  {item.artist?.name ?? "Unknown"}
-                </td>
-                <td className="px-3 py-2.5 font-normal text-gray-600 max-w-[28vw] truncate sm:max-w-none">
-                  {item.album.title}
-                </td>
-                <td className="px-3 py-2.5 text-right font-normal text-gray-500">
-                  {formatDuration(item.track.duration ? item.track.duration : 0)}
-                </td>
-              </WipeRow>
+              <div
+                key={item.track.track_id}
+                data-row-id={item.track.track_id}
+                ref={(el) => {
+                  if (el) rowEls.current.set(item.track.track_id, el);
+                  else rowEls.current.delete(item.track.track_id);
+                }}
+              >
+                <WipeRow
+                  ref={(handle) => {
+                    if (handle) rowHandles.current.set(item.track.track_id, handle);
+                    else rowHandles.current.delete(item.track.track_id);
+                  }}
+                  onClick={() => setSelectedTrack(item.track)}
+                >
+                  <div data-cell className="px-3 py-2.5 font-bold text-gray-900 truncate">
+                    {item.track.title}
+                  </div>
+                  <div data-cell className="px-3 py-2.5 font-normal text-gray-600 truncate">
+                    {item.artist?.name ?? "Unknown"}
+                  </div>
+                  <div data-cell className="px-3 py-2.5 font-normal text-gray-600 truncate">
+                    {item.album.title}
+                  </div>
+                  <div data-cell className="px-3 py-2.5 text-right font-normal text-gray-500">
+                    {formatDuration(item.track.duration ? item.track.duration : 0)}
+                  </div>
+                </WipeRow>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
 
       {selectedTrack && (
