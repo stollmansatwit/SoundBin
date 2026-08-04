@@ -101,22 +101,28 @@ npm run dev  # Runs on http://localhost:5173
 
 ```
 SoundBin/
-├── backend/                 # Express.js backend
+├── backend/
 │   ├── src/
-│   │   └── index.ts        # Main server file
+│   │   ├── routes/        # REST endpoints, one file per resource
+│   │   ├── services/      # ingest.ts, watcher.ts, artwork.ts
+│   │   ├── middleware/     # auth, etc.
+│   │   ├── controllers/
+│   │   ├── lib/           # database.ts, activity.ts
+│   │   └── utils/         # metadata.ts
 │   ├── prisma/
-│   │   ├── schema.prisma   # Database schema
-│   │   └── migrations/     # Database migrations
-│   ├── .env                # Environment variables
-│   ├── package.json
-│   └── tsconfig.json
-├── frontend/               # React + Vite frontend
+│   │   ├── schema.prisma
+│   │   └── migrations/
+│   └── package.json
+├── frontend/
 │   ├── src/
-│   │   ├── App.tsx        # Main app component
-│   │   └── index.css      # Global styles
-│   ├── package.json
-│   └── tsconfig.json
-├── docker-compose.yml      # Docker services
+│   │   ├── pages/          # route-level views
+│   │   ├── components/     # buttons, library, playback, popUpPage, scrollable
+│   │   ├── audio/          # AudioEngine.ts
+│   │   ├── context/        # AudioContext, PopupContext
+│   │   ├── hooks/          # useAudioEngine
+│   │   └── config.ts
+│   └── package.json
+├── docker-compose.yml
 └── README.md
 ```
 
@@ -124,13 +130,21 @@ SoundBin/
 
 ### Core Models
 
-- **User** - User authentication and profile
+- **User** - Account, auth, and profile info
+- **UserFavorite** - Join table for a user's favorited tracks
+- **UserTag** - User-created tags on tracks
+- **Activity** - Play history / listening log, used for statistics
+- **Track** - Individual songs
+- **TrackFile** - Audio file metadata (bitrate, codec, storage path); supports multiple files per track
+- **TrackContributor** - Credits an artist's role on a track (join table, Track ↔ Artist)
+- **TrackGenre** - Join table, Track ↔ Genre
+- **Genre** - Genre metadata
+- **Lyrics** - Per-track, per-language lyrics
 - **Artist** - Music artist information
 - **Album** - Album metadata
-- **Track** - Individual songs with file information
+- **AlbumTrackSequence** - Defines track order within an album
 - **Playlist** - User-created playlists
-- **PlaylistTrack** - Many-to-many junction between playlists and tracks
-- **PlayEvent** - User listening history for statistics
+- **PlaylistItem** - Ordered track membership in a playlist
 
 ## 🔧 Environment Variables
 
@@ -206,11 +220,46 @@ Expected response:
 
 The backend allows requests from the frontend on `http://localhost:5173`. To change this, update `backend/src/index.ts`.
 
-## 📚 API Endpoints
+### 📚 API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/health` | Check backend and database status |
+| POST | `/api/auth/register` | Register a new user |
+| POST | `/api/auth/login` | Log in and receive a JWT |
+| GET | `/api/user` | Get current user's info |
+| PATCH | `/api/user` | Update current user's info |
+| PATCH | `/api/user/password` | Change current user's password |
+| GET | `/api/admin/users` | List all users (admin only) |
+| PATCH | `/api/admin/users/:userId/approve` | Approve a pending user (admin only) |
+| PATCH | `/api/admin/users/:userId/admin` | Grant/revoke admin status (admin only) |
+| DELETE | `/api/admin/users/:userId` | Delete a user (admin only) |
+| GET | `/api/search` | Search across the library |
+| POST | `/api/upload` | Upload an audio file |
+| POST | `/api/upload-image` | Upload a cover/artwork image |
+| GET | `/api/tracks` | List all tracks |
+| GET | `/api/tracks/:trackId` | Get a single track |
+| PATCH | `/api/tracks/:trackId` | Edit track metadata |
+| GET | `/api/album/:id` | Get a single album |
+| PATCH | `/api/albums/:id` | Edit an album |
+| DELETE | `/api/albums/:id` | Delete an album |
+| GET | `/api/artists` | List all artists |
+| POST | `/api/artists` | Create an artist |
+| PATCH | `/api/artists/:id` | Edit an artist |
+| GET | `/api/genres` | List all genres |
+| POST | `/api/genres` | Create a genre |
+| GET | `/api/playlists` | List all playlists |
+| POST | `/api/playlists` | Create a playlist |
+| GET | `/api/playlist/:id` | Get a single playlist |
+| PATCH | `/api/playlists/:id` | Edit a playlist |
+| DELETE | `/api/playlists/:id` | Delete a playlist |
+| POST | `/api/playlist-items` | Add a track to a playlist |
+| DELETE | `/api/playlist-items` | Remove a track from a playlist |
+| POST | `/api/activity` | Log a listening event |
+| GET | `/api/activity/recent` | Get recent listening activity |
+| GET | `/api/stats/summary` | Get overall listening stats summary |
+| GET | `/api/stats/top-tracks` | Get most-played tracks |
+| GET | `/api/stats/genres` | Get listening stats by genre |
 
 ## 🐳 Docker Compose Commands
 
@@ -263,35 +312,22 @@ docker compose up -d --build
 
 ## 🎯 Next Steps
 
-1. **Implement Authentication**
-   - User registration and login endpoints
-   - JWT token generation
-   - Protected routes
 
-2. **Audio File Upload**
-   - File upload endpoints
-   - Metadata extraction from ID3 tags
-   - File storage management
+1. **Statistics Improvements**
+   - Deeper listening insights (e.g. top genres over time, trends by day/week)
+   - More detailed per-artist and per-album breakdowns
 
-3. **Audio Streaming**
-   - Streaming endpoint with HTTP Range support
-   - Playback controls
+2. **Recommendation Queue**
+   - Suggest tracks based on listening history and favorites
+   - Surface recommendations directly in the queue, not just the library
 
-4. **Library Management**
-   - Library scanner to detect files
-   - Metadata enrichment
-   - Search functionality
+3. **Playlist Generation**
+   - Auto-generate playlists from listening history (e.g. "most played," "recently discovered")
+   - Move beyond manual, user-created playlists to smart/dynamic ones
 
-5. **Statistics & Playlists**
-   - Track listening events
-   - Generate statistics dashboard
-   - Auto-generate playlists from history
-
-6. **Frontend Features**
-   - User dashboard
-   - Library browser
-   - Playlist management
-   - Audio player UI
+4. **Settings Page with Customization**
+   - User-level preferences (theme, default view, playback behavior)
+   - Centralize account and app settings currently scattered across the UI
 
 ## 📄 License
 
