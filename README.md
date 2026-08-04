@@ -11,13 +11,13 @@ SoundBin gives control back to the user and allows them to create convenient pla
 **Target Audience:** Privacy-conscious listeners who own a personal music collection and want to replace subscription services with a self-hosted alternative.
 
 ### Project Goals
-- ✅ Easy to install
-- ✅ Fast performance
-- ✅ Database backend (PostgreSQL)
-- ✅ Clean, user-friendly UI
-- 🚧 Quick search with filters
-- 🚧 Playlist generation
-- 🚧 Listening statistics
+- Easy to install
+- Fast performance
+- Database backend (PostgreSQL)
+- Clean, user-friendly UI
+- Quick search
+- Playlist generation
+- Listening statistics
 
 ## 🏗️ Architecture
 
@@ -34,39 +34,44 @@ SoundBin gives control back to the user and allows them to create convenient pla
 - **Vite** - Fast build tool and dev server
 - **TypeScript** - Type-safe frontend code
 
-**Infrastructure:**
+**Orchestration:**
 - **Docker & Docker Compose** - Containerization and orchestration
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
 - Docker and Docker Compose installed
+- Hardware capable of running Docker
 
-### One-Command Startup
+### One-Command Startup (Assuming Docker is running)
 
 ```bash
 cd /path/to/SoundBin
 docker compose up
 ```
 
-That's it! This single command starts:
+This single command starts:
 - **PostgreSQL 16** on port 5433 (soundbin_postgres-data volume for persistence)
 - **Backend API** on port 3000 (auto-runs migrations on startup)
 - **Frontend** on port 5173 with hot-reload support
 
 ### Access the Application
 
-Open your browser and navigate to: **http://localhost:5173**
+Open browser and navigate to: **http://localhost:5173**
 
-You should see:
-```
-🎵 SoundBin
-{ "ok": true, "db": "connected" }
-```
+If you see the following in your terminal, everything has been created correctly:
 
-This confirms all services are running and connected!
+[+] up 4/4\
+ ✔ Network soundbin_default    &nbsp;&nbsp;&emsp; <span style="color:green">Created</span>&emsp;                                                  0.3s\
+ ✔ Container soundbin-db       &nbsp;&nbsp;&emsp;&emsp;&emsp;<span style="color:green">Created</span>&emsp;                                                  0.0s\
+ ✔ Container soundbin-backend  &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:green">Created</span>&emsp;                                                  2.1s\
+ ✔ Container soundbin-frontend &nbsp;&nbsp;&nbsp;<span style="color:green">Created</span>&emsp;                                                  1.8s\
+Attaching to soundbin-backend, soundbin-db, soundbin-frontend\
+Container soundbin-db Waiting 
 
+You should see a home page with links to registration and login.\
+You must register as a user before you can use the application for authentication. 
 ### Local Development (without Docker)
 
 If you prefer to run locally for development:
