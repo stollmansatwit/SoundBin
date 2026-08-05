@@ -83,11 +83,11 @@ export default function SongPopUp({ track, album_id, onClose }: Props) {
 
   return createPortal(
     <div
-      className="fixed inset-0 center bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4"
+      className="fixed inset-0 center bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4 animate-transparency"
       ref={overlayRef}
       onClick={handleOverlayClick}
     >
-      <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-gray-700 shadow-2xl">
+      <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-gray-700 shadow-2xl animate-modal-open">
         {/* Ambient glow pulled from the artwork, sitting behind everything */}
         <div
           className="absolute inset-0 scale-125 opacity-80 blur-3xl"

@@ -119,11 +119,11 @@ export default function ArtistPopUp({ artist, onClose }: Props) {
 
   return createPortal(
     <div 
-      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4 animate-transparency"
       ref={overlayRef}
       onClick={handleOverlayClick}
     >
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-5xl w-full relative shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-5xl w-full relative shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-modal-open">
         
         {/* Close Button */}
         <button

@@ -126,11 +126,11 @@ export default function AlbumPopUp({ album, onClose, onDeleted }: Props) {
   return createPortal(
 
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4 animate-transparency"
       ref={overlayRef}
       onClick={handleOverlayClick}
     >
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-4xl w-full relative shadow-2xl overflow-hidden">
+      <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-4xl w-full relative shadow-2xl overflow-hidden animate-modal-open">
 
         <button
           onClick={onClose}

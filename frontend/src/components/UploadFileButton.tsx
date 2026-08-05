@@ -1,14 +1,12 @@
 /**
  * @file Component for the upload a single file button
  * @module UploadFileButton
- * @author Ian MacDougall
+ * @author Ian MacDougall and Sammy Stollman
  * @version 0.1
  */
-import React from 'react';
+import {useState, useEffect} from 'react';
 import { API_BASE_URL } from '../config';
-// type AlbumArt = {
-//     url: string,
-// };
+
 
 // prop needed for visibility toggle
 type UploadButtonProps = {
@@ -20,7 +18,8 @@ type UploadButtonProps = {
  */
 export function UploadButton({ onClose }: UploadButtonProps) {
 
-  const [uploading, setUploading] = React.useState(false);
+  const [uploading, setUploading] = useState(false);
+
 
   async function handleOnSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -50,7 +49,8 @@ export function UploadButton({ onClose }: UploadButtonProps) {
         alert(data?.message ?? "Upload successful");
         // The server now waits for indexing to finish before responding,
         // so there's no need to delay the reload for the watcher to catch up.
-        window.location.reload();
+        // TODO: replace window.location.reload() with TanStack Query pattern this involves changing Album, Artist, and Song scrollables
+        window.location.reload()
 
 
       } else {
@@ -66,7 +66,7 @@ export function UploadButton({ onClose }: UploadButtonProps) {
 
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
   function handleKeyDown(event: KeyboardEvent) {
     if (event.key === "Escape") {
       onClose();
